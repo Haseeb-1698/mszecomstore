@@ -1,0 +1,100 @@
+---
+const testimonials = [
+  {
+    quote: 'SubHub has completely changed how I manage my subscriptions. It is so simple to use, and I am saving a lot of money!',
+    name: 'Fatima K.',
+    title: 'Freelance Designer',
+    avatar: 'https://i.pravatar.cc/150?u=fatima-k',
+  },
+  {
+    quote: 'I was a little hesitant at first, but SubHub has surpassed all my expectations. The customer support is excellent, and the variety of services is amazing.',
+    name: 'Ali R.',
+    title: 'Marketing Manager',
+    avatar: 'https://i.pravatar.cc/150?u=ali-r',
+  },
+  {
+    quote: 'As a student with a limited budget, SubHub has been a lifesaver. I can now afford all the premium services I need for my studies and entertainment.',
+    name: 'Aisha S.',
+    title: 'University Student',
+    avatar: 'https://i.pravatar.cc/150?u=aisha-s',
+  },
+  {
+    quote: 'SubHub is a game-changer! Managing my family\'s subscriptions has never been easier. Highly recommended!',
+    name: 'Hassan M.',
+    title: 'Software Engineer',
+    avatar: 'https://i.pravatar.cc/150?u=hassan-m',
+  },
+    {
+    quote: 'The best part about SubHub is the savings. I\'m getting all my favorite services for a fraction of the price.',
+    name: 'Zoya T.',
+    title: 'Doctor',
+    avatar: 'https://i.pravatar.cc/150?u=zoya-t',
+  },
+];
+
+const duplicatedTestimonials = [...testimonials, ...testimonials];
+---
+
+<style>
+  .scroller {
+    max-width: 100%;
+  }
+
+  .scroller__inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .scroller[data-animated="true"] {
+    overflow: hidden;
+    -webkit-mask: linear-gradient(90deg, transparent, white 20%, white 80%, transparent);
+    mask: linear-gradient(90deg, transparent, white 20%, white 80%, transparent);
+  }
+
+  .scroller[data-animated="true"] .scroller__inner {
+    width: max-content;
+    flex-wrap: nowrap;
+    animation: scroll 40s linear infinite;
+  }
+  
+  .scroller:hover .scroller__inner {
+    animation-play-state: paused;
+  }
+
+  @keyframes scroll {
+    to {
+      transform: translate(calc(-50% - 0.5rem));
+    }
+  }
+</style>
+
+<section class="py-24 sm:py-32">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="max-w-2xl mx-auto text-center">
+      <h2 class="text-4xl sm:text-5xl font-bold text-charcoal-900 tracking-tighter">
+        Loved by users in Pakistan
+      </h2>
+      <p class="mt-4 text-lg text-charcoal-800/80">
+        Don't just take our word for it. Here's what our customers have to say.
+      </p>
+    </div>
+
+    <div class="mt-16 scroller" data-animated="true">
+      <div class="scroller__inner">
+        {duplicatedTestimonials.map(testimonial => (
+          <div class="w-96 bg-cream-50 rounded-2xl p-8 border border-cream-400 shadow-soft-light">
+            <p class="text-charcoal-800/80 italic">"{testimonial.quote}"</p>
+            <div class="mt-6 flex items-center">
+              <img src={testimonial.avatar} alt={testimonial.name} class="w-12 h-12 rounded-full mr-4" />
+              <div>
+                <p class="font-medium text-charcoal-900">{testimonial.name}</p>
+                <p class="text-charcoal-800/70">{testimonial.title}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

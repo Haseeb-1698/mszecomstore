@@ -1,0 +1,22 @@
+---
+export interface Props {
+  name: string;
+  description: string;
+  icon: string;
+  price: string;
+}
+
+const { name, description, icon, price } = Astro.props;
+---
+
+<div class="bg-cream-50 rounded-2xl p-8 border border-cream-400 shadow-soft-light hover:shadow-soft-light-focus transition-all">
+  <img src={icon} alt={name} class="h-12 w-12 mb-6" />
+  <h3 class="text-xl font-medium text-charcoal-900">{name}</h3>
+  <p class="mt-2 text-charcoal-800/70">{description}</p>
+  <div class="mt-6 flex items-center justify-between">
+    <span class="text-2xl font-medium text-charcoal-900">{price}</span>
+    <a href="#" class="px-5 py-2 rounded-full bg-coral-500 text-white font-medium text-sm hover:bg-coral-600 transition-all">
+      Subscribe
+    </a>
+  </div>
+</div>

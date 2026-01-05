@@ -1,0 +1,49 @@
+---
+import { Package, ShieldCheck, RefreshCw } from 'lucide-react';
+
+const steps = [
+  {
+    icon: Package,
+    title: '1. Find Your Service',
+    description: 'Browse our marketplace of top digital subscriptions.',
+    color: 'coral-500'
+  },
+  {
+    icon: ShieldCheck,
+    title: '2. Securely Subscribe',
+    description: 'Enjoy a hassle-free and secure transaction process.',
+    color: 'indigo-500'
+  },
+  {
+    icon: RefreshCw,
+    title: '3. Manage with Ease',
+    description: 'Track and manage all your subscriptions from one dashboard.',
+    color: 'slate-500'
+  },
+];
+---
+
+<section class="py-24 sm:py-32">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="max-w-2xl mx-auto text-center">
+      <h2 class="text-4xl sm:text-5xl font-bold text-charcoal-900 tracking-tighter">
+        How It Works
+      </h2>
+      <p class="mt-4 text-lg text-charcoal-800/80">
+        A simple, secure, and streamlined process to get you started.
+      </p>
+    </div>
+
+    <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+      {steps.map(step => (
+        <div>
+          <div class={`inline-flex items-center justify-center w-20 h-20 rounded-full bg-${step.color}/10 border-4 border-${step.color}/20 mb-6`}>
+            <step.icon className={`w-10 h-10 text-${step.color}`} />
+          </div>
+          <h3 class="text-xl font-medium text-charcoal-900">{step.title}</h3>
+          <p class="mt-2 text-charcoal-800/70">{step.description}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

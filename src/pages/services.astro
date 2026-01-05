@@ -1,0 +1,77 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ServiceCard from '../components/ServiceCard.astro';
+
+const services = [
+  {
+    name: 'Netflix',
+    description: 'Unlimited movies, TV shows, and more.',
+    icon: 'https://cdn.simpleicons.org/netflix/E50914',
+    price: 'PKR 1,100/mo',
+  },
+  {
+    name: 'Spotify',
+    description: 'Music for everyone.',
+    icon: 'https://cdn.simpleicons.org/spotify/1ED760',
+    price: 'PKR 499/mo',
+  },
+  {
+    name: 'Adobe Creative Cloud',
+    description: 'The future of creativity.',
+    icon: 'https://cdn.simpleicons.org/adobecreativecloud/DA1F26',
+    price: 'PKR 8,500/mo',
+  },
+  {
+    name: 'Microsoft 365',
+    description: 'Your productivity cloud.',
+    icon: 'https://cdn.simpleicons.org/microsoft365/D83B01',
+    price: 'PKR 1,200/mo',
+  },
+  {
+    name: 'Disney+',
+    description: 'The best stories in the world, all in one place.',
+    icon: 'https://cdn.simpleicons.org/disneyplus/0063E5',
+    price: 'PKR 1,100/mo',
+  },
+  {
+    name: 'Hulu',
+    description: 'Watch TV and movies online.',
+    icon: 'https://cdn.simpleicons.org/hulu/1CE783',
+    price: 'PKR 999/mo',
+  },
+  {
+    name: 'Amazon Prime',
+    description: 'Get the best of shopping and entertainment.',
+    icon: 'https://cdn.simpleicons.org/amazonprime/00A8E1',
+    price: 'PKR 1,500/mo',
+  },
+  {
+    name: 'YouTube Premium',
+    description: 'Watch your favorite videos without ads.',
+    icon: 'https://cdn.simpleicons.org/youtubepremium/FF0000',
+    price: 'PKR 499/mo',
+  },
+  {
+    name: 'Slack',
+    description: 'Where work happens.',
+    icon: 'https://cdn.simpleicons.org/slack/4A154B',
+    price: 'PKR 1,250/mo',
+  },
+];
+---
+
+<Layout title="Services - SubHub">
+  <main class="max-w-7xl mx-auto px-6 py-12">
+    <div class="text-center mb-16">
+      <h1 class="text-4xl sm:text-5xl font-bold text-charcoal-900 tracking-tighter">Our Services</h1>
+      <p class="mt-4 text-lg text-charcoal-800/80 max-w-2xl mx-auto">
+        Browse our extensive library of premium subscriptions and find the ones that best suit your needs.
+      </p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {services.map(service => (
+        <ServiceCard {...service} />
+      ))}
+    </div>
+  </main>
+</Layout>

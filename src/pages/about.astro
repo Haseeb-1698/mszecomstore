@@ -1,0 +1,71 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const team = [
+  {
+    name: 'John Doe',
+    role: 'CEO & Co-Founder',
+    avatar: 'https://i.pravatar.cc/150?u=john-doe',
+  },
+  {
+    name: 'Jane Doe',
+    role: 'CTO & Co-Founder',
+    avatar: 'https://i.pravatar.cc/150?u=jane-doe',
+  },
+  {
+    name: 'Peter Jones',
+    role: 'Lead Developer',
+    avatar: 'https://i.pravatar.cc/150?u=peter-jones',
+  },
+  {
+    name: 'Mary Smith',
+    role: 'UI/UX Designer',
+    avatar: 'https://i.pravatar.cc/150?u=mary-smith',
+  },
+];
+---
+
+<Layout title="About - SubHub">
+  <main class="max-w-7xl mx-auto px-6 py-12">
+    <div class="text-center mb-16">
+      <h1 class="text-4xl sm:text-5xl font-bold text-charcoal-900 tracking-tighter">About SubHub</h1>
+      <p class="mt-4 text-lg text-charcoal-800/80 max-w-2xl mx-auto">
+        We're on a mission to simplify the way you manage your premium subscriptions.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+      <div>
+        <h2 class="text-3xl font-bold text-charcoal-900">Our Story</h2>
+        <p class="mt-4 text-charcoal-800/80">
+          SubHub was born out of a simple frustration: managing multiple subscriptions across different platforms is a hassle. We wanted to create a single, unified dashboard where users could easily browse, purchase, and manage all of their premium subscriptions in one place.
+        </p>
+        <p class="mt-4 text-charcoal-800/80">
+          Our goal is to provide a seamless and affordable solution that saves you time and money, while giving you access to the best premium content and services on the market.
+        </p>
+      </div>
+      <div>
+        <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Our Story" class="rounded-2xl shadow-soft-light" />
+      </div>
+    </div>
+
+    <div class="mt-24">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl sm:text-4xl font-bold text-charcoal-900 tracking-tighter">Meet the Team</h2>
+        <p class="mt-4 text-lg text-charcoal-800/80 max-w-2xl mx-auto">
+          We are a small but passionate team of developers, designers, and subscription enthusiasts.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+        {team.map(member => (
+          <div class="text-center">
+            <img src={member.avatar} alt={member.name} class="w-32 h-32 rounded-full mx-auto mb-4 shadow-soft-light" />
+            <h3 class="text-xl font-medium text-charcoal-900">{member.name}</h3>
+            <p class="text-charcoal-800/70">{member.role}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </main>
+</Layout>
