@@ -1,0 +1,49 @@
+---
+import { ChevronDown } from 'lucide-react';
+
+const faqs = [
+  {
+    question: 'What is SubHub?',
+    answer: 'SubHub is a subscription management platform that allows you to bundle and save on your favorite digital services. We provide a single dashboard to manage all your subscriptions, payments, and renewals.',
+  },
+  {
+    question: 'Is SubHub secure?',
+    answer: 'Yes, security is our top priority. We use industry-standard encryption to protect your personal and payment information. Your data is always safe and secure with us.',
+  },
+  {
+    question: 'What kind of services can I find on SubHub?',
+    answer: 'We offer a wide range of popular services, including streaming (Netflix, Disney+), music (Spotify, Apple Music), productivity (Notion, Adobe Creative Cloud), and more. We are constantly expanding our marketplace.',
+  },
+  {
+    question: 'How does the billing work?',
+    answer: 'SubHub simplifies your billing by consolidating all your subscription payments into a single monthly bill. You can easily track your spending and manage your payment methods from your dashboard.',
+  },
+];
+---
+
+<section class="py-24 sm:py-32 bg-white dark:bg-charcoal-900">
+  <div class="max-w-4xl mx-auto px-6">
+    <div class="max-w-2xl mx-auto text-center">
+      <h2 class="text-4xl sm:text-5xl font-bold text-charcoal-900 dark:text-white tracking-tighter">
+        Frequently Asked Questions
+      </h2>
+      <p class="mt-4 text-lg text-charcoal-800/80 dark:text-gray-300">
+        Have questions? We have answers. If you can't find what you're looking for, feel free to contact us.
+      </p>
+    </div>
+
+    <div class="mt-16 space-y-6">
+      {faqs.map((faq, index) => (
+        <div class="bg-cream-50 dark:bg-charcoal-800 rounded-2xl p-6 border border-cream-400 dark:border-charcoal-700" x-data=`{ open: ${index === 0} }`>
+          <button class="w-full flex justify-between items-center text-left" @click="open = !open">
+            <h3 class="text-xl font-medium text-charcoal-900 dark:text-white">{faq.question}</h3>
+            <ChevronDown class="w-6 h-6 text-charcoal-800 dark:text-white transition-transform" :class="{ 'rotate-180': open }" />
+          </button>
+          <div class="mt-4 text-charcoal-800/80 dark:text-gray-300" x-show="open" x-collapse>
+            <p>{faq.answer}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

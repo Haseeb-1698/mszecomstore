@@ -1,52 +1,57 @@
 ---
-import { Package, ShieldCheck, RefreshCw } from "lucide-react";
+import { Search, LayoutList, Smile } from "lucide-react";
 ---
 
-<section class="py-24 sm:py-32">
+<section class="py-24 sm:py-32 bg-cream-50 dark:bg-charcoal-900">
   <div class="max-w-7xl mx-auto px-6">
-    <div class="max-w-2xl mx-auto text-center">
+    <div class="max-w-3xl mx-auto text-center">
       <h2
-        class="text-4xl sm:text-5xl font-bold text-charcoal-900 tracking-tighter"
+        class="text-4xl sm:text-5xl font-bold text-charcoal-900 dark:text-white tracking-tighter"
       >
-        How It Works
+        Streamline Your Digital Life
       </h2>
-      <p class="mt-4 text-lg text-charcoal-800/80">
-        A simple, secure, and streamlined process to get you started.
+      <p class="mt-4 text-lg text-charcoal-800/80 dark:text-gray-300">
+        Managing your subscriptions shouldn't be complicated. With SubHub, it's a simple, three-step process to bundle, save, and enjoy.
       </p>
     </div>
 
-    <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
-      <!-- Step 1 -->
-      <div class="flex flex-col items-center">
-        <div
-          class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-coral-500/10 border-4 border-coral-500/20 mb-6"
-        >
-          <Package class="w-10 h-10 text-coral-500" />
-        </div>
-        <h3 class="text-xl font-medium text-charcoal-900">1. Find Your Service</h3>
-        <p class="mt-2 text-charcoal-800/70">Browse our marketplace of top digital subscriptions.</p>
-      </div>
+    <div class="mt-20 relative">
+      <!-- Connecting Line -->
+      <div class="absolute left-1/2 top-10 h-2/3 w-px bg-cream-300 dark:bg-charcoal-700 hidden md:block"></div>
 
-      <!-- Step 2 -->
-      <div class="flex flex-col items-center">
-        <div
-          class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-purple-500/10 border-4 border-purple-500/20 mb-6"
-        >
-          <ShieldCheck class="w-10 h-10 text-purple-500" />
+      <div class="space-y-16 md:space-y-0 md:grid md:grid-cols-3 md:gap-12">
+        <!-- Step 1 -->
+        <div class="relative text-center">
+          <div
+            class="relative z-10 inline-flex items-center justify-center w-20 h-20 rounded-full bg-white dark:bg-charcoal-800 shadow-soft-light border-4 border-cream-200 dark:border-charcoal-700 mb-6"
+          >
+            <Search class="w-10 h-10 text-coral-500" />
+          </div>
+          <h3 class="text-xl font-medium text-charcoal-900 dark:text-white">1. Discover & Choose</h3>
+          <p class="mt-2 text-charcoal-800/70 dark:text-gray-400">Explore our extensive collection of premium services and select the ones you love.</p>
         </div>
-        <h3 class="text-xl font-medium text-charcoal-900">2. Securely Subscribe</h3>
-        <p class="mt-2 text-charcoal-800/70">Enjoy a hassle-free and secure transaction process.</p>
-      </div>
 
-      <!-- Step 3 -->
-      <div class="flex flex-col items-center">
-        <div
-          class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-charcoal-800/10 border-4 border-charcoal-800/20 mb-6"
-        >
-          <RefreshCw class="w-10 h-10 text-charcoal-800" />
+        <!-- Step 2 -->
+        <div class="relative text-center">
+          <div
+            class="relative z-10 inline-flex items-center justify-center w-20 h-20 rounded-full bg-white dark:bg-charcoal-800 shadow-soft-light border-4 border-cream-200 dark:border-charcoal-700 mb-6"
+          >
+            <LayoutList class="w-10 h-10 text-purple-500" />
+          </div>
+          <h3 class="text-xl font-medium text-charcoal-900 dark:text-white">2. Bundle & Save</h3>
+          <p class="mt-2 text-charcoal-800/70 dark:text-gray-400">Combine your chosen subscriptions into a single, manageable bill and unlock exclusive savings.</p>
         </div>
-        <h3 class="text-xl font-medium text-charcoal-900">3. Manage with Ease</h3>
-        <p class="mt-2 text-charcoal-800/70">Track and manage all your subscriptions from one dashboard.</p>
+
+        <!-- Step 3 -->
+        <div class="relative text-center">
+          <div
+            class="relative z-10 inline-flex items-center justify-center w-20 h-20 rounded-full bg-white dark:bg-charcoal-800 shadow-soft-light border-4 border-cream-200 dark:border-charcoal-700 mb-6"
+          >
+            <Smile class="w-10 h-10 text-charcoal-800 dark:text-white" />
+          </div>
+          <h3 class="text-xl font-medium text-charcoal-900 dark:text-white">3. Manage & Enjoy</h3>
+          <p class="mt-2 text-charcoal-800/70 dark:text-gray-400">Enjoy seamless access to all your services and manage them effortlessly from your SubHub dashboard.</p>
+        </div>
       </div>
     </div>
   </div>

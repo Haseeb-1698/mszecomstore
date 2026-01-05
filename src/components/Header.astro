@@ -1,5 +1,6 @@
 ---
 import { Menu } from 'lucide-react';
+import ThemeSwitcher from './ThemeSwitcher.jsx';
 
 const links = [
   { href: '/', label: 'Home' },
@@ -9,25 +10,29 @@ const links = [
 ];
 ---
 
-<header class="bg-cream-50/80 backdrop-blur-lg border-b border-cream-400 sticky top-0 z-50">
+<header class="bg-cream-50/80 dark:bg-charcoal-900/80 backdrop-blur-lg border-b border-cream-400 dark:border-charcoal-700 sticky top-0 z-50">
   <nav class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-    <a href="/" class="text-2xl font-bold text-charcoal-900">SubHub</a>
+    <a href="/" class="text-2xl font-bold text-charcoal-900 dark:text-white">SubHub</a>
 
     <div class="hidden md:flex items-center gap-8">
       {links.map(link => (
-        <a href={link.href} class="text-charcoal-800 hover:text-coral-500 transition-colors">{link.label}</a>
+        <a href={link.href} class="text-charcoal-800 dark:text-cream-100 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">{link.label}</a>
       ))}
     </div>
 
     <div class="hidden md:flex items-center gap-4">
-      <a href="/login" class="text-charcoal-800 hover:text-coral-500 transition-colors">Log In</a>
+      <a href="/login" class="text-charcoal-800 dark:text-cream-100 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">Log In</a>
       <a href="/signup" class="px-5 py-2 rounded-full bg-coral-500 text-white font-medium hover:bg-coral-600 transition-all">
         Sign Up
       </a>
+      <ThemeSwitcher client:load />
     </div>
 
-    <button class="md:hidden">
-      <Menu className="w-6 h-6 text-charcoal-800" />
-    </button>
+    <div class="md:hidden flex items-center gap-4">
+      <ThemeSwitcher client:load />
+      <button>
+        <Menu className="w-6 h-6 text-charcoal-800 dark:text-white" />
+      </button>
+    </div>
   </nav>
 </header>

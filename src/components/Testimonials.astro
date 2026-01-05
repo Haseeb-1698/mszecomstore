@@ -69,13 +69,13 @@ const duplicatedTestimonials = [...testimonials, ...testimonials];
   }
 </style>
 
-<section class="py-24 sm:py-32">
+<section class="py-24 sm:py-32 dark:bg-charcoal-800">
   <div class="max-w-7xl mx-auto px-6">
     <div class="max-w-2xl mx-auto text-center">
-      <h2 class="text-4xl sm:text-5xl font-bold text-charcoal-900 tracking-tighter">
+      <h2 class="text-4xl sm:text-5xl font-bold text-charcoal-900 dark:text-white tracking-tighter">
         Loved by users in Pakistan
       </h2>
-      <p class="mt-4 text-lg text-charcoal-800/80">
+      <p class="mt-4 text-lg text-charcoal-800/80 dark:text-gray-300">
         Don't just take our word for it. Here's what our customers have to say.
       </p>
     </div>
@@ -83,13 +83,13 @@ const duplicatedTestimonials = [...testimonials, ...testimonials];
     <div class="mt-16 scroller" data-animated="true">
       <div class="scroller__inner">
         {duplicatedTestimonials.map(testimonial => (
-          <div class="w-96 bg-cream-50 rounded-2xl p-8 border border-cream-400 shadow-soft-light">
-            <p class="text-charcoal-800/80 italic">"{testimonial.quote}"</p>
+          <div class="w-96 bg-cream-50 dark:bg-charcoal-900 rounded-2xl p-8 border border-cream-400 dark:border-charcoal-700 shadow-soft-light dark:shadow-soft-dark">
+            <p class="text-charcoal-800/80 dark:text-gray-300 italic">"{testimonial.quote}"</p>
             <div class="mt-6 flex items-center">
               <img src={testimonial.avatar} alt={testimonial.name} class="w-12 h-12 rounded-full mr-4" />
               <div>
-                <p class="font-medium text-charcoal-900">{testimonial.name}</p>
-                <p class="text-charcoal-800/70">{testimonial.title}</p>
+                <p class="font-medium text-charcoal-900 dark:text-white">{testimonial.name}</p>
+                <p class="text-charcoal-800/70 dark:text-gray-400">{testimonial.title}</p>
               </div>
             </div>
           </div>

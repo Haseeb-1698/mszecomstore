@@ -1,0 +1,35 @@
+---
+import { services } from '../data/services.js';
+import { ArrowRight } from 'lucide-react';
+---
+
+<section class="py-24 sm:py-32 dark:bg-charcoal-900">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="max-w-2xl mx-auto text-center">
+      <h2 class="text-4xl sm:text-5xl font-bold text-charcoal-900 dark:text-white tracking-tighter">
+        Popular Services
+      </h2>
+      <p class="mt-4 text-lg text-charcoal-800/80 dark:text-gray-300">
+        We partner with the world's leading digital services to bring you the best deals.
+      </p>
+    </div>
+
+    <div class="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      {services.slice(0, 6).map(service => (
+        <div class="bg-white dark:bg-charcoal-800 rounded-2xl p-8 border border-cream-400 dark:border-charcoal-700 shadow-soft-light-inset dark:shadow-soft-dark-inset transition-all duration-300 hover:shadow-soft-light-hover dark:hover:shadow-soft-dark-hover hover:-translate-y-1">
+            <div class="flex-shrink-0">
+              <img src={service.logo} alt={service.name} class="h-10 w-auto" />
+            </div>
+            <h3 class="mt-6 text-xl font-medium text-charcoal-900 dark:text-white">{service.name}</h3>
+            <p class="mt-2 text-charcoal-800/80 dark:text-gray-400">{service.description}</p>
+            <div class="mt-6">
+              <a href={`/services/${service.slug}`} class="font-medium text-coral-500 hover:text-coral-600 dark:hover:text-coral-400 flex items-center gap-2">
+                <span>View Details</span>
+                <ArrowRight className="w-4 h-4" />
+              </a>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

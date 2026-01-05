@@ -1,0 +1,47 @@
+---
+import { BarChart, Wallet, Bell, Lock } from 'lucide-react';
+
+const features = [
+  {
+    icon: BarChart,
+    name: 'Dashboard Insights',
+    description: 'Visualize your spending with our intuitive dashboard, and gain insights into your subscription habits.',
+  },
+  {
+    icon: Wallet,
+    name: 'Centralized Billing',
+    description: 'Manage all your subscription payments from one place with a single monthly bill.',
+  },
+  {
+    icon: Bell,
+    name: 'Renewal Alerts',
+    description: 'Never get caught by surprise again. We notify you before any subscription is due for renewal.',
+  },
+  {
+    icon: Lock,
+    name: 'Secure & Reliable',
+    description: 'Your data is safe with us. We use industry-standard encryption to protect your information.',
+  },
+];
+---
+
+<section class="py-24 sm:py-32 bg-white dark:bg-charcoal-800">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center">
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tighter text-charcoal-900 dark:text-white">Why SubHub?</h2>
+      <p class="mt-4 max-w-2xl mx-auto text-lg text-charcoal-800 dark:text-gray-300">Everything you need to manage your subscriptions effectively.</p>
+    </div>
+
+    <div class="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      {features.map(feature => (
+        <div class="text-center">
+          <div class="flex items-center justify-center h-12 w-12 rounded-xl bg-coral-500 text-white mx-auto">
+            <feature.icon className="w-6 h-6" />
+          </div>
+          <h3 class="mt-6 text-xl font-medium text-charcoal-900 dark:text-white">{feature.name}</h3>
+          <p class="mt-2 text-charcoal-800 dark:text-gray-400">{feature.description}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
