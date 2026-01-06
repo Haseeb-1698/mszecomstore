@@ -65,7 +65,7 @@ const CheckoutPage: React.FC = () => {
       const sessionId = `checkout_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 
       // Redirect to payment page
-      window.location.href = `/payment/success?session=${sessionId}&method=${encodeURIComponent(paymentMethod)}`;
+      globalThis.location.href = `/payment/success?session=${sessionId}&method=${encodeURIComponent(paymentMethod)}`;
     } catch (error) {
       console.error('Checkout error:', error);
       alert('Failed to process checkout. Please try again.');

@@ -51,6 +51,7 @@ const PaymentSection: React.FC<PaymentSectionProps> = ({ paymentMethod, setPayme
         {paymentMethods.map((method) => (
           <label
             key={method.id}
+            htmlFor={`payment-${method.id.replaceAll(/\s+/g, '-')}`}
             className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
               paymentMethod === method.id
                 ? 'border-coral-500 bg-coral-50 dark:bg-coral-900/20'
@@ -58,12 +59,14 @@ const PaymentSection: React.FC<PaymentSectionProps> = ({ paymentMethod, setPayme
             }`}
           >
             <input
+              id={`payment-${method.id.replaceAll(/\s+/g, '-')}`}
               type="radio"
               name="paymentMethod"
               value={method.id}
               checked={paymentMethod === method.id}
               onChange={() => setPaymentMethod(method.id)}
               className="mt-1 w-5 h-5 text-coral-500 focus:ring-coral-500"
+              aria-label={method.name}
             />
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">

@@ -50,7 +50,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ isOpen, onClose, service })
       }`}
     >
       {/* Backdrop */}
-      <div
+      <button
         className="absolute inset-0 bg-charcoal-900/70 backdrop-blur-sm"
         onClick={handleClose}
       />

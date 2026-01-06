@@ -16,6 +16,10 @@ const CartPage: React.FC = () => {
   }
 
   const itemCount = cart.items.reduce((count, item) => count + item.quantity, 0);
+  // avoid nested ternary by extracting pluralization and message into separate constants
+  const pluralSuffix = itemCount === 1 ? '' : 's';
+  const cartMessage =
+    cart.items.length === 0 ? 'Your cart is empty' : `${itemCount} item${pluralSuffix} in your cart`;
 
   return (
     <div className="min-h-screen bg-cream-50 dark:bg-charcoal-900 py-16">
@@ -41,9 +45,7 @@ const CartPage: React.FC = () => {
           </div>
 
           <p className="text-charcoal-700 dark:text-cream-300 text-lg">
-            {cart.items.length === 0
-              ? 'Your cart is empty'
-              : `${itemCount} item${itemCount !== 1 ? 's' : ''} in your cart`}
+            {cartMessage}
           </p>
         </div>
 

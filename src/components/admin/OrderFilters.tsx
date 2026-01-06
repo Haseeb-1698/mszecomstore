@@ -10,11 +10,12 @@ const OrderFilters: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Search */}
         <div>
-          <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+          <label htmlFor="search-input" className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
             Search Orders
           </label>
           <div className="relative">
             <input
+              id="search-input"
               type="text"
               placeholder="Order ID or customer name..."
               value={searchTerm}
@@ -34,10 +35,11 @@ const OrderFilters: React.FC = () => {
 
         {/* Status Filter */}
         <div>
-          <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+          <label htmlFor="status-select" className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
             Status
           </label>
           <select
+            id="status-select"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             className="w-full px-4 py-2 bg-cream-100 dark:bg-charcoal-900 border border-cream-400 dark:border-charcoal-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-coral-500 text-charcoal-800 dark:text-cream-100"
@@ -52,10 +54,11 @@ const OrderFilters: React.FC = () => {
 
         {/* Date Range */}
         <div>
-          <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+          <label htmlFor="date-select" className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
             Date Range
           </label>
           <select
+            id="date-select"
             value={dateRange}
             onChange={(e) => setDateRange(e.target.value)}
             className="w-full px-4 py-2 bg-cream-100 dark:bg-charcoal-900 border border-cream-400 dark:border-charcoal-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-coral-500 text-charcoal-800 dark:text-cream-100"

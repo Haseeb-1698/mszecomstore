@@ -25,7 +25,7 @@ const ThemeSwitcher = () => {
     document.documentElement.classList.remove(theme);
     document.documentElement.classList.add(newTheme);
     // Dispatch a custom event to notify the inline script to save the preference.
-    window.dispatchEvent(new CustomEvent('theme-change', { detail: newTheme }));
+    globalThis.dispatchEvent(new CustomEvent('theme-change', { detail: newTheme }));
   };
 
   return (

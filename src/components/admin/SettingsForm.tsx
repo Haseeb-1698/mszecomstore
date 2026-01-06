@@ -1,10 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import type { SettingsTab } from './SettingsTabs';
 
 const SettingsForm: React.FC = () => {
   const [activeTab] = useState<SettingsTab>('business');
+
+  // Generate unique IDs for form controls
+  const businessNameId = useId();
+  const emailId = useId();
+  const phoneId = useId();
+  const addressId = useId();
+  const descriptionId = useId();
+  const stripePublishableId = useId();
+  const stripeSecretId = useId();
+  const easyPaisaId = useId();
+  const jazzCashId = useId();
+  const bankNameId = useId();
+  const accountNumberId = useId();
   const [businessInfo, setBusinessInfo] = useState({
     businessName: 'MSZ Ecom Store',
     email: 'contact@mszecom.com',
@@ -63,10 +76,11 @@ const SettingsForm: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+              <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2" htmlFor={businessNameId}>
                 Business Name *
               </label>
               <Input
+                id={businessNameId}
                 type="text"
                 name="businessName"
                 value={businessInfo.businessName}
@@ -76,10 +90,11 @@ const SettingsForm: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+              <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2" htmlFor={emailId}>
                 Email *
               </label>
               <Input
+                id={emailId}
                 type="email"
                 name="email"
                 value={businessInfo.email}
@@ -89,10 +104,11 @@ const SettingsForm: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+              <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2" htmlFor={phoneId}>
                 Phone *
               </label>
               <Input
+                id={phoneId}
                 type="tel"
                 name="phone"
                 value={businessInfo.phone}
@@ -102,10 +118,11 @@ const SettingsForm: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+              <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2" htmlFor={addressId}>
                 Address
               </label>
               <Input
+                id={addressId}
                 type="text"
                 name="address"
                 value={businessInfo.address}
@@ -115,10 +132,11 @@ const SettingsForm: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+            <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2" htmlFor={descriptionId}>
               Business Description
             </label>
             <textarea
+              id={descriptionId}
               name="description"
               value={businessInfo.description}
               onChange={handleBusinessChange}
@@ -144,10 +162,11 @@ const SettingsForm: React.FC = () => {
             <h4 className="font-semibold text-charcoal-800 dark:text-cream-100 mb-4">Stripe (Coming Soon)</h4>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+                <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2" htmlFor={stripePublishableId}>
                   Publishable Key
                 </label>
                 <Input
+                  id={stripePublishableId}
                   type="text"
                   name="stripePublishableKey"
                   value={paymentSettings.stripePublishableKey}
@@ -157,10 +176,11 @@ const SettingsForm: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+                <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2" htmlFor={stripeSecretId}>
                   Secret Key
                 </label>
                 <Input
+                  id={stripeSecretId}
                   type="password"
                   name="stripeSecretKey"
                   value={paymentSettings.stripeSecretKey}
@@ -177,10 +197,11 @@ const SettingsForm: React.FC = () => {
             <h4 className="font-semibold text-charcoal-800 dark:text-cream-100 mb-4">Local Payment Methods</h4>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+                <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2" htmlFor={easyPaisaId}>
                   EasyPaisa Number
                 </label>
                 <Input
+                  id={easyPaisaId}
                   type="tel"
                   name="easyPaisaNumber"
                   value={paymentSettings.easyPaisaNumber}
@@ -188,10 +209,11 @@ const SettingsForm: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+                <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2" htmlFor={jazzCashId}>
                   JazzCash Number
                 </label>
                 <Input
+                  id={jazzCashId}
                   type="tel"
                   name="jazzCashNumber"
                   value={paymentSettings.jazzCashNumber}
@@ -200,10 +222,11 @@ const SettingsForm: React.FC = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+                  <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2" htmlFor={bankNameId}>
                     Bank Name
                   </label>
                   <Input
+                    id={bankNameId}
                     type="text"
                     name="bankName"
                     value={paymentSettings.bankName}
@@ -211,10 +234,11 @@ const SettingsForm: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+                  <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2" htmlFor={accountNumberId}>
                     Account Number
                   </label>
                   <Input
+                    id={accountNumberId}
                     type="text"
                     name="accountNumber"
                     value={paymentSettings.accountNumber}
@@ -245,7 +269,7 @@ const SettingsForm: React.FC = () => {
               >
                 <div>
                   <h4 className="font-medium text-charcoal-800 dark:text-cream-100">
-                    {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                    {key.replaceAll(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                   </h4>
                   <p className="text-sm text-charcoal-600 dark:text-cream-400 mt-1">
                     {getNotificationDescription(key)}

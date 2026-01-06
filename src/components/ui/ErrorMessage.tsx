@@ -89,9 +89,9 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({
           {/* Actions */}
           {actions && actions.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
-              {actions.map((action, index) => (
+              {actions.map((action) => (
                 <button
-                  key={index}
+                  key={`${action.label}-${action.variant || 'secondary'}`}
                   onClick={action.onClick}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     action.variant === 'primary'

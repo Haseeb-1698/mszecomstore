@@ -38,8 +38,9 @@ export const calculateCartTotals = (items: CartItem[]): { subtotal: number; tota
 
 // Helper to parse price string to number
 const parsePrice = (priceStr: string): number => {
-  const match = priceStr.match(/[\d.]+/);
-  return match ? parseFloat(match[0]) : 0;
+  const match = new RegExp(/[\d.]+/).exec(priceStr);
+  const value = match ? Number.parseFloat(match[0]) : 0;
+  return Number.isFinite(value) ? value : 0;
 };
 
 // Add item to cart
@@ -187,7 +188,7 @@ export const CART_STORAGE_KEY = 'msz_ecom_cart';
 
 // Save cart to local storage
 export const saveCartToStorage = (cart: Cart): void => {
-  if (typeof window === 'undefined') return;
+  if (typeof globalThis === 'undefined') return;
   try {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
   } catch (error) {
@@ -197,7 +198,7 @@ export const saveCartToStorage = (cart: Cart): void => {
 
 // Load cart from local storage
 export const loadCartFromStorage = (): Cart | null => {
-  if (typeof window === 'undefined') return null;
+  if (typeof globalThis === 'undefined') return null;
   try {
     const cartData = localStorage.getItem(CART_STORAGE_KEY);
     if (!cartData) return null;
@@ -218,7 +219,7 @@ export const loadCartFromStorage = (): Cart | null => {
 
 // Remove cart from local storage
 export const removeCartFromStorage = (): void => {
-  if (typeof window === 'undefined') return;
+  if (typeof globalThis === 'undefined') return;
   try {
     localStorage.removeItem(CART_STORAGE_KEY);
   } catch (error) {

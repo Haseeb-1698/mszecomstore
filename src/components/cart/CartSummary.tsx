@@ -66,7 +66,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({ cart, onApplyDiscount }) => {
               placeholder="Discount code"
               value={discountCode}
               onChange={(e) => setDiscountCode(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleApplyDiscount()}
+              onKeyDown={(e) => e.key === 'Enter' && handleApplyDiscount()}
               className="flex-1"
             />
             <Button

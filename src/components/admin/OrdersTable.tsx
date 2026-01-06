@@ -178,7 +178,7 @@ const OrdersTable: React.FC = () => {
                     <button
                       className="p-2 rounded-lg hover:bg-cream-200 dark:hover:bg-charcoal-600 text-charcoal-700 dark:text-cream-300 transition-colors"
                       title="View details"
-                      onClick={() => window.location.href = `/order/${order.id}`}
+                      onClick={() => globalThis.location.href = `/order/${order.id}`}
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />

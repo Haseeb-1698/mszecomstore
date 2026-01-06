@@ -101,8 +101,8 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId = 'ORD-12345' }) =>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {order.items.map((item, index) => (
-                  <div key={index} className="flex justify-between py-3 border-b border-cream-400 dark:border-charcoal-700 last:border-0">
+                {order.items.map((item) => (
+                  <div key={`${item.name}-${item.plan}-${item.price}`} className="flex justify-between py-3 border-b border-cream-400 dark:border-charcoal-700 last:border-0">
                     <div>
                       <p className="font-medium text-charcoal-800 dark:text-cream-100">{item.name}</p>
                       <p className="text-sm text-charcoal-600 dark:text-cream-400">{item.plan}</p>

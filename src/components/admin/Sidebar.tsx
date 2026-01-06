@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 const Sidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+  const currentPath = globalThis.window === undefined ? '' : globalThis.location.pathname;
 
   const menuItems = [
     {

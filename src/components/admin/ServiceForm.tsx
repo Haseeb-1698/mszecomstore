@@ -81,10 +81,11 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose }) => {
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Service Name */}
       <div>
-        <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+        <label htmlFor="name" className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
           Service Name *
         </label>
         <Input
+          id="name"
           type="text"
           name="name"
           value={formData.name}
@@ -97,10 +98,11 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose }) => {
       {/* Category & Duration */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+          <label htmlFor="category" className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
             Category *
           </label>
           <select
+            id="category"
             name="category"
             value={formData.category}
             onChange={handleChange}
@@ -116,10 +118,11 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose }) => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+          <label htmlFor="duration" className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
             Duration *
           </label>
           <select
+            id="duration"
             name="duration"
             value={formData.duration}
             onChange={handleChange}
@@ -135,10 +138,11 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose }) => {
 
       {/* Price */}
       <div>
-        <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+        <label htmlFor="price" className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
           Price *
         </label>
         <Input
+          id="price"
           type="text"
           name="price"
           value={formData.price}
@@ -150,10 +154,11 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose }) => {
 
       {/* Description */}
       <div>
-        <label className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+        <label htmlFor="description" className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
           Description *
         </label>
         <textarea
+          id="description"
           name="description"
           value={formData.description}
           onChange={handleChange}

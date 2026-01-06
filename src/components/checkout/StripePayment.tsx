@@ -32,13 +32,13 @@ const StripePayment: React.FC<StripePaymentProps> = ({ onSubmit, isLoading = fal
   };
 
   const formatCardNumber = (value: string) => {
-    const cleaned = value.replace(/\s/g, '');
+    const cleaned = value.replaceAll(/\s/g, '');
     const formatted = cleaned.match(/.{1,4}/g)?.join(' ') || cleaned;
     return formatted.substring(0, 19); // 16 digits + 3 spaces
   };
 
   const formatExpiry = (value: string) => {
-    const cleaned = value.replace(/\D/g, '');
+    const cleaned = value.replaceAll(/\D/g, '');
     if (cleaned.length >= 2) {
       return cleaned.substring(0, 2) + '/' + cleaned.substring(2, 4);
     }
@@ -94,7 +94,7 @@ const StripePayment: React.FC<StripePaymentProps> = ({ onSubmit, isLoading = fal
               type="text"
               placeholder="123"
               value={cvc}
-              onChange={(e) => setCvc(e.target.value.replace(/\D/g, '').substring(0, 4))}
+              onChange={(e) => setCvc(e.target.value.replaceAll(/\D/g, '').substring(0, 4))}
               disabled
             />
           </div>
