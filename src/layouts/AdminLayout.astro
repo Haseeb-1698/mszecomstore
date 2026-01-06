@@ -1,0 +1,64 @@
+---
+import '../styles/globals.css';
+import Sidebar from '../components/admin/Sidebar.tsx';
+import AdminHeader from '../components/admin/AdminHeader.tsx';
+
+export interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="MSZ Ecom Store Admin" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<script is:inline>
+		  const theme = (() => {
+		    if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+		      return localStorage.getItem('theme');
+		    }
+		    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+		      return 'dark';
+		    }
+		    return 'light';
+		  })();
+
+		  if (theme === 'light') {
+		    document.documentElement.classList.remove('dark');
+		  } else {
+		    document.documentElement.classList.add('dark');
+		  }
+
+		  window.addEventListener('theme-change', (e) => {
+		    localStorage.setItem('theme', e.detail);
+		  });
+		</script>
+	</head>
+	<body class="bg-cream-50 dark:bg-charcoal-900 text-charcoal-800 dark:text-cream-50 antialiased">
+		<div class="flex h-screen overflow-hidden">
+			<!-- Sidebar -->
+			<Sidebar client:load />
+			
+			<!-- Main Content -->
+			<div class="flex-1 flex flex-col overflow-hidden">
+				<!-- Header -->
+				<AdminHeader client:load />
+				
+				<!-- Page Content -->
+				<main class="flex-1 overflow-y-auto bg-cream-100 dark:bg-charcoal-900 p-6">
+					<slot />
+				</main>
+			</div>
+		</div>
+	</body>
+</html>

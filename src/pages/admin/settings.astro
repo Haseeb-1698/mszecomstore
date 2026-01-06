@@ -1,0 +1,28 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import SettingsTabs from '../../components/admin/SettingsTabs.tsx';
+import SettingsForm from '../../components/admin/SettingsForm.tsx';
+---
+
+<AdminLayout title="Settings - MSZ Ecom Store">
+	<div class="max-w-5xl mx-auto">
+		<!-- Page Header -->
+		<div class="mb-8">
+			<h1 class="text-3xl font-bold text-charcoal-800 dark:text-cream-100 mb-2">Settings</h1>
+			<p class="text-charcoal-600 dark:text-cream-400">Manage your store settings and preferences</p>
+		</div>
+
+		<!-- Tabs & Form -->
+		<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+			<!-- Sidebar Tabs -->
+			<div class="lg:col-span-1">
+				<SettingsTabs client:load />
+			</div>
+
+			<!-- Form Content -->
+			<div class="lg:col-span-3">
+				<SettingsForm client:load />
+			</div>
+		</div>
+	</div>
+</AdminLayout>

@@ -1,0 +1,81 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import StatsCard from '../../components/admin/StatsCard.tsx';
+import RecentOrders from '../../components/admin/RecentOrders.tsx';
+import QuickActions from '../../components/admin/QuickActions.tsx';
+---
+
+<AdminLayout title="Admin Dashboard - MSZ Ecom Store">
+	<div class="max-w-7xl mx-auto">
+		<!-- Page Header -->
+		<div class="mb-8">
+			<h1 class="text-3xl font-bold text-charcoal-800 dark:text-cream-100 mb-2">Dashboard</h1>
+			<p class="text-charcoal-600 dark:text-cream-400">Welcome back! Here's what's happening with your store.</p>
+		</div>
+
+		<!-- Stats Grid -->
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+			<StatsCard
+				client:load
+				title="Total Orders"
+				value="247"
+				change="+12.5%"
+				trend="up"
+				icon="orders"
+			/>
+			<StatsCard
+				client:load
+				title="Revenue"
+				value="$12,450"
+				change="+8.2%"
+				trend="up"
+				icon="revenue"
+			/>
+			<StatsCard
+				client:load
+				title="Customers"
+				value="1,245"
+				change="+5.1%"
+				trend="up"
+				icon="customers"
+			/>
+			<StatsCard
+				client:load
+				title="Active Services"
+				value="42"
+				change="-2.3%"
+				trend="down"
+				icon="services"
+			/>
+		</div>
+
+		<!-- Main Content Grid -->
+		<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+			<!-- Recent Orders -->
+			<div class="lg:col-span-2">
+				<RecentOrders client:load />
+			</div>
+
+			<!-- Quick Actions -->
+			<div>
+				<QuickActions client:load />
+			</div>
+		</div>
+
+		<!-- Revenue Chart Placeholder -->
+		<div class="mt-8">
+			<div class="bg-cream-50 dark:bg-charcoal-800 rounded-2xl p-6 border border-cream-400 dark:border-charcoal-700">
+				<h2 class="text-xl font-bold text-charcoal-800 dark:text-cream-100 mb-4">Revenue Overview</h2>
+				<div class="h-64 flex items-center justify-center border-2 border-dashed border-cream-400 dark:border-charcoal-700 rounded-xl">
+					<div class="text-center">
+						<svg class="w-16 h-16 mx-auto mb-4 text-cream-600 dark:text-charcoal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+						</svg>
+						<p class="text-charcoal-600 dark:text-cream-400 font-medium">Chart coming soon</p>
+						<p class="text-sm text-charcoal-500 dark:text-cream-500">Integrate with Chart.js or similar</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</AdminLayout>

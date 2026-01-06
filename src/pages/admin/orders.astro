@@ -1,0 +1,29 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import OrdersTable from '../../components/admin/OrdersTable.tsx';
+import OrderFilters from '../../components/admin/OrderFilters.tsx';
+---
+
+<AdminLayout title="Orders Management - MSZ Ecom Store">
+	<div class="max-w-7xl mx-auto">
+		<!-- Page Header -->
+		<div class="mb-8 flex items-center justify-between">
+			<div>
+				<h1 class="text-3xl font-bold text-charcoal-800 dark:text-cream-100 mb-2">Orders Management</h1>
+				<p class="text-charcoal-600 dark:text-cream-400">View and manage all customer orders</p>
+			</div>
+			<button class="px-4 py-2 bg-coral-500 hover:bg-coral-600 text-white rounded-xl font-medium transition-colors flex items-center gap-2">
+				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+				</svg>
+				Export Orders
+			</button>
+		</div>
+
+		<!-- Filters -->
+		<OrderFilters client:load />
+
+		<!-- Orders Table -->
+		<OrdersTable client:load />
+	</div>
+</AdminLayout>

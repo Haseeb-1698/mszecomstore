@@ -1,13 +1,18 @@
 ---
 import { Menu } from 'lucide-react';
-import ThemeSwitcher from './ThemeSwitcher.jsx';
+import ThemeSwitcher from './ThemeSwitcher.tsx';
+import CartIcon from './ui/CartIcon';
 
 const links = [
   { href: '/', label: 'Home' },
   { href: '/services', label: 'Services' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
+  { href: '/cart', label: 'Cart' },
 ];
+
+// Check if user is admin (this would be from auth in production)
+const isAdmin = false; // TODO: Replace with actual auth check
 ---
 
 <header class="bg-cream-50/80 dark:bg-charcoal-900/80 backdrop-blur-lg border-b border-cream-400 dark:border-charcoal-700 sticky top-0 z-50">
@@ -18,9 +23,13 @@ const links = [
       {links.map(link => (
         <a href={link.href} class="text-charcoal-800 dark:text-cream-100 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">{link.label}</a>
       ))}
+      {isAdmin && (
+        <a href="/admin" class="text-charcoal-800 dark:text-cream-100 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">Admin</a>
+      )}
     </div>
 
     <div class="hidden md:flex items-center gap-4">
+      <CartIcon client:load />
       <a href="/login" class="text-charcoal-800 dark:text-cream-100 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">Log In</a>
       <a href="/signup" class="px-5 py-2 rounded-full bg-coral-500 text-white font-medium hover:bg-coral-600 transition-all">
         Sign Up
@@ -29,6 +38,7 @@ const links = [
     </div>
 
     <div class="md:hidden flex items-center gap-4">
+      <CartIcon client:load />
       <ThemeSwitcher client:load />
       <button>
         <Menu className="w-6 h-6 text-charcoal-800 dark:text-white" />

@@ -7,6 +7,7 @@ const ThemeSwitcher = () => {
   useEffect(() => {
     const root = document.documentElement;
     const initialTheme = root.classList.contains('dark') ? 'dark' : 'light';
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(initialTheme);
 
     // Listen for changes from the inline script

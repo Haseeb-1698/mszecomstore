@@ -1,0 +1,11 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { CartProvider } from '../contexts/CartContext.tsx';
+import CartPage from '../components/cart/CartPage.tsx';
+---
+
+<Layout title="Shopping Cart - MSZ Ecom Store">
+  <CartProvider client:load>
+    <CartPage client:load />
+  </CartProvider>
+</Layout>

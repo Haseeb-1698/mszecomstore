@@ -1,0 +1,104 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="500 - Server Error">
+	<div class="min-h-screen flex items-center justify-center px-4 py-16 bg-cream-100 dark:bg-charcoal-900">
+		<div class="max-w-2xl w-full text-center">
+			<!-- 500 Illustration -->
+			<div class="mb-8">
+				<svg class="w-48 h-48 mx-auto text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+				</svg>
+			</div>
+
+			<!-- Error Message -->
+			<div class="mb-8">
+				<h1 class="text-6xl md:text-8xl font-bold text-red-500 mb-4">500</h1>
+				<h2 class="text-3xl md:text-4xl font-bold text-charcoal-800 dark:text-cream-100 mb-4">
+					Server Error
+				</h2>
+				<p class="text-lg text-charcoal-600 dark:text-cream-400 mb-8">
+					Something went wrong on our end. Our team has been notified and is working to fix the issue. Please try again in a few moments.
+				</p>
+			</div>
+
+			<!-- Error Details (for development) -->
+			<div class="bg-red-50 dark:bg-red-900/20 rounded-2xl p-6 border border-red-300 dark:border-red-800 mb-8">
+				<h3 class="text-lg font-semibold text-red-800 dark:text-red-300 mb-3 flex items-center justify-center gap-2">
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+					</svg>
+					What can you do?
+				</h3>
+				<ul class="text-left space-y-2 text-red-700 dark:text-red-400 text-sm max-w-md mx-auto">
+					<li class="flex items-start gap-2">
+						<svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+						</svg>
+						<span>Wait a few moments and try refreshing the page</span>
+					</li>
+					<li class="flex items-start gap-2">
+						<svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+						</svg>
+						<span>Clear your browser cache and cookies</span>
+					</li>
+					<li class="flex items-start gap-2">
+						<svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+						</svg>
+						<span>Contact our support team if the problem persists</span>
+					</li>
+				</ul>
+			</div>
+
+			<!-- Actions -->
+			<div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+				<button
+					onclick="window.location.reload()"
+					class="inline-flex items-center gap-2 px-8 py-4 bg-coral-500 hover:bg-coral-600 text-white rounded-xl font-semibold text-lg shadow-soft-lg hover:shadow-soft-xl transition-all"
+				>
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+					</svg>
+					Try Again
+				</button>
+				<a
+					href="/"
+					class="inline-flex items-center gap-2 px-8 py-4 bg-cream-50 dark:bg-charcoal-800 hover:bg-cream-200 dark:hover:bg-charcoal-700 text-charcoal-800 dark:text-cream-100 rounded-xl font-semibold text-lg border border-cream-400 dark:border-charcoal-700 transition-all"
+				>
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+					</svg>
+					Go Home
+				</a>
+			</div>
+
+			<!-- Support Contact -->
+			<div class="mt-12 pt-8 border-t border-cream-400 dark:border-charcoal-700">
+				<p class="text-sm text-charcoal-600 dark:text-cream-400 mb-4">
+					Need immediate assistance?
+				</p>
+				<div class="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm">
+					<a
+						href="/contact"
+						class="flex items-center gap-2 text-coral-600 dark:text-coral-400 hover:text-coral-700 dark:hover:text-coral-300 font-medium"
+					>
+						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+						</svg>
+						Contact Support
+					</a>
+					<span class="text-charcoal-400 dark:text-cream-600">•</span>
+					<a
+						href="mailto:support@mszecom.com"
+						class="flex items-center gap-2 text-coral-600 dark:text-coral-400 hover:text-coral-700 dark:hover:text-coral-300 font-medium"
+					>
+						support@mszecom.com
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</Layout>
