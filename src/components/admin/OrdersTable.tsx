@@ -150,7 +150,7 @@ const OrdersTable: React.FC = () => {
               <tr
                 key={order.id}
                 className={`border-t border-cream-400 dark:border-charcoal-700 hover:bg-cream-100 dark:hover:bg-charcoal-700 transition-colors ${
-                  index % 2 === 0 ? 'bg-cream-50 dark:bg-charcoal-800' : 'bg-cream-100 dark:bg-charcoal-750'
+                  index % 2 === 0 ? 'bg-cream-50 dark:bg-charcoal-800' : 'bg-white dark:bg-charcoal-900'
                 }`}
               >
                 <td className="py-4 px-6">

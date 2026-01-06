@@ -1,12 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import DashboardWrapper from '../components/dashboard/DashboardWrapper.tsx';
 ---
 
-<Layout title="Dashboard | SubHub">
-  <main class="bg-white dark:bg-charcoal-900">
-    <div class="max-w-7xl mx-auto px-6 py-24">
-      <h1 class="text-6xl font-bold text-center text-charcoal-900 dark:text-white">Dashboard</h1>
-      <p class="mt-4 text-xl text-center text-charcoal-800/80 dark:text-gray-300">Manage your subscriptions and account details.</p>
-    </div>
-  </main>
+<Layout title="Dashboard - SubHub">
+  <DashboardWrapper client:load />
 </Layout>

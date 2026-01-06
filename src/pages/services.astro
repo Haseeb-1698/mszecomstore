@@ -1,63 +1,16 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ServiceCard from '../components/ServiceCard.astro';
+import { services } from '../data/services.js';
 
-const services = [
-  {
-    name: 'Netflix',
-    description: 'Unlimited movies, TV shows, and more.',
-    icon: '/icons/netflix.svg',
-    price: 'PKR 1,100/mo',
-  },
-  {
-    name: 'Spotify',
-    description: 'Music for everyone.',
-    icon: '/icons/spotify.svg',
-    price: 'PKR 499/mo',
-  },
-  {
-    name: 'Adobe Creative Cloud',
-    description: 'The future of creativity.',
-    icon: '/icons/adobe-creative-cloud.svg',
-    price: 'PKR 8,500/mo',
-  },
-  {
-    name: 'Microsoft 365',
-    description: 'Your productivity cloud.',
-    icon: '/icons/microsoft-365.svg',
-    price: 'PKR 1,200/mo',
-  },
-  {
-    name: 'Disney+',
-    description: 'The best stories in the world, all in one place.',
-    icon: '/icons/disney-plus.svg',
-    price: 'PKR 1,100/mo',
-  },
-  {
-    name: 'Hulu',
-    description: 'Watch TV and movies online.',
-    icon: '/icons/hulu.svg',
-    price: 'PKR 999/mo',
-  },
-  {
-    name: 'Amazon Prime',
-    description: 'Get the best of shopping and entertainment.',
-    icon: '/icons/amazon-prime.svg',
-    price: 'PKR 1,500/mo',
-  },
-  {
-    name: 'YouTube Premium',
-    description: 'Watch your favorite videos without ads.',
-    icon: '/icons/youtube-premium.svg',
-    price: 'PKR 499/mo',
-  },
-  {
-    name: 'Slack',
-    description: 'Where work happens.',
-    icon: '/icons/slack.svg',
-    price: 'PKR 1,250/mo',
-  },
-];
+// Convert services data to match ServiceCard props
+const serviceCards = services.map(service => ({
+  name: service.name,
+  description: service.description,
+  icon: service.logo,
+  price: service.price,
+  slug: service.slug
+}));
 ---
 
 <Layout title="Services - SubHub">
@@ -70,7 +23,7 @@ const services = [
         </p>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {services.map(service => (
+        {serviceCards.map(service => (
           <ServiceCard {...service} />
         ))}
       </div>

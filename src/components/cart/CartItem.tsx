@@ -70,10 +70,10 @@ const CartItem: React.FC<CartItemProps> = ({ item, onUpdateQuantity, onRemoveIte
         {/* Price */}
         <div className="text-right">
           <p className="text-2xl font-bold text-charcoal-800 dark:text-cream-100">
-            ${(item.price * item.quantity).toFixed(2)}
+            PKR {(item.price * item.quantity).toFixed(2)}
           </p>
           <p className="text-sm text-charcoal-600 dark:text-cream-400">
-            ${item.price.toFixed(2)} each
+            PKR {item.price.toFixed(2)} each
           </p>
         </div>
       </div>

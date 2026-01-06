@@ -39,14 +39,14 @@ const CartSummary: React.FC<CartSummaryProps> = ({ cart, onApplyDiscount }) => {
         {/* Subtotal */}
         <div className="flex justify-between text-charcoal-700 dark:text-cream-300">
           <span>Subtotal</span>
-          <span className="font-medium">${cart.subtotal.toFixed(2)}</span>
+          <span className="font-medium">PKR {cart.subtotal.toFixed(2)}</span>
         </div>
 
         {/* Discount */}
         {cart.discount > 0 && (
           <div className="flex justify-between text-coral-600 dark:text-coral-400">
             <span>Discount</span>
-            <span className="font-medium">-${cart.discount.toFixed(2)}</span>
+            <span className="font-medium">-PKR {cart.discount.toFixed(2)}</span>
           </div>
         )}
 
@@ -54,7 +54,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({ cart, onApplyDiscount }) => {
         <div className="border-t border-cream-400 dark:border-charcoal-700 pt-4">
           <div className="flex justify-between text-xl font-bold text-charcoal-800 dark:text-cream-100">
             <span>Total</span>
-            <span>${cart.total.toFixed(2)}</span>
+            <span>PKR {cart.total.toFixed(2)}</span>
           </div>
         </div>
 

@@ -2,6 +2,7 @@
 import { Menu } from 'lucide-react';
 import ThemeSwitcher from './ThemeSwitcher.tsx';
 import CartIcon from './ui/CartIcon';
+import AnnouncementStrip from './AnnouncementStrip.astro';
 
 const links = [
   { href: '/', label: 'Home' },
@@ -15,34 +16,78 @@ const links = [
 const isAdmin = false; // TODO: Replace with actual auth check
 ---
 
-<header class="bg-cream-50/80 dark:bg-charcoal-900/80 backdrop-blur-lg border-b border-cream-400 dark:border-charcoal-700 sticky top-0 z-50">
-  <nav class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-    <a href="/" class="text-2xl font-bold text-charcoal-900 dark:text-white">SubHub</a>
+<header class="sticky top-0 z-50">
+  <AnnouncementStrip />
+  <div class="bg-cream-50/80 dark:bg-charcoal-900/80 backdrop-blur-lg border-b border-cream-400 dark:border-charcoal-700">
+    <nav class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="/" class="text-2xl font-bold text-charcoal-900 dark:text-white">SubHub</a>
 
-    <div class="hidden md:flex items-center gap-8">
-      {links.map(link => (
-        <a href={link.href} class="text-charcoal-800 dark:text-cream-100 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">{link.label}</a>
-      ))}
-      {isAdmin && (
-        <a href="/admin" class="text-charcoal-800 dark:text-cream-100 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">Admin</a>
-      )}
-    </div>
+      <div class="hidden md:flex items-center gap-8">
+        {links.map(link => (
+          <a href={link.href} class="text-charcoal-800 dark:text-cream-100 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">{link.label}</a>
+        ))}
+        
+        <!-- Terms & Policy Dropdown -->
+        <div class="relative group">
+          <button class="text-charcoal-800 dark:text-cream-100 hover:text-coral-500 dark:hover:text-coral-400 transition-colors flex items-center gap-1">
+            Legal
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="absolute top-full left-0 mt-2 w-48 bg-cream-50 dark:bg-charcoal-800 border border-cream-400 dark:border-charcoal-700 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+            <a href="/terms" class="block px-4 py-3 text-charcoal-800 dark:text-cream-100 hover:bg-cream-100 dark:hover:bg-charcoal-700 hover:text-coral-500 dark:hover:text-coral-400 transition-colors first:rounded-t-lg">
+              Terms of Service
+            </a>
+            <a href="/privacy" class="block px-4 py-3 text-charcoal-800 dark:text-cream-100 hover:bg-cream-100 dark:hover:bg-charcoal-700 hover:text-coral-500 dark:hover:text-coral-400 transition-colors last:rounded-b-lg">
+              Privacy Policy
+            </a>
+          </div>
+        </div>
+      </div>
 
-    <div class="hidden md:flex items-center gap-4">
-      <CartIcon client:load />
-      <a href="/login" class="text-charcoal-800 dark:text-cream-100 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">Log In</a>
-      <a href="/signup" class="px-5 py-2 rounded-full bg-coral-500 text-white font-medium hover:bg-coral-600 transition-all">
-        Sign Up
-      </a>
-      <ThemeSwitcher client:load />
-    </div>
+      <div class="hidden md:flex items-center gap-4">
+        <!-- Admin Icon -->
+        <a href="/admin" class="relative inline-flex items-center justify-center p-2 rounded-lg hover:bg-cream-200 dark:hover:bg-charcoal-800 transition-colors group" title="Admin Panel">
+          <svg class="w-6 h-6 text-charcoal-800 dark:text-cream-100 group-hover:text-coral-500 dark:group-hover:text-coral-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+        </a>
+        
+        <CartIcon client:load />
+        <a href="/login" class="text-charcoal-800 dark:text-cream-100 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">Log In</a>
+        <a href="/signup" class="px-5 py-2 rounded-full bg-coral-500 text-white font-medium hover:bg-coral-600 transition-all">
+          Sign Up
+        </a>
+        <a href="/dashboard" class="relative inline-flex items-center justify-center p-2 rounded-lg hover:bg-cream-200 dark:hover:bg-charcoal-800 transition-colors group" title="Profile">
+          <svg class="w-6 h-6 text-charcoal-800 dark:text-cream-100 group-hover:text-coral-500 dark:group-hover:text-coral-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+          </svg>
+        </a>
+        <ThemeSwitcher client:load />
+      </div>
 
-    <div class="md:hidden flex items-center gap-4">
-      <CartIcon client:load />
-      <ThemeSwitcher client:load />
-      <button>
-        <Menu className="w-6 h-6 text-charcoal-800 dark:text-white" />
-      </button>
-    </div>
-  </nav>
+      <div class="md:hidden flex items-center gap-4">
+        <!-- Admin Icon Mobile -->
+        <a href="/admin" class="relative inline-flex items-center justify-center p-2 rounded-lg hover:bg-cream-200 dark:hover:bg-charcoal-800 transition-colors group" title="Admin Panel">
+          <svg class="w-5 h-5 text-charcoal-800 dark:text-cream-100 group-hover:text-coral-500 dark:group-hover:text-coral-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+        </a>
+        
+        <CartIcon client:load />
+        <a href="/dashboard" class="relative inline-flex items-center justify-center p-2 rounded-lg hover:bg-cream-200 dark:hover:bg-charcoal-800 transition-colors group" title="Profile">
+          <svg class="w-5 h-5 text-charcoal-800 dark:text-cream-100 group-hover:text-coral-500 dark:group-hover:text-coral-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+          </svg>
+        </a>
+        <ThemeSwitcher client:load />
+        <button>
+          <Menu className="w-6 h-6 text-charcoal-800 dark:text-white" />
+        </button>
+      </div>
+    </nav>
+  </div>
 </header>

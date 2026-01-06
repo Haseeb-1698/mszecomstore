@@ -14,6 +14,36 @@ interface CustomerInfo {
 
 type PaymentMethod = 'EasyPaisa' | 'JazzCash' | 'Bank Transfer';
 
+// Demo cart data for when cart is empty
+const demoCart = {
+  id: 'demo_cart',
+  items: [
+    {
+      id: 'demo_1',
+      serviceId: 'netflix',
+      planId: 'netflix-standard',
+      serviceName: 'Netflix Premium',
+      planDuration: 'Standard Plan - 1 Month',
+      price: 1500,
+      quantity: 1
+    },
+    {
+      id: 'demo_2',
+      serviceId: 'spotify',
+      planId: 'spotify-individual',
+      serviceName: 'Spotify Premium',
+      planDuration: 'Individual Plan - 1 Month',
+      price: 800,
+      quantity: 1
+    }
+  ],
+  subtotal: 2300,
+  discount: 0,
+  total: 2300,
+  createdAt: new Date(),
+  updatedAt: new Date()
+};
+
 const CheckoutPage: React.FC = () => {
   const { cart, isLoading } = useCartContext();
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
@@ -26,6 +56,9 @@ const CheckoutPage: React.FC = () => {
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  // Use demo cart if real cart is empty or loading
+  const displayCart = (!isLoading && cart.items.length > 0) ? cart : demoCart;
 
   const validateCustomerInfo = (): boolean => {
     const newErrors: { [key: string]: string } = {};
@@ -73,36 +106,6 @@ const CheckoutPage: React.FC = () => {
       setIsSubmitting(false);
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-cream-50 dark:bg-charcoal-900 flex items-center justify-center">
-        <div className="text-charcoal-800 dark:text-cream-100">Loading checkout...</div>
-      </div>
-    );
-  }
-
-  if (cart.items.length === 0) {
-    return (
-      <div className="min-h-screen bg-cream-50 dark:bg-charcoal-900 py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center py-16">
-            <h1 className="text-3xl font-bold text-charcoal-800 dark:text-cream-100 mb-4">
-              Your cart is empty
-            </h1>
-            <p className="text-charcoal-700 dark:text-cream-300 mb-8">
-              Add some services to your cart before checkout.
-            </p>
-            <a href="/services">
-              <Button variant="primary" size="lg">
-                Browse Services
-              </Button>
-            </a>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-cream-50 dark:bg-charcoal-900 py-16">
@@ -158,6 +161,20 @@ const CheckoutPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Demo Notice */}
+        {displayCart === demoCart && (
+          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
+                Demo Mode: Showing sample checkout with demo items
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Checkout Content */}
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -201,7 +218,7 @@ const CheckoutPage: React.FC = () => {
             {/* Right Column - Order Review */}
             <div className="lg:col-span-1">
               <OrderReview
-                cart={cart}
+                cart={displayCart}
                 isSubmitting={isSubmitting}
                 agreeToTerms={agreeToTerms}
               />
