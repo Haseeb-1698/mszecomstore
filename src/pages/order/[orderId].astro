@@ -2,6 +2,8 @@
 import Layout from '../../layouts/Layout.astro';
 import OrderDetails from '../../components/order/OrderDetails.tsx';
 
+export const prerender = false;
+
 const { orderId } = Astro.params;
 ---
 

@@ -21,40 +21,49 @@ export const useCart = (): UseCartReturn => {
   const [error, setError] = useState<string | null>(null);
 
   // Load cart from localStorage on mount
+  // Load cart from localStorage on mount
   useEffect(() => {
     const loadCart = () => {
+      console.log('🛒 loadCart started');
       try {
-        // Clear localStorage for testing (remove this in production)
-        localStorage.removeItem('cart');
-        
         const savedCart = cartUtils.load();
+        console.log('🛒 savedCart from storage:', savedCart);
+
         let cartToUse = cartUtils.create();
+        console.log('🛒 empty cart created:', cartToUse);
+
         if (savedCart) {
           const validatedCart = cartUtils.validate(savedCart);
+          console.log('🛒 validatedCart:', validatedCart);
           cartToUse = validatedCart;
         }
-        
+
         // Add dummy items for testing if cart is empty
         if (cartToUse.items.length === 0) {
-          cartToUse = cartUtils.addItem(cartToUse, 'netflix', 1); // Standard plan
-          cartToUse = cartUtils.addItem(cartToUse, 'spotify', 0); // Individual plan
-          cartToUse = cartUtils.addItem(cartToUse, 'disney-plus', 1); // Premium (No Ads)
-          cartUtils.save(cartToUse);
+          console.log('🛒 Cart empty, adding dummy items...');
+          try {
+            cartToUse = cartUtils.addItem(cartToUse, 'netflix', 1);
+            console.log('🛒 After adding netflix:', cartToUse);
+          } catch (error) {
+            console.error('🛒 Failed to add dummy item:', error);
+          }
         }
-        
+
         setCart(cartToUse);
+        console.log('🛒 setCart called');
         setError(null);
       } catch (err) {
-        console.error('Failed to load cart:', err);
+        console.error('🛒 loadCart error:', err);
         setError('Failed to load your cart. Starting with an empty cart.');
+        setCart(cartUtils.create());
       } finally {
+        console.log('🛒 Setting isLoading to false');
         setIsLoading(false);
       }
     };
 
     loadCart();
   }, []);
-
   // Save cart to localStorage whenever it changes
   useEffect(() => {
     if (!isLoading) {
@@ -102,12 +111,12 @@ export const useCart = (): UseCartReturn => {
     try {
       const updatedCart = cartUtils.applyDiscountCode(cart, code);
       const discountApplied = updatedCart.discount > cart.discount;
-      
+
       if (discountApplied) {
         setCart(updatedCart);
         setError(null);
       }
-      
+
       return discountApplied;
     } catch (err) {
       console.error('Apply discount failed:', err);
