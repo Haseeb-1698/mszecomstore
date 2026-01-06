@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 
-const Sidebar: React.FC = () => {
+export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const currentPath = globalThis.window === undefined ? '' : globalThis.location.pathname;
+  const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
 
   const menuItems = [
     {
@@ -109,6 +109,4 @@ const Sidebar: React.FC = () => {
       </div>
     </aside>
   );
-};
-
-export default Sidebar;
+}

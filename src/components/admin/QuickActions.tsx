@@ -8,7 +8,7 @@ interface QuickAction {
   color: 'coral' | 'purple' | 'green' | 'blue';
 }
 
-const QuickActions: React.FC = () => {
+export default function QuickActions() {
   const actions: QuickAction[] = [
     {
       title: 'Add New Service',
@@ -121,6 +121,4 @@ const QuickActions: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default QuickActions;
+}

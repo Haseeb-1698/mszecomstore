@@ -1,0 +1,12 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import OrderDetails from '../../components/order/OrderDetails.tsx';
+
+export const prerender = false;
+
+const { orderId } = Astro.params;
+---
+
+<Layout title={`Order ${orderId} - MSZ Ecom Store`}>
+  <OrderDetails client:load orderId={orderId} />
+</Layout>

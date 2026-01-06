@@ -9,7 +9,7 @@ interface Order {
   date: string;
 }
 
-const RecentOrders: React.FC = () => {
+export default function RecentOrders() {
   const orders: Order[] = [
     {
       id: 'ORD-001',
@@ -121,6 +121,4 @@ const RecentOrders: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default RecentOrders;
+}

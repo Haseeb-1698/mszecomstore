@@ -8,7 +8,7 @@ interface StatsCardProps {
   icon: 'orders' | 'revenue' | 'customers' | 'services';
 }
 
-const StatsCard: React.FC<StatsCardProps> = ({ title, value, change, trend, icon }) => {
+export default function StatsCard({ title, value, change, trend, icon }: StatsCardProps) {
   const getIcon = () => {
     switch (icon) {
       case 'orders':
@@ -69,6 +69,4 @@ const StatsCard: React.FC<StatsCardProps> = ({ title, value, change, trend, icon
       </div>
     </div>
   );
-};
-
-export default StatsCard;
+}

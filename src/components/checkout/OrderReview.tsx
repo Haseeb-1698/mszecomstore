@@ -8,7 +8,6 @@ interface OrderReviewProps {
   isSubmitting: boolean;
   agreeToTerms: boolean;
 }
-
 const OrderReview: React.FC<OrderReviewProps> = ({ cart, isSubmitting, agreeToTerms }) => {
   return (
     <div className="sticky top-4">

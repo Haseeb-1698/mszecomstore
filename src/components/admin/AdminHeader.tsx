@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const AdminHeader: React.FC = () => {
+export default function AdminHeader() {
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   return (
@@ -91,6 +91,4 @@ const AdminHeader: React.FC = () => {
       </div>
     </header>
   );
-};
-
-export default AdminHeader;
+}

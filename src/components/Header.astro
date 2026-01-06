@@ -20,7 +20,7 @@ const isAdmin = false; // TODO: Replace with actual auth check
   <AnnouncementStrip />
   <div class="bg-cream-50/80 dark:bg-charcoal-900/80 backdrop-blur-lg border-b border-cream-400 dark:border-charcoal-700">
     <nav class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-      <a href="/" class="text-2xl font-bold text-charcoal-900 dark:text-white">SubHub</a>
+      <a href="/" class="text-2xl font-bold text-charcoal-900 dark:text-white">MSZ Software House</a>
 
       <div class="hidden md:flex items-center gap-8">
         {links.map(link => (
@@ -37,10 +37,16 @@ const isAdmin = false; // TODO: Replace with actual auth check
           </button>
           <div class="absolute top-full left-0 mt-2 w-48 bg-cream-50 dark:bg-charcoal-800 border border-cream-400 dark:border-charcoal-700 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
             <a href="/terms" class="block px-4 py-3 text-charcoal-800 dark:text-cream-100 hover:bg-cream-100 dark:hover:bg-charcoal-700 hover:text-coral-500 dark:hover:text-coral-400 transition-colors first:rounded-t-lg">
-              Terms of Service
+              Terms & Conditions
             </a>
-            <a href="/privacy" class="block px-4 py-3 text-charcoal-800 dark:text-cream-100 hover:bg-cream-100 dark:hover:bg-charcoal-700 hover:text-coral-500 dark:hover:text-coral-400 transition-colors last:rounded-b-lg">
+            <a href="/privacy" class="block px-4 py-3 text-charcoal-800 dark:text-cream-100 hover:bg-cream-100 dark:hover:bg-charcoal-700 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">
               Privacy Policy
+            </a>
+            <a href="/refund-policy" class="block px-4 py-3 text-charcoal-800 dark:text-cream-100 hover:bg-cream-100 dark:hover:bg-charcoal-700 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">
+              Refund Policy
+            </a>
+            <a href="/shipping-policy" class="block px-4 py-3 text-charcoal-800 dark:text-cream-100 hover:bg-cream-100 dark:hover:bg-charcoal-700 hover:text-coral-500 dark:hover:text-coral-400 transition-colors last:rounded-b-lg">
+              Shipping Policy
             </a>
           </div>
         </div>
