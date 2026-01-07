@@ -42,12 +42,12 @@ const services = [
     name: 'Netflix',
     description: 'Stream unlimited movies and TV shows.',
     longDescription: 'Netflix is a streaming service that offers a wide variety of award-winning TV shows, movies, anime, documentaries, and more on thousands of internet-connected devices. You can watch as much as you want, whenever you want without a single commercial – all for one low monthly price.',
-    price: 'PKR 1,500/mo',
+    price: '$9.99/mo',
     logo: '/icons/netflix.svg',
     pricingTiers: [
-      { name: 'Basic', price: 'PKR 1,200/mo', quality: 'SD (480p)' },
-      { name: 'Standard', price: 'PKR 1,800/mo', quality: 'HD (1080p)' },
-      { name: 'Premium', price: 'PKR 2,400/mo', quality: 'UHD (4K) + HDR' },
+      { name: 'Basic', price: '$9.99/mo', quality: 'SD (480p)' },
+      { name: 'Standard', price: '$15.49/mo', quality: 'HD (1080p)' },
+      { name: 'Premium', price: '$19.99/mo', quality: 'UHD (4K) + HDR' },
     ]
   },
   {
@@ -55,25 +55,25 @@ const services = [
     name: 'Spotify',
     description: 'Music for everyone. Ad-free listening.',
     longDescription: 'Spotify is a digital music, podcast, and video service that gives you access to millions of songs and other content from creators all over the world. Basic functions are free, but you can also choose to upgrade to Spotify Premium.',
-    price: 'PKR 1,300/mo',
+    price: '$10.99/mo',
     logo: '/icons/spotify.svg',
     pricingTiers: [
-      { name: 'Individual', price: 'PKR 1,300/mo', quality: '320kbps' },
-      { name: 'Duo', price: 'PKR 1,800/mo', quality: '320kbps' },
-      { name: 'Family', price: 'PKR 2,000/mo', quality: '320kbps' },
+      { name: 'Individual', price: '$10.99/mo', quality: '320kbps' },
+      { name: 'Duo', price: '$14.99/mo', quality: '320kbps' },
+      { name: 'Family', price: '$16.99/mo', quality: '320kbps' },
     ]
   },
   {
     slug: 'adobe-creative-cloud',
     name: 'Adobe Creative Cloud',
-    description: 'The world\'s best creative apps and services.',
+    description: 'The world’s best creative apps and services.',
     longDescription: 'Adobe Creative Cloud is a set of applications and services from Adobe Inc. that gives subscribers access to a collection of software used for graphic design, video editing, web development, photography, along with a set of mobile applications and also some optional cloud services.',
-    price: 'PKR 6,500/mo',
+    price: '$54.99/mo',
     logo: '/icons/adobe-creative-cloud.svg',
     pricingTiers: [
-      { name: 'Photography (20GB)', price: 'PKR 1,200/mo', quality: 'N/A' },
-      { name: 'All Apps', price: 'PKR 6,500/mo', quality: 'N/A' },
-      { name: 'Single App', price: 'PKR 2,500/mo', quality: 'N/A' },
+      { name: 'Photography (20GB)', price: '$9.99/mo', quality: 'N/A' },
+      { name: 'All Apps', price: '$54.99/mo', quality: 'N/A' },
+      { name: 'Single App', price: '$20.99/mo', quality: 'N/A' },
     ]
   },
   {
@@ -81,11 +81,11 @@ const services = [
     name: 'Notion',
     description: 'The all-in-one workspace for your notes, tasks, wikis, and databases.',
     longDescription: 'Notion is an application that provides components such as notes, databases, kanban boards, wikis, calendars and reminders. Users can connect these components to create their own systems for knowledge management, note taking, data management, project management, among others.',
-    price: 'PKR 950/mo',
+    price: '$8/mo',
     logo: '/icons/notion.svg',
     pricingTiers: [
-      { name: 'Plus', price: 'PKR 950/mo', quality: 'N/A' },
-      { name: 'Business', price: 'PKR 1,800/mo', quality: 'N/A' },
+      { name: 'Plus', price: '$8/mo', quality: 'N/A' },
+      { name: 'Business', price: '$15/mo', quality: 'N/A' },
       { name: 'Enterprise', price: 'Contact us', quality: 'N/A' },
     ]
   },
@@ -94,23 +94,23 @@ const services = [
     name: 'Figma',
     description: 'The collaborative interface design tool.',
     longDescription: 'Figma is a collaborative web application for interface design, with additional offline features enabled by desktop applications for macOS and Windows. The Figma mobile app for Android and iOS allows viewing and interacting with Figma prototypes in real-time on mobile and tablet devices.',
-    price: 'PKR 1,400/mo',
+    price: '$12/mo',
     logo: '/icons/figma.svg',
     pricingTiers: [
-      { name: 'Professional', price: 'PKR 1,400/mo', quality: 'N/A' },
-      { name: 'Organization', price: 'PKR 5,400/mo', quality: 'N/A' },
+      { name: 'Professional', price: '$12/mo', quality: 'N/A' },
+      { name: 'Organization', price: '$45/mo', quality: 'N/A' },
     ]
   },
   {
     slug: 'disney-plus',
     name: 'Disney+',
     description: 'The streaming home of your favorite stories.',
-    price: 'PKR 950/mo',
+    price: '$7.99/mo',
     logo: '/icons/disney-plus.svg',
     longDescription: 'Disney+ is the streaming home of your favorite stories from Disney, Pixar, Marvel, Star Wars, and National Geographic. Watch the latest releases, Original series and movies, classic films, and more.',
     pricingTiers: [
-      { name: 'Basic (With Ads)', price: 'PKR 950/mo', quality: 'Up to 4K UHD' },
-      { name: 'Premium (No Ads)', price: 'PKR 1,650/mo', quality: 'Up to 4K UHD' },
+      { name: 'Basic (With Ads)', price: '$7.99/mo', quality: 'Up to 4K UHD' },
+      { name: 'Premium (No Ads)', price: '$13.99/mo', quality: 'Up to 4K UHD' },
     ]
   }
 ];
@@ -495,8 +495,8 @@ Sign Up
 const $$Footer = createComponent(($$result, $$props, $$slots) => {
   return renderTemplate`${maybeRenderHead()}<footer class="bg-cream-100 dark:bg-charcoal-900 border-t border-cream-400 dark:border-charcoal-700 py-16"> <div class="max-w-7xl mx-auto px-6"> <div class="grid grid-cols-1 md:grid-cols-4 gap-12"> <div> <h3 class="text-2xl font-medium text-charcoal-900 dark:text-white mb-4">MSZ Software House</h3> <p class="text-charcoal-800 dark:text-gray-400 leading-relaxed">
 Your trusted partner for premium digital products, services, and legal SaaS subscriptions.
-</p> <div class="flex mt-4 space-x-4"> <a href="#" class="text-charcoal-800 dark:text-gray-400 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">${renderComponent($$result, "Twitter", Twitter, { "className": "w-5 h-5" })}</a> <a href="#" class="text-charcoal-800 dark:text-gray-400 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">${renderComponent($$result, "Facebook", Facebook, { "className": "w-5 h-5" })}</a> <a href="#" class="text-charcoal-800 dark:text-gray-400 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">${renderComponent($$result, "Instagram", Instagram, { "className": "w-5 h-5" })}</a> </div> </div> <div> <h4 class="font-medium text-charcoal-900 dark:text-white mb-4">Navigation</h4> <ul class="space-y-2"> <li><a href="/" class="text-charcoal-800 dark:text-gray-400 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">Home</a></li> <li><a href="/services" class="text-charcoal-800 dark:text-gray-400 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">Services</a></li> <li><a href="/about" class="text-charcoal-800 dark:text-gray-400 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">About</a></li> <li><a href="/contact" class="text-charcoal-800 dark:text-gray-400 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">Contact</a></li> </ul> </div> <div> <h4 class="font-medium text-charcoal-900 dark:text-white mb-4">Legal</h4> <ul class="space-y-2"> <li><a href="/terms" class="text-charcoal-800 dark:text-gray-400 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">Terms & Conditions</a></li> <li><a href="/privacy" class="text-charcoal-800 dark:text-gray-400 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">Privacy Policy</a></li> <li><a href="/refund-policy" class="text-charcoal-800 dark:text-gray-400 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">Refund Policy</a></li> <li><a href="/shipping-policy" class="text-charcoal-800 dark:text-gray-400 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">Shipping Policy</a></li> </ul> </div> <div> <h4 class="font-medium text-charcoal-900 dark:text-white mb-4">Get in Touch</h4> <ul class="space-y-3"> <li class="flex items-center gap-2 text-charcoal-800 dark:text-gray-400"> ${renderComponent($$result, "MessageCircle", MessageCircle, { "className": "w-4 h-4" })} <a href="https://wa.me/923332040826" class="hover:text-coral-500 dark:hover:text-coral-400 transition-colors">+92 333 2040826</a> </li> <li class="flex items-center gap-2 text-charcoal-800 dark:text-gray-400"> ${renderComponent($$result, "Mail", Mail, { "className": "w-4 h-4" })} <a href="mailto:mszsoftwarehouse@gmail.com" class="hover:text-coral-500 dark:hover:text-coral-400 transition-colors">mszsoftwarehouse@gmail.com</a> </li> </ul> <div class="mt-4 text-xs text-charcoal-600 dark:text-gray-500"> <p>202, 2nd floor 27c Sunset lane 1,</p> <p>Phase 2 EXT DHA, Karachi South</p> <p>Registered: 26-SEP-2021</p> </div> </div> </div> <div class="mt-12 pt-8 border-t border-cream-400 dark:border-charcoal-700 text-center text-charcoal-800 dark:text-gray-500 text-sm">
-© 2025 MSZ Software House. All rights reserved. | Tax Office: RTO-I KARACHI
+</p> <div class="flex mt-4 space-x-4"> <a href="#" class="text-charcoal-800 dark:text-gray-400 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">${renderComponent($$result, "Twitter", Twitter, { "className": "w-5 h-5" })}</a> <a href="#" class="text-charcoal-800 dark:text-gray-400 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">${renderComponent($$result, "Facebook", Facebook, { "className": "w-5 h-5" })}</a> <a href="#" class="text-charcoal-800 dark:text-gray-400 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">${renderComponent($$result, "Instagram", Instagram, { "className": "w-5 h-5" })}</a> </div> </div> <div> <h4 class="font-medium text-charcoal-900 dark:text-white mb-4">Navigation</h4> <ul class="space-y-2"> <li><a href="/" class="text-charcoal-800 dark:text-gray-400 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">Home</a></li> <li><a href="/services" class="text-charcoal-800 dark:text-gray-400 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">Services</a></li> <li><a href="/about" class="text-charcoal-800 dark:text-gray-400 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">About</a></li> <li><a href="/contact" class="text-charcoal-800 dark:text-gray-400 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">Contact</a></li> </ul> </div> <div> <h4 class="font-medium text-charcoal-900 dark:text-white mb-4">Legal</h4> <ul class="space-y-2"> <li><a href="/terms" class="text-charcoal-800 dark:text-gray-400 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">Terms & Conditions</a></li> <li><a href="/privacy" class="text-charcoal-800 dark:text-gray-400 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">Privacy Policy</a></li> <li><a href="/refund-policy" class="text-charcoal-800 dark:text-gray-400 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">Refund Policy</a></li> <li><a href="/shipping-policy" class="text-charcoal-800 dark:text-gray-400 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">Shipping Policy</a></li> </ul> </div> <div> <h4 class="font-medium text-charcoal-900 dark:text-white mb-4">Get in Touch</h4> <ul class="space-y-3"> <li class="flex items-center gap-2 text-charcoal-800 dark:text-gray-400"> ${renderComponent($$result, "MessageCircle", MessageCircle, { "className": "w-4 h-4" })} <a href="https://wa.me/923332040826" class="hover:text-coral-500 dark:hover:text-coral-400 transition-colors">+92 333 2040826</a> </li> <li class="flex items-center gap-2 text-charcoal-800 dark:text-gray-400"> ${renderComponent($$result, "Mail", Mail, { "className": "w-4 h-4" })} <a href="mailto:mszsoftwarehouse@gmail.com" class="hover:text-coral-500 dark:hover:text-coral-400 transition-colors">mszsoftwarehouse@gmail.com</a> </li> </ul> <div class="mt-4 p-3 bg-cream-200 dark:bg-charcoal-800 rounded-lg border border-cream-400 dark:border-charcoal-600"> <p class="text-sm font-medium text-charcoal-900 dark:text-white">Address:</p> <p class="text-sm text-charcoal-800 dark:text-gray-300">202, 2nd floor 27c Sunset lane 1,</p> <p class="text-sm text-charcoal-800 dark:text-gray-300">Phase 2 EXT DHA, Karachi South</p> </div> </div> </div> <div class="mt-12 pt-8 border-t border-cream-400 dark:border-charcoal-700 text-center text-charcoal-800 dark:text-gray-500 text-sm">
+© 2025 MSZ Software House. All rights reserved.
 </div> </div> </footer>`;
 }, "C:/Users/cb26h/OneDrive/Desktop/MSZ/mszecomstore/src/components/Footer.astro", void 0);
 
@@ -509,7 +509,7 @@ const $$Layout = createComponent(($$result, $$props, $$slots) => {
   const Astro2 = $$result.createAstro($$Astro, $$props, $$slots);
   Astro2.self = $$Layout;
   const { title } = Astro2.props;
-  return renderTemplate(_a || (_a = __template(['<html lang="en"> <head><meta charset="UTF-8"><meta name="description" content="MSZ Software House - Premium subscriptions, simplified."><meta name="viewport" content="width=device-width"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><meta name="generator"', "><title>", `</title><script>
+  return renderTemplate(_a || (_a = __template(['<html lang="en"> <head><meta charset="UTF-8"><meta name="description" content="SubHub - Premium subscriptions, simplified."><meta name="viewport" content="width=device-width"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><meta name="generator"', "><title>", `</title><script>
 		  // This script is executed before the page is rendered to prevent a theme flash.
 		  const theme = (() => {
 		    if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
