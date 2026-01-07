@@ -10,7 +10,8 @@
   },
   "env": {
     "VERCEL_FORCE_NO_BUILD_CACHE": "1",
-    "BUILD_TIMESTAMP": "$VERCEL_GIT_COMMIT_SHA"
+    "BUILD_TIMESTAMP": "$VERCEL_GIT_COMMIT_SHA",
+    "NODE_ENV": "production"
   },
   "headers": [
     {
@@ -18,9 +19,23 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
+          "value": "public, max-age=0, s-maxage=0, must-revalidate"
+        },
+        {
+          "key": "Pragma",
+          "value": "no-cache"
+        },
+        {
+          "key": "Expires",
+          "value": "0"
         }
       ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/$1?v=$VERCEL_GIT_COMMIT_SHA"
     }
   ]
 }
