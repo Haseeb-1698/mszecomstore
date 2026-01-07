@@ -7,7 +7,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.astro"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.astro",
+    "force-deploy": "node force-deploy.js"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.2",
@@ -33,5 +34,6 @@
     "eslint-plugin-astro": "^1.5.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1"
-  }
+  },
+  "buildTimestamp": "2026-01-07T07:22:31.244Z"
 }

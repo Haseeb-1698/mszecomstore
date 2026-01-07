@@ -7,5 +7,20 @@
     "_render": {
       "maxDuration": 30
     }
-  }
+  },
+  "env": {
+    "VERCEL_FORCE_NO_BUILD_CACHE": "1",
+    "BUILD_TIMESTAMP": "$VERCEL_GIT_COMMIT_SHA"
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    }
+  ]
 }

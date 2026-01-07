@@ -1,6 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
+// Force cache invalidation with build timestamp
+const buildTime = new Date().toISOString();
+
 const team = [
   {
     name: 'Muhammad Zain',
@@ -66,6 +69,13 @@ const team = [
               <p class="text-charcoal-800/70 dark:text-gray-400">{member.role}</p>
             </div>
           ))}
+        </div>
+
+        <div class="mt-12 p-6 bg-cream-100 dark:bg-charcoal-800 rounded-lg border border-cream-400 dark:border-charcoal-700">
+          <p class="text-sm text-charcoal-600 dark:text-gray-400 text-center">
+            © 2025 MSZ Software House. All rights reserved.<br>
+            <span class="text-xs opacity-50">Build: {buildTime}</span>
+          </p>
         </div>
       </div>
     </div>
