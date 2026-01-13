@@ -5,21 +5,19 @@ import { SignupForm } from '../components/auth/SignupForm';
 import { SupabaseAuthProvider } from '../contexts/SupabaseAuthContext';
 ---
 
-<Layout title="Sign Up - MSZ Ecom Store">
-  <div class="min-h-screen flex items-center justify-center px-4 py-12">
-    <div class="max-w-md w-full space-y-8">
+<Layout title="Sign Up | SubHub">
+  <main class="py-24 sm:py-32 px-6 bg-white dark:bg-charcoal-900">
+    <div class="max-w-md mx-auto bg-cream-100 dark:bg-charcoal-800 rounded-2xl shadow-soft-light dark:shadow-soft-dark p-8 sm:p-10 border border-cream-200 dark:border-charcoal-700">
       <div class="text-center">
-        <h1 class="text-3xl font-bold">Create Account</h1>
-        <p class="mt-2 text-gray-600 dark:text-gray-400">
-          Join MSZ Ecom Store today
-        </p>
+        <h1 class="text-4xl sm:text-5xl font-bold text-charcoal-900 dark:text-white tracking-tighter">Create an Account</h1>
+        <p class="mt-4 text-lg text-charcoal-800/80 dark:text-gray-300">Get started with SubHub today.</p>
       </div>
-      
-      <div class="bg-card rounded-lg shadow-lg p-8">
+
+      <div class="mt-12">
         <SupabaseAuthProvider client:load>
           <SignupForm client:load />
         </SupabaseAuthProvider>
       </div>
     </div>
-  </div>
+  </main>
 </Layout>

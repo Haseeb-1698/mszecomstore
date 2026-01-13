@@ -1,0 +1,40 @@
+﻿---
+// Announcement strip component for promotions and deals
+---
+
+<div class="bg-gradient-to-r from-[#E5723A] to-[#2B2F38] text-white py-2 overflow-hidden relative">
+  <div class="flex animate-marquee-rtl whitespace-nowrap">
+    <div class="flex items-center text-sm">
+      <span class="font-semibold mx-4">WINTER SALE</span>ÔÇó<span class="mx-4">Up to 50% OFF</span>ÔÇó<span class="font-semibold mx-4">LIMITED TIME</span>ÔÇó<span class="mx-4">Act Fast!</span>
+      <span class="mx-32"></span> <!-- Large gap -->
+      <span class="font-semibold mx-4">EARLY BIRD DISCOUNT</span>ÔÇó<span class="mx-4">Save 30% More</span>ÔÇó<span class="font-semibold mx-4">EXCLUSIVE OFFER</span>ÔÇó<span class="mx-4">Don't Miss Out!</span>
+      <span class="mx-32"></span> <!-- Large gap before repeat -->
+    </div>
+    <!-- Duplicate content for seamless loop -->
+    <div class="flex items-center text-sm">
+      <span class="font-semibold mx-4">WINTER SALE</span>ÔÇó<span class="mx-4">Up to 50% OFF</span>ÔÇó<span class="font-semibold mx-4">LIMITED TIME</span>ÔÇó<span class="mx-4">Act Fast!</span>
+      <span class="mx-32"></span> <!-- Large gap -->
+      <span class="font-semibold mx-4">EARLY BIRD DISCOUNT</span>ÔÇó<span class="mx-4">Save 30% More</span>ÔÇó<span class="font-semibold mx-4">EXCLUSIVE OFFER</span>ÔÇó<span class="mx-4">Don't Miss Out!</span>
+      <span class="mx-32"></span> <!-- Large gap before repeat -->
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes marquee-rtl {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+  
+  .animate-marquee-rtl {
+    animation: marquee-rtl 45s linear infinite;
+  }
+  
+  .animate-marquee-rtl:hover {
+    animation-play-state: paused;
+  }
+</style>
