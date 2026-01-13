@@ -76,7 +76,7 @@ function LoginFormContent() {
 
       <div className="mt-8 text-center">
         <p className="text-charcoal-800/80 dark:text-gray-300">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <a href="/signup" className="font-medium text-coral-500 hover:text-coral-600 dark:hover:text-coral-400">
             Sign up
           </a>
