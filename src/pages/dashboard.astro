@@ -1,12 +1,36 @@
+<!-- filepath: src/pages/dashboard.astro -->
 ---
 import Layout from '../layouts/Layout.astro';
+import { ProtectedRoute } from '../components/auth/ProtectedRoute';
+import { SupabaseAuthProvider } from '../contexts/SupabaseAuthContext';
 ---
 
-<Layout title="Dashboard | SubHub">
-  <main class="bg-white dark:bg-charcoal-900">
-    <div class="max-w-7xl mx-auto px-6 py-24">
-      <h1 class="text-6xl font-bold text-center text-charcoal-900 dark:text-white">Dashboard</h1>
-      <p class="mt-4 text-xl text-center text-charcoal-800/80 dark:text-gray-300">Manage your subscriptions and account details.</p>
-    </div>
-  </main>
+<Layout title="Dashboard - MSZ Ecom Store">
+  <SupabaseAuthProvider client:load>
+    <ProtectedRoute client:load>
+      <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-8">My Dashboard</h1>
+        
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div class="bg-card rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">My Orders</h2>
+            <p class="text-gray-600 dark:text-gray-400">View your order history and track current orders</p>
+            <a href="/orders" class="mt-4 inline-block text-primary hover:underline">View Orders →</a>
+          </div>
+          
+          <div class="bg-card rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">My Subscriptions</h2>
+            <p class="text-gray-600 dark:text-gray-400">Manage your active subscriptions</p>
+            <a href="/subscriptions" class="mt-4 inline-block text-primary hover:underline">View Subscriptions →</a>
+          </div>
+          
+          <div class="bg-card rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Browse Services</h2>
+            <p class="text-gray-600 dark:text-gray-400">Explore our available services</p>
+            <a href="/services" class="mt-4 inline-block text-primary hover:underline">View Services →</a>
+          </div>
+        </div>
+      </div>
+    </ProtectedRoute>
+  </SupabaseAuthProvider>
 </Layout>

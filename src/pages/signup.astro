@@ -1,45 +1,25 @@
+<!-- filepath: src/pages/signup.astro -->
 ---
 import Layout from '../layouts/Layout.astro';
-import { ArrowRight } from 'lucide-react';
+import { SignupForm } from '../components/auth/SignupForm';
+import { SupabaseAuthProvider } from '../contexts/SupabaseAuthContext';
 ---
 
-<Layout title="Sign Up | SubHub">
-  <main class="py-24 sm:py-32 px-6 bg-white dark:bg-charcoal-900">
-    <div class="max-w-md mx-auto bg-cream-100 dark:bg-charcoal-800 rounded-2xl shadow-soft-light dark:shadow-soft-dark p-8 sm:p-10 border border-cream-200 dark:border-charcoal-700">
+<Layout title="Sign Up - MSZ Ecom Store">
+  <div class="min-h-screen flex items-center justify-center px-4 py-12">
+    <div class="max-w-md w-full space-y-8">
       <div class="text-center">
-        <h1 class="text-4xl sm:text-5xl font-bold text-charcoal-900 dark:text-white tracking-tighter">Create an Account</h1>
-        <p class="mt-4 text-lg text-charcoal-800/80 dark:text-gray-300">Get started with SubHub today.</p>
+        <h1 class="text-3xl font-bold">Create Account</h1>
+        <p class="mt-2 text-gray-600 dark:text-gray-400">
+          Join MSZ Ecom Store today
+        </p>
       </div>
-
-      <div class="mt-12">
-        <form action="#" method="POST">
-          <div class="grid grid-cols-1 gap-y-6">
-            <div>
-              <label for="name" class="sr-only">Full name</label>
-              <input type="text" name="name" id="name" autocomplete="name" required class="block w-full rounded-xl border-cream-400 dark:border-charcoal-600 bg-white dark:bg-charcoal-700 px-4 py-3.5 text-charcoal-900 dark:text-white placeholder-charcoal-800/50 dark:placeholder-gray-400 focus:border-coral-500 focus:ring-coral-500" placeholder="Enter your full name">
-            </div>
-            <div>
-              <label for="email" class="sr-only">Email address</label>
-              <input type="email" name="email" id="email" autocomplete="email" required class="block w-full rounded-xl border-cream-400 dark:border-charcoal-600 bg-white dark:bg-charcoal-700 px-4 py-3.5 text-charcoal-900 dark:text-white placeholder-charcoal-800/50 dark:placeholder-gray-400 focus:border-coral-500 focus:ring-coral-500" placeholder="Enter your email">
-            </div>
-            <div>
-              <label for="password" class="sr-only">Password</label>
-              <input type="password" name="password" id="password" autocomplete="new-password" required class="block w-full rounded-xl border-cream-400 dark:border-charcoal-600 bg-white dark:bg-charcoal-700 px-4 py-3.5 text-charcoal-900 dark:text-white placeholder-charcoal-800/50 dark:placeholder-gray-400 focus:border-coral-500 focus:ring-coral-500" placeholder="Create a password">
-            </div>
-          </div>
-
-          <div class="mt-8">
-            <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-xl bg-coral-500 px-8 py-3.5 font-medium text-white shadow-soft-light-focus hover:bg-coral-600 focus:outline-none focus:ring-2 focus:ring-coral-500 focus:ring-offset-2">
-              <span>Continue with Email</span>
-              <ArrowRight className="w-5 h-5" />
-            </button>
-          </div>
-        </form>
-
-        <div class="mt-8 text-center">
-          <p class="text-charcoal-800/80 dark:text-gray-300">Already have an account? <a href="/login" class="font-medium text-coral-500 hover:text-coral-600 dark:hover:text-coral-400">Log in</a></p>
-        </div>
+      
+      <div class="bg-card rounded-lg shadow-lg p-8">
+        <SupabaseAuthProvider client:load>
+          <SignupForm client:load />
+        </SupabaseAuthProvider>
       </div>
     </div>
-  </main>
+  </div>
 </Layout>

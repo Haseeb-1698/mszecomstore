@@ -13,7 +13,7 @@ interface ErrorMessageProps {
   }>;
 }
 
-const ErrorMessage: React.FC<ErrorMessageProps> = ({
+export const ErrorMessage: React.FC<ErrorMessageProps> = ({
   title,
   message,
   type = 'error',
@@ -122,5 +122,3 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({
     </div>
   );
 };
-
-export default ErrorMessage;
