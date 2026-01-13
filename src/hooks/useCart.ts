@@ -2,9 +2,18 @@ import { useState, useEffect, useCallback } from 'react';
 import type { Cart } from '../lib/types';
 import { cartUtils } from '../lib/cart';
 
+export interface ItemData {
+  serviceId: string;
+  serviceName: string;
+  planId: string;
+  planName: string;
+  price: number | string;
+  quantity?: number;
+}
+
 export interface UseCartReturn {
   cart: Cart;
-  addItem: (serviceSlug: string, tierIndex?: number) => void;
+  addItem: (item: ItemData) => void;
   removeItem: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
   applyDiscountCode: (code: string) => boolean;
@@ -21,7 +30,6 @@ export const useCart = (): UseCartReturn => {
   const [error, setError] = useState<string | null>(null);
 
   // Load cart from localStorage on mount
-  // Load cart from localStorage on mount
   useEffect(() => {
     const loadCart = () => {
       console.log('🛒 loadCart started');
@@ -36,17 +44,6 @@ export const useCart = (): UseCartReturn => {
           const validatedCart = cartUtils.validate(savedCart);
           console.log('🛒 validatedCart:', validatedCart);
           cartToUse = validatedCart;
-        }
-
-        // Add dummy items for testing if cart is empty
-        if (cartToUse.items.length === 0) {
-          console.log('🛒 Cart empty, adding dummy items...');
-          try {
-            cartToUse = cartUtils.addItem(cartToUse, 'netflix', 1);
-            console.log('🛒 After adding netflix:', cartToUse);
-          } catch (error) {
-            console.error('🛒 Failed to add dummy item:', error);
-          }
         }
 
         setCart(cartToUse);
@@ -77,9 +74,9 @@ export const useCart = (): UseCartReturn => {
     }
   }, [cart, isLoading]);
 
-  const addItem = useCallback((serviceSlug: string, tierIndex: number = 0) => {
+  const addItem = useCallback((item: ItemData) => {
     try {
-      setCart(currentCart => cartUtils.addItem(currentCart, serviceSlug, tierIndex));
+      setCart(currentCart => cartUtils.addItem(currentCart, item));
       setError(null);
     } catch (err) {
       console.error('Add to cart failed:', err);

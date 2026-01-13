@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import ServiceModal from './ServiceModal';
+import ConfirmModal from './ConfirmModal';
+import { useServices } from '../../hooks/useServices';
 
 interface Service {
   id: string;
@@ -15,73 +17,31 @@ interface Service {
 const ServicesTable: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const mockServices: Service[] = [
-    {
-      id: 'SRV-001',
-      name: 'Netflix Premium',
-      category: 'Streaming',
-      price: '$15.99',
-      duration: '1 Month',
-      active: true,
-      totalSales: 156,
-      description: 'Premium Netflix subscription with 4K streaming'
-    },
-    {
-      id: 'SRV-002',
-      name: 'Spotify Individual',
-      category: 'Music',
-      price: '$9.99',
-      duration: '1 Month',
-      active: true,
-      totalSales: 234,
-      description: 'Individual Spotify Premium subscription'
-    },
-    {
-      id: 'SRV-003',
-      name: 'YouTube Premium',
-      category: 'Streaming',
-      price: '$11.99',
-      duration: '1 Month',
-      active: true,
-      totalSales: 98,
-      description: 'YouTube Premium with ad-free viewing'
-    },
-    {
-      id: 'SRV-004',
-      name: 'Disney+ Hotstar',
-      category: 'Streaming',
-      price: '$7.99',
-      duration: '1 Month',
-      active: true,
-      totalSales: 145,
-      description: 'Disney+ Hotstar Premium subscription'
-    },
-    {
-      id: 'SRV-005',
-      name: 'Amazon Prime',
-      category: 'Streaming',
-      price: '$12.99',
-      duration: '1 Month',
-      active: false,
-      totalSales: 67,
-      description: 'Amazon Prime Video subscription'
-    },
-    {
-      id: 'SRV-006',
-      name: 'HBO Max',
-      category: 'Streaming',
-      price: '$14.99',
-      duration: '1 Month',
-      active: true,
-      totalSales: 89,
-      description: 'HBO Max Premium subscription'
+  const { services: dbServices, loading, toggleActiveStatus, deleteService, refresh } = useServices();
+
+  const services: Service[] = dbServices.map(s => {
+    const defaultPlan = s.plans?.[0];
+    return {
+      id: s.id,
+      name: s.name,
+      category: s.category,
+      price: defaultPlan ? `$${defaultPlan.price}` : 'N/A',
+      duration: defaultPlan ? `${defaultPlan.duration_months} Month${defaultPlan.duration_months > 1 ? 's' : ''}` : 'N/A',
+      active: s.is_active,
+      totalSales: 0, // In a real app, this would come from a view or aggregation
+      description: s.description || ''
+    };
+  });
+
+  const handleToggleActive = async (serviceId: string) => {
+    const service = services.find(s => s.id === serviceId);
+    if (service) {
+      await toggleActiveStatus(serviceId, service.active);
     }
-  ];
-
-  const handleToggleActive = (serviceId: string) => {
-    console.log(`Toggling active status for service: ${serviceId}`);
-    // In a real app, this would make an API call
   };
 
   const handleEdit = (service: Service) => {
@@ -89,10 +49,21 @@ const ServicesTable: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (serviceId: string) => {
-    if (confirm('Are you sure you want to delete this service?')) {
-      console.log(`Deleting service: ${serviceId}`);
-      // In a real app, this would make an API call
+  const handleDeleteClick = (serviceId: string) => {
+    setServiceToDelete(serviceId);
+    setIsConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (serviceToDelete) {
+      setIsDeleting(true);
+      try {
+        await deleteService(serviceToDelete);
+        setIsConfirmOpen(false);
+      } finally {
+        setIsDeleting(false);
+        setServiceToDelete(null);
+      }
     }
   };
 
@@ -108,18 +79,18 @@ const ServicesTable: React.FC = () => {
         <div className="bg-cream-200 dark:bg-charcoal-900 px-6 py-4 grid grid-cols-3 gap-4">
           <div>
             <p className="text-xs text-charcoal-600 dark:text-cream-400 mb-1">Total Services</p>
-            <p className="text-2xl font-bold text-charcoal-800 dark:text-cream-100">{mockServices.length}</p>
+            <p className="text-2xl font-bold text-charcoal-800 dark:text-cream-100">{services.length}</p>
           </div>
           <div>
             <p className="text-xs text-charcoal-600 dark:text-cream-400 mb-1">Active Services</p>
             <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-              {mockServices.filter(s => s.active).length}
+              {services.filter(s => s.active).length}
             </p>
           </div>
           <div>
             <p className="text-xs text-charcoal-600 dark:text-cream-400 mb-1">Total Sales</p>
             <p className="text-2xl font-bold text-coral-600 dark:text-coral-400">
-              {mockServices.reduce((sum, s) => sum + s.totalSales, 0)}
+              {services.reduce((sum, s) => sum + s.totalSales, 0)}
             </p>
           </div>
         </div>
@@ -149,12 +120,11 @@ const ServicesTable: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {mockServices.map((service, index) => (
+              {services.map((service, index) => (
                 <tr
                   key={service.id}
-                  className={`border-t border-cream-400 dark:border-charcoal-700 hover:bg-cream-100 dark:hover:bg-charcoal-700 transition-colors ${
-                    index % 2 === 0 ? 'bg-cream-50 dark:bg-charcoal-800' : 'bg-cream-100 dark:bg-charcoal-750'
-                  }`}
+                  className={`border-t border-cream-400 dark:border-charcoal-700 hover:bg-cream-100 dark:hover:bg-charcoal-700 transition-colors ${index % 2 === 0 ? 'bg-cream-50 dark:bg-charcoal-800' : 'bg-cream-100 dark:bg-charcoal-900'
+                    }`}
                 >
                   <td className="py-4 px-6">
                     <div>
@@ -173,14 +143,12 @@ const ServicesTable: React.FC = () => {
                   <td className="py-4 px-6">
                     <button
                       onClick={() => handleToggleActive(service.id)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        service.active ? 'bg-green-500' : 'bg-gray-400'
-                      }`}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${service.active ? 'bg-green-500' : 'bg-gray-400'
+                        }`}
                     >
                       <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          service.active ? 'translate-x-6' : 'translate-x-1'
-                        }`}
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${service.active ? 'translate-x-6' : 'translate-x-1'
+                          }`}
                       />
                     </button>
                   </td>
@@ -196,7 +164,7 @@ const ServicesTable: React.FC = () => {
                         </svg>
                       </button>
                       <button
-                        onClick={() => handleDelete(service.id)}
+                        onClick={() => handleDeleteClick(service.id)}
                         className="p-2 rounded-lg hover:bg-cream-200 dark:hover:bg-charcoal-600 text-red-600 dark:text-red-400 transition-colors"
                         title="Delete service"
                       >
@@ -217,7 +185,19 @@ const ServicesTable: React.FC = () => {
       <ServiceModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        onSuccess={refresh}
         service={editingService}
+      />
+
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Service"
+        message="Are you sure you want to delete this service? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+        isLoading={isDeleting}
       />
     </>
   );

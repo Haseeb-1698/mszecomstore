@@ -1,16 +1,17 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { services } from '../../data/services.js';
+import { getServices, getServiceBySlug } from '../../lib/api/services';
 import { Check } from 'lucide-react';
 
 export async function getStaticPaths() {
+  const services = await getServices();
   return services.map(service => ({
     params: { slug: service.slug },
   }));
 }
 
 const { slug } = Astro.params;
-const service = services.find(s => s.slug === slug);
+const service = await getServiceBySlug(slug as string);
 
 if (!service) {
   return new Response(null, {

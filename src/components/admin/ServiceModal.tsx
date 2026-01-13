@@ -15,10 +15,11 @@ interface Service {
 interface ServiceModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
   service: Service | null;
 }
 
-const ServiceModal: React.FC<ServiceModalProps> = ({ isOpen, onClose, service }) => {
+const ServiceModal: React.FC<ServiceModalProps> = ({ isOpen, onClose, onSuccess, service }) => {
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
@@ -45,9 +46,8 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ isOpen, onClose, service })
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-200 ${
-        isClosing ? 'opacity-0' : 'opacity-100'
-      }`}
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-200 ${isClosing ? 'opacity-0' : 'opacity-100'
+        }`}
     >
       {/* Backdrop */}
       <button
@@ -57,9 +57,8 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ isOpen, onClose, service })
 
       {/* Modal */}
       <div
-        className={`relative bg-cream-50 dark:bg-charcoal-800 rounded-2xl shadow-soft-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-cream-400 dark:border-charcoal-700 transition-transform duration-200 ${
-          isClosing ? 'scale-95' : 'scale-100'
-        }`}
+        className={`relative bg-cream-50 dark:bg-charcoal-800 rounded-2xl shadow-soft-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-cream-400 dark:border-charcoal-700 transition-transform duration-200 ${isClosing ? 'scale-95' : 'scale-100'
+          }`}
       >
         {/* Header */}
         <div className="sticky top-0 bg-cream-50 dark:bg-charcoal-800 border-b border-cream-400 dark:border-charcoal-700 px-6 py-4 flex items-center justify-between">
@@ -78,7 +77,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ isOpen, onClose, service })
 
         {/* Content */}
         <div className="p-6">
-          <ServiceForm service={service} onClose={handleClose} />
+          <ServiceForm service={service} onClose={handleClose} onSuccess={onSuccess} />
         </div>
       </div>
     </div>

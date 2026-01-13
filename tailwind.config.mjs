@@ -25,6 +25,7 @@ export default {
         },
         charcoal: {
           700: '#3D3D3D',
+          750: '#262626',
           800: '#2D2D2D',
           900: '#1A1A1A',
         }

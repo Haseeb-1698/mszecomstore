@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
+import { useServices } from '../../hooks/useServices';
 
 interface Service {
   id: string;
@@ -11,24 +12,29 @@ interface Service {
   active: boolean;
   totalSales: number;
   description: string;
+  icon_url?: string;
 }
 
 interface ServiceFormProps {
   service: Service | null;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose }) => {
+const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose, onSuccess }) => {
+  const { createService, updateService } = useServices();
   const [formData, setFormData] = useState({
     name: service?.name || '',
     category: service?.category || 'Streaming',
     price: service?.price || '',
     duration: service?.duration || '1 Month',
     description: service?.description || '',
-    active: service?.active ?? true
+    active: service?.active ?? true,
+    iconUrl: (service as any)?.icon_url || ''
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -52,29 +58,61 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose }) => {
       newErrors.name = 'Service name is required';
     }
 
-    if (!formData.price.trim()) {
-      newErrors.price = 'Price is required';
-    }
-
-    if (!formData.description.trim()) {
-      newErrors.description = 'Description is required';
+    const priceNum = parseFloat(formData.price.replace(/[^0-9.]/g, ''));
+    if (isNaN(priceNum)) {
+      newErrors.price = 'Valid price is required';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
       return;
     }
 
-    console.log('Submitting service:', formData);
-    // In a real app, this would make an API call
-    alert(`Service ${service ? 'updated' : 'created'} successfully!`);
-    onClose();
+    setIsSubmitting(true);
+    try {
+      const serviceData = {
+        name: formData.name,
+        category: formData.category,
+        description: formData.description,
+        is_active: formData.active,
+        icon_url: formData.iconUrl
+      };
+
+      const durationMonths = parseInt(formData.duration) || 1;
+      const priceNum = parseFloat(formData.price.replace(/[^0-9.]/g, ''));
+
+      const plansData = [{
+        name: `${formData.duration} Plan`,
+        duration_months: durationMonths,
+        price: priceNum,
+        type: 'dedicated' as const,
+        is_available: true
+      }];
+
+      let result;
+      if (service) {
+        result = await updateService(service.id, serviceData, plansData);
+      } else {
+        result = await createService(serviceData, plansData);
+      }
+
+      if (result.error) {
+        alert(`Error: ${result.error}`);
+      } else {
+        if (onSuccess) onSuccess();
+        onClose();
+      }
+    } catch (err: any) {
+      alert(`Error: ${err.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -152,6 +190,21 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose }) => {
         />
       </div>
 
+      {/* Icon URL */}
+      <div>
+        <label htmlFor="iconUrl" className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+          Icon URL
+        </label>
+        <Input
+          id="iconUrl"
+          type="text"
+          name="iconUrl"
+          value={formData.iconUrl}
+          onChange={handleChange}
+          placeholder="e.g., /icons/netflix.svg"
+        />
+      </div>
+
       {/* Description */}
       <div>
         <label htmlFor="description" className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
@@ -164,11 +217,10 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose }) => {
           onChange={handleChange}
           placeholder="Describe the service and what's included..."
           rows={4}
-          className={`w-full px-4 py-2 bg-cream-100 dark:bg-charcoal-900 border rounded-xl focus:outline-none focus:ring-2 focus:ring-coral-500 text-charcoal-800 dark:text-cream-100 resize-none ${
-            errors.description
-              ? 'border-red-500 focus:ring-red-500'
-              : 'border-cream-400 dark:border-charcoal-700'
-          }`}
+          className={`w-full px-4 py-2 bg-cream-100 dark:bg-charcoal-900 border rounded-xl focus:outline-none focus:ring-2 focus:ring-coral-500 text-charcoal-800 dark:text-cream-100 resize-none ${errors.description
+            ? 'border-red-500 focus:ring-red-500'
+            : 'border-cream-400 dark:border-charcoal-700'
+            }`}
         />
         {errors.description && (
           <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.description}</p>
@@ -186,22 +238,20 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose }) => {
         <button
           type="button"
           onClick={handleToggleActive}
-          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-            formData.active ? 'bg-green-500' : 'bg-gray-400'
-          }`}
+          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.active ? 'bg-green-500' : 'bg-gray-400'
+            }`}
         >
           <span
-            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-              formData.active ? 'translate-x-6' : 'translate-x-1'
-            }`}
+            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.active ? 'translate-x-6' : 'translate-x-1'
+              }`}
           />
         </button>
       </div>
 
       {/* Actions */}
       <div className="flex items-center gap-3 pt-4 border-t border-cream-400 dark:border-charcoal-700">
-        <Button type="submit" variant="primary" fullWidth>
-          {service ? 'Update Service' : 'Create Service'}
+        <Button type="submit" variant="primary" fullWidth disabled={isSubmitting}>
+          {isSubmitting ? 'Processing...' : (service ? 'Update Service' : 'Create Service')}
         </Button>
         <Button type="button" variant="outline" onClick={onClose} fullWidth>
           Cancel

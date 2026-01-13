@@ -1,6 +1,5 @@
 // Cart management utilities for MSZ Ecom Store
 import type { Cart, CartItem } from './types';
-import { services } from '../data/services';
 
 // Generate unique cart ID
 export const generateCartId = (): string => {
@@ -44,44 +43,44 @@ const parsePrice = (priceStr: string): number => {
 };
 
 // Add item to cart
-export const addItemToCart = (cart: Cart, serviceSlug: string, tierIndex: number = 0): Cart => {
-  const service = services.find(s => s.slug === serviceSlug);
-  if (!service) {
-    throw new Error(`Service with slug ${serviceSlug} not found`);
+export const addItemToCart = (
+  cart: Cart,
+  itemData: {
+    serviceId: string;
+    serviceName: string;
+    planId: string;
+    planName: string;
+    price: number | string;
+    quantity?: number;
   }
-
-  const tier = service.pricingTiers?.[tierIndex];
-  if (!tier) {
-    throw new Error(`Tier index ${tierIndex} not found for service ${serviceSlug}`);
-  }
-
-  const price = parsePrice(tier.price);
-  const planId = `${serviceSlug}-tier-${tierIndex}`;
+): Cart => {
+  const { serviceId, serviceName, planId, planName, price: rawPrice, quantity = 1 } = itemData;
+  const price = typeof rawPrice === 'string' ? parsePrice(rawPrice) : rawPrice;
 
   // Check if item already exists in cart
   const existingItemIndex = cart.items.findIndex(
-    item => item.serviceId === serviceSlug && item.planId === planId
+    item => item.serviceId === serviceId && item.planId === planId
   );
 
   let updatedItems: CartItem[];
 
   if (existingItemIndex >= 0) {
     // Update quantity of existing item
-    updatedItems = cart.items.map((item, index) => 
-      index === existingItemIndex 
-        ? { ...item, quantity: item.quantity + 1 }
+    updatedItems = cart.items.map((item, index) =>
+      index === existingItemIndex
+        ? { ...item, quantity: item.quantity + (itemData.quantity || 1) }
         : item
     );
   } else {
     // Add new item
     const newItem: CartItem = {
       id: generateCartItemId(),
-      serviceId: serviceSlug,
+      serviceId,
       planId,
-      serviceName: service.name,
-      planDuration: tier.name,
+      serviceName,
+      planDuration: planName,
       price,
-      quantity: 1
+      quantity
     };
     updatedItems = [...cart.items, newItem];
   }
@@ -117,8 +116,8 @@ export const updateItemQuantity = (cart: Cart, itemId: string, quantity: number)
     return removeItemFromCart(cart, itemId);
   }
 
-  const updatedItems = cart.items.map(item => 
-    item.id === itemId 
+  const updatedItems = cart.items.map(item =>
+    item.id === itemId
       ? { ...item, quantity }
       : item
   );
@@ -204,7 +203,7 @@ export const loadCartFromStorage = (): Cart | null => {
     if (!cartData) return null;
 
     const cart = JSON.parse(cartData);
-    
+
     // Convert date strings back to Date objects
     return {
       ...cart,
@@ -227,22 +226,10 @@ export const removeCartFromStorage = (): void => {
   }
 };
 
-// Validate cart items against current service data
+// Validate cart items (stubbed for now as services.js is removed)
 export const validateCartItems = (cart: Cart): Cart => {
-  const validItems = cart.items.filter(item => {
-    const service = services.find(s => s.slug === item.serviceId);
-    return !!service;
-  });
-
-  const { subtotal } = calculateCartTotals(validItems);
-
-  return {
-    ...cart,
-    items: validItems,
-    subtotal,
-    total: subtotal - cart.discount,
-    updatedAt: new Date()
-  };
+  // In a future step, this should fetch services from Supabase to validate
+  return cart;
 };
 
 // Cart utility functions for React components

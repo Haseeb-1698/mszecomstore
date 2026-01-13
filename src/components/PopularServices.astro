@@ -1,6 +1,8 @@
 ---
-import { services } from '../data/services.js';
+import { getServices } from '../lib/api/services';
 import { ArrowRight } from 'lucide-react';
+
+const services = await getServices();
 ---
 
 <section class="py-24 sm:py-32 dark:bg-charcoal-900">

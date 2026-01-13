@@ -25,7 +25,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      setIsAdmin(session?.user?.email === 'admin@mszecomstore.com');
+      setIsAdmin(session?.user?.email === 'umerfarooq1105@gmail.com');
       setLoading(false);
     });
 
@@ -35,7 +35,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-      setIsAdmin(session?.user?.email === 'admin@mszecomstore.com');
+      setIsAdmin(session?.user?.email === 'umerfarooq1105@gmail.com');
       setLoading(false);
     });
 
