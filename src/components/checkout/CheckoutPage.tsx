@@ -3,7 +3,7 @@ import { useCartContext } from '../../contexts/CartContext';
 import { Button } from '../ui/Button';
 import CheckoutForm from './CheckoutForm';
 import OrderReview from './OrderReview';
-import PaymentSection from './PaymentSection';
+import { supabase } from '../../lib/supabase';
 
 interface CustomerInfo {
   name: string;
@@ -12,17 +12,14 @@ interface CustomerInfo {
   instructions: string;
 }
 
-type PaymentMethod = 'EasyPaisa' | 'JazzCash' | 'Bank Transfer';
-
 const CheckoutPage: React.FC = () => {
-  const { cart, isLoading } = useCartContext();
+  const { cart, isLoading, clearCart } = useCartContext();
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: '',
     email: '',
     whatsapp: '',
     instructions: ''
   });
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('EasyPaisa');
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -61,11 +58,66 @@ const CheckoutPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      // Simulate order creation
-      const sessionId = `checkout_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
 
-      // Redirect to payment page
-      globalThis.location.href = `/payment/success?session=${sessionId}&method=${encodeURIComponent(paymentMethod)}`;
+      if (!user) {
+        alert('Please log in to place an order');
+        globalThis.location.href = '/login';
+        return;
+      }
+      
+      const firstItem = cart.items[0];
+      if (!firstItem) {
+        alert('Cart is empty');
+        return;
+      }
+
+      // Create order in database
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert([{
+          user_id: user.id,
+          plan_id: firstItem.planId,
+          amount: cart.total,
+          customer_name: customerInfo.name,
+          customer_email: customerInfo.email,
+          customer_whatsapp: customerInfo.whatsapp,
+          special_instructions: customerInfo.instructions || null,
+          status: 'pending'
+        }])
+        .select()
+        .single() as any;
+
+      if (orderError) {
+        console.error('Order creation error:', orderError);
+        throw new Error('Failed to create order');
+      }
+
+      // Create order items
+      const orderItems = cart.items.map(item => ({
+        order_id: order.id,
+        plan_id: item.planId,
+        service_name: item.serviceName,
+        plan_name: item.planDuration,
+        duration_months: parseInt(item.planDuration) || 1,
+        price: item.price,
+        quantity: item.quantity
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems) as any;
+
+      if (itemsError) {
+        console.error('Order items error:', itemsError);
+      }
+
+      // Clear the cart after successful order
+      clearCart();
+
+      // Redirect to order details page
+      globalThis.location.href = `/order/${order.id}`;
     } catch (error) {
       console.error('Checkout error:', error);
       alert('Failed to process checkout. Please try again.');
@@ -168,11 +220,6 @@ const CheckoutPage: React.FC = () => {
                 setCustomerInfo={setCustomerInfo}
                 errors={errors}
                 setErrors={setErrors}
-              />
-
-              <PaymentSection
-                paymentMethod={paymentMethod}
-                setPaymentMethod={setPaymentMethod}
               />
 
               {/* Terms and Conditions */}

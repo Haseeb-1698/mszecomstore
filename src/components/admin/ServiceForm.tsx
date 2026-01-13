@@ -27,7 +27,6 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose, onSuccess }
     name: service?.name || '',
     category: service?.category || 'Streaming',
     price: service?.price || '',
-    duration: service?.duration || '1 Month',
     description: service?.description || '',
     active: service?.active ?? true,
     iconUrl: (service as any)?.icon_url || ''
@@ -84,16 +83,43 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose, onSuccess }
         icon_url: formData.iconUrl
       };
 
-      const durationMonths = parseInt(formData.duration) || 1;
       const priceNum = parseFloat(formData.price.replace(/[^0-9.]/g, ''));
 
-      const plansData = [{
-        name: `${formData.duration} Plan`,
-        duration_months: durationMonths,
-        price: priceNum,
-        type: 'dedicated' as const,
-        is_available: true
-      }];
+      const plansData = [
+        {
+          name: 'Basic',
+          tier: 'basic',
+          duration_months: 1,
+          price: priceNum,
+          type: 'dedicated' as const,
+          is_available: true,
+          display_order: 1,
+          description: '1 month subscription with full access'
+        },
+        {
+          name: 'Standard',
+          tier: 'standard',
+          duration_months: 3,
+          price: Math.round(priceNum * 3 * 0.9), // 10% discount for 3 months
+          type: 'dedicated' as const,
+          is_available: true,
+          is_popular: true,
+          display_order: 2,
+          badge: 'popular',
+          description: '3 months subscription with 10% discount'
+        },
+        {
+          name: 'Premium',
+          tier: 'premium',
+          duration_months: 12,
+          price: Math.round(priceNum * 12 * 0.75), // 25% discount for 12 months
+          type: 'dedicated' as const,
+          is_available: true,
+          display_order: 3,
+          badge: 'best_value',
+          description: '12 months subscription with 25% discount'
+        }
+      ];
 
       let result;
       if (service) {
@@ -133,7 +159,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose, onSuccess }
         />
       </div>
 
-      {/* Category & Duration */}
+      {/* Category & Base Price */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="category" className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
@@ -156,38 +182,19 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose, onSuccess }
         </div>
 
         <div>
-          <label htmlFor="duration" className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
-            Duration *
+          <label htmlFor="price" className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+            Base Price (Rs) *
           </label>
-          <select
-            id="duration"
-            name="duration"
-            value={formData.duration}
+          <Input
+            id="price"
+            type="text"
+            name="price"
+            value={formData.price}
             onChange={handleChange}
-            className="w-full px-4 py-2 bg-cream-100 dark:bg-charcoal-900 border border-cream-400 dark:border-charcoal-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-coral-500 text-charcoal-800 dark:text-cream-100"
-          >
-            <option value="1 Month">1 Month</option>
-            <option value="3 Months">3 Months</option>
-            <option value="6 Months">6 Months</option>
-            <option value="1 Year">1 Year</option>
-          </select>
+            placeholder="Enter price for 1 month"
+            error={errors.price}
+          />
         </div>
-      </div>
-
-      {/* Price */}
-      <div>
-        <label htmlFor="price" className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
-          Price *
-        </label>
-        <Input
-          id="price"
-          type="text"
-          name="price"
-          value={formData.price}
-          onChange={handleChange}
-          placeholder="e.g., $15.99"
-          error={errors.price}
-        />
       </div>
 
       {/* Icon URL */}

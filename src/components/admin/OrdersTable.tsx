@@ -1,133 +1,117 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import OrderStatusBadge from './OrderStatusBadge';
+import { supabase } from '../../lib/supabase';
+import type { OrderStatus } from '../../lib/database.types';
+import { OrderStatusDisplay } from '../../lib/types';
+import { formatPrice } from '../../lib/utils';
 
 interface Order {
   id: string;
   customer: string;
   email: string;
+  whatsapp: string;
   service: string;
   amount: string;
-  status: 'pending' | 'processing' | 'completed' | 'cancelled';
+  status: OrderStatus;
   date: string;
-  paymentMethod: string;
 }
 
 const OrdersTable: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
   const ordersPerPage = 10;
 
-  const mockOrders: Order[] = [
-    {
-      id: 'ORD-001',
-      customer: 'John Doe',
-      email: 'john@example.com',
-      service: 'Netflix Premium',
-      amount: '$15.99',
-      status: 'completed',
-      date: '2024-01-15',
-      paymentMethod: 'EasyPaisa'
-    },
-    {
-      id: 'ORD-002',
-      customer: 'Jane Smith',
-      email: 'jane@example.com',
-      service: 'Spotify Individual',
-      amount: '$9.99',
-      status: 'processing',
-      date: '2024-01-15',
-      paymentMethod: 'JazzCash'
-    },
-    {
-      id: 'ORD-003',
-      customer: 'Bob Johnson',
-      email: 'bob@example.com',
-      service: 'YouTube Premium',
-      amount: '$11.99',
-      status: 'pending',
-      date: '2024-01-14',
-      paymentMethod: 'Bank Transfer'
-    },
-    {
-      id: 'ORD-004',
-      customer: 'Alice Williams',
-      email: 'alice@example.com',
-      service: 'Disney+ Hotstar',
-      amount: '$7.99',
-      status: 'completed',
-      date: '2024-01-14',
-      paymentMethod: 'EasyPaisa'
-    },
-    {
-      id: 'ORD-005',
-      customer: 'Charlie Brown',
-      email: 'charlie@example.com',
-      service: 'Amazon Prime',
-      amount: '$12.99',
-      status: 'cancelled',
-      date: '2024-01-13',
-      paymentMethod: 'JazzCash'
-    },
-    {
-      id: 'ORD-006',
-      customer: 'Diana Prince',
-      email: 'diana@example.com',
-      service: 'HBO Max',
-      amount: '$14.99',
-      status: 'completed',
-      date: '2024-01-13',
-      paymentMethod: 'Bank Transfer'
-    },
-    {
-      id: 'ORD-007',
-      customer: 'Bruce Wayne',
-      email: 'bruce@example.com',
-      service: 'Apple Music',
-      amount: '$9.99',
-      status: 'processing',
-      date: '2024-01-12',
-      paymentMethod: 'EasyPaisa'
-    },
-    {
-      id: 'ORD-008',
-      customer: 'Clark Kent',
-      email: 'clark@example.com',
-      service: 'Netflix Premium',
-      amount: '$15.99',
-      status: 'completed',
-      date: '2024-01-12',
-      paymentMethod: 'JazzCash'
-    },
-    {
-      id: 'ORD-009',
-      customer: 'Peter Parker',
-      email: 'peter@example.com',
-      service: 'Spotify Family',
-      amount: '$14.99',
-      status: 'pending',
-      date: '2024-01-11',
-      paymentMethod: 'Bank Transfer'
-    },
-    {
-      id: 'ORD-010',
-      customer: 'Tony Stark',
-      email: 'tony@example.com',
-      service: 'YouTube Premium',
-      amount: '$11.99',
-      status: 'completed',
-      date: '2024-01-11',
-      paymentMethod: 'EasyPaisa'
-    }
-  ];
+  useEffect(() => {
+    fetchOrders();
+  }, []);
 
-  const totalPages = Math.ceil(mockOrders.length / ordersPerPage);
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          items:order_items (service_name, plan_name)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const mappedOrders: Order[] = (data || []).map((order: any) => ({
+        id: order.id.substring(0, 8).toUpperCase(),
+        customer: order.customer_name || 'Unknown',
+        email: order.customer_email || '',
+        whatsapp: order.customer_whatsapp || '',
+        service: order.items?.[0]?.service_name || 'N/A',
+        amount: formatPrice(order.amount),
+        status: order.status as OrderStatus,
+        date: new Date(order.created_at).toLocaleDateString()
+      }));
+
+      setOrders(mappedOrders);
+    } catch (err: any) {
+      console.error('Error fetching orders:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const totalPages = Math.ceil(orders.length / ordersPerPage);
   const indexOfLastOrder = currentPage * ordersPerPage;
   const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-  const currentOrders = mockOrders.slice(indexOfFirstOrder, indexOfLastOrder);
+  const currentOrders = orders.slice(indexOfFirstOrder, indexOfLastOrder);
 
-  const handleStatusChange = (orderId: string, newStatus: Order['status']) => {
-    console.log(`Updating order ${orderId} to status: ${newStatus}`);
-    // In a real app, this would make an API call
+  const handleStatusChange = async (orderId: string, newStatus: OrderStatus) => {
+    try {
+      // Find the full order ID from the truncated display ID
+      const { data } = await supabase
+        .from('orders')
+        .select('id')
+        .ilike('id', `${orderId.toLowerCase()}%`)
+        .single();
+      
+      if (!data) return;
+
+      const updateData: any = { status: newStatus };
+      if (newStatus === 'delivered') {
+        updateData.delivered_at = new Date().toISOString();
+      }
+
+      const { error } = await supabase
+        .from('orders')
+        .update(updateData)
+        .eq('id', data.id);
+
+      if (error) throw error;
+      
+      // Refresh orders
+      fetchOrders();
+    } catch (err: any) {
+      console.error('Error updating order status:', err);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="bg-cream-50 dark:bg-charcoal-800 rounded-2xl border border-cream-400 dark:border-charcoal-700 p-8 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-coral-500 mx-auto"></div>
+        <p className="mt-4 text-charcoal-600 dark:text-cream-400">Loading orders...</p>
+      </div>
+    );
+  }
+
+  if (orders.length === 0) {
+    return (
+      <div className="bg-cream-50 dark:bg-charcoal-800 rounded-2xl border border-cream-400 dark:border-charcoal-700 p-8 text-center">
+        <svg className="w-12 h-12 mx-auto text-charcoal-400 dark:text-cream-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        <p className="text-charcoal-600 dark:text-cream-400">No orders yet</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-cream-50 dark:bg-charcoal-800 rounded-2xl border border-cream-400 dark:border-charcoal-700 overflow-hidden">
@@ -186,12 +170,13 @@ const OrdersTable: React.FC = () => {
                     </button>
                     <select
                       value={order.status}
-                      onChange={(e) => handleStatusChange(order.id, e.target.value as Order['status'])}
+                      onChange={(e) => handleStatusChange(order.id, e.target.value as OrderStatus)}
                       className="text-xs px-2 py-1 bg-cream-100 dark:bg-charcoal-900 border border-cream-400 dark:border-charcoal-700 rounded-lg text-charcoal-700 dark:text-cream-300 focus:outline-none focus:ring-2 focus:ring-coral-500"
                     >
                       <option value="pending">Pending</option>
                       <option value="processing">Processing</option>
                       <option value="completed">Completed</option>
+                      <option value="delivered">Delivered</option>
                       <option value="cancelled">Cancelled</option>
                     </select>
                   </div>
@@ -205,7 +190,7 @@ const OrdersTable: React.FC = () => {
       {/* Pagination */}
       <div className="bg-cream-200 dark:bg-charcoal-900 px-6 py-4 flex items-center justify-between">
         <p className="text-sm text-charcoal-600 dark:text-cream-400">
-          Showing {indexOfFirstOrder + 1} to {Math.min(indexOfLastOrder, mockOrders.length)} of {mockOrders.length} orders
+          Showing {indexOfFirstOrder + 1} to {Math.min(indexOfLastOrder, orders.length)} of {orders.length} orders
         </p>
         <div className="flex items-center gap-2">
           <button
@@ -216,11 +201,11 @@ const OrdersTable: React.FC = () => {
             Previous
           </button>
           <span className="text-sm text-charcoal-700 dark:text-cream-300">
-            Page {currentPage} of {totalPages}
+            Page {currentPage} of {totalPages || 1}
           </span>
           <button
             onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-            disabled={currentPage === totalPages}
+            disabled={currentPage === totalPages || totalPages === 0}
             className="px-3 py-2 rounded-lg border border-cream-400 dark:border-charcoal-700 text-charcoal-700 dark:text-cream-300 hover:bg-cream-100 dark:hover:bg-charcoal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Next

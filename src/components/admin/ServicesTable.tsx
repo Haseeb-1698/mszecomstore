@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ServiceModal from './ServiceModal';
 import ConfirmModal from './ConfirmModal';
 import { useServices } from '../../hooks/useServices';
+import { formatPrice } from '../../lib/utils';
 
 interface Service {
   id: string;
@@ -29,7 +30,7 @@ const ServicesTable: React.FC = () => {
       id: s.id,
       name: s.name,
       category: s.category,
-      price: defaultPlan ? `$${defaultPlan.price}` : 'N/A',
+      price: defaultPlan ? formatPrice(defaultPlan.price) : 'N/A',
       duration: defaultPlan ? `${defaultPlan.duration_months} Month${defaultPlan.duration_months > 1 ? 's' : ''}` : 'N/A',
       active: s.is_active,
       totalSales: 0, // In a real app, this would come from a view or aggregation

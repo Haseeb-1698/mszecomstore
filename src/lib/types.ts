@@ -5,13 +5,24 @@ export type {
   DbPlan, 
   DbSubscription, 
   DbOrder,
+  DbOrderItem,
+  DbUserProfile,
+  DbServiceWithPlans,
+  DbOrderDetails,
+  DbAdminDashboardStats,
+  ServiceWithPlans,
+  OrderWithItems,
   SubscriptionStatus,
-  PaymentStatus 
+  OrderStatus,
+  ServiceCategory,
+  UserRole,
+  ServiceBadge
 } from './database.types'
 
-import type { SubscriptionStatus, PaymentStatus } from './database.types'
+import type { SubscriptionStatus, OrderStatus, UserRole } from './database.types'
 
-export type ServiceCategory = 
+// Legacy type alias for backwards compatibility
+export type ServiceCategoryLegacy = 
   | "streaming" 
   | "professional" 
   | "vpn" 
@@ -32,12 +43,13 @@ export interface Service {
   id: string;
   slug: string;
   name: string;
-  category: ServiceCategory;
+  category: string;
   logo: string;
   description: string;
+  longDescription?: string;
   features: string[];
   plans: Plan[];
-  badge?: "Popular" | "Best Value";
+  badge?: "Popular" | "Best Value" | null;
   relatedServices: string[];
 }
 
@@ -78,14 +90,17 @@ export interface Order {
   id: string;
   customerId: string;
   customerName?: string;
+  customerEmail?: string;
+  customerWhatsapp?: string;
   serviceName?: string;
   serviceId: string;
   planId: string;
   amount: number;
-  status: PaymentStatus | "delivered"; // Extended from database type
-  paymentMethod: "EasyPaisa" | "JazzCash" | "Bank Transfer";
+  status: OrderStatus;
   createdAt: Date;
+  updatedAt?: Date;
   deliveredAt?: Date;
+  specialInstructions?: string;
 }
 
 export interface CartItem {
@@ -117,8 +132,7 @@ export interface CheckoutSession {
     email: string;
     whatsapp: string;
   };
-  paymentMethod: "EasyPaisa" | "JazzCash" | "Bank Transfer";
-  status: "pending" | "processing" | "completed" | "failed";
+  status: OrderStatus;
   createdAt: Date;
   expiresAt: Date;
 }
@@ -164,8 +178,17 @@ export interface User {
   email: string;
   phone?: string;
   whatsapp?: string;
-  role: "customer" | "admin";
+  role: UserRole;
   avatar?: string;
   createdAt: Date;
   lastLogin?: Date;
+}
+
+// Order status display mapping
+export const OrderStatusDisplay: Record<OrderStatus, string> = {
+  pending: 'Pending',
+  processing: 'Processing',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+  delivered: 'Delivered'
 }

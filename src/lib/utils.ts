@@ -26,7 +26,7 @@ export function isSubscriptionExpired(expiresAt: string): boolean {
 
 // Format price for display
 export function formatPrice(price: number): string {
-  return `PKR ${price.toLocaleString('en-PK')}`
+  return `Rs ${price.toLocaleString('en-PK')}`
 }
 
 // Type guard for checking if error is from Supabase

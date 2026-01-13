@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import type { DbService, DbPlan } from '../lib/database.types';
+import type { DbService, DbPlan, DbPlanInsert, DbServiceInsert, DbServiceUpdate } from '../lib/database.types';
 
 export interface ServiceWithPlans extends DbService {
     plans: DbPlan[];
@@ -20,10 +20,11 @@ export const useServices = () => {
           *,
           plans (*)
         `)
+                .order('display_order')
                 .order('name');
 
             if (error) throw error;
-            setServices(data || []);
+            setServices(data as ServiceWithPlans[] || []);
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -31,7 +32,10 @@ export const useServices = () => {
         }
     };
 
-    const createService = async (serviceData: any, plansData: any[]) => {
+    const createService = async (
+        serviceData: Omit<DbServiceInsert, 'id' | 'created_at' | 'updated_at' | 'slug'>,
+        plansData: Omit<DbPlanInsert, 'id' | 'service_id' | 'created_at' | 'updated_at'>[]
+    ) => {
         try {
             setLoading(true);
             const { data: service, error: sError } = await supabase
@@ -40,11 +44,14 @@ export const useServices = () => {
                     name: serviceData.name,
                     category: serviceData.category,
                     description: serviceData.description,
+                    long_description: serviceData.long_description,
                     icon_url: serviceData.icon_url,
-                    is_active: serviceData.is_active
+                    badge: serviceData.badge,
+                    display_order: serviceData.display_order,
+                    is_active: serviceData.is_active ?? true
                 }])
                 .select()
-                .single();
+                .single() as any;
 
             if (sError) throw sError;
 
@@ -55,7 +62,7 @@ export const useServices = () => {
                 }));
                 const { error: pError } = await supabase
                     .from('plans')
-                    .insert(plansWithId);
+                    .insert(plansWithId) as any;
 
                 if (pError) throw pError;
             }
@@ -69,7 +76,11 @@ export const useServices = () => {
         }
     };
 
-    const updateService = async (id: string, serviceData: any, plansData?: any[]) => {
+    const updateService = async (
+        id: string,
+        serviceData: Partial<DbServiceUpdate>,
+        plansData?: Omit<DbPlanInsert, 'id' | 'service_id' | 'created_at' | 'updated_at'>[]
+    ) => {
         try {
             setLoading(true);
             const { error: sError } = await supabase
@@ -78,14 +89,17 @@ export const useServices = () => {
                     name: serviceData.name,
                     category: serviceData.category,
                     description: serviceData.description,
+                    long_description: serviceData.long_description,
                     icon_url: serviceData.icon_url,
+                    badge: serviceData.badge,
+                    display_order: serviceData.display_order,
                     is_active: serviceData.is_active
-                })
+                } as any)
                 .eq('id', id);
 
             if (sError) throw sError;
 
-            // Handle plans update if provided (simplistic approach: delete and re-insert)
+            // Handle plans update if provided (delete and re-insert)
             if (plansData) {
                 await supabase.from('plans').delete().eq('service_id', id);
                 const plansWithId = plansData.map(plan => ({
@@ -94,7 +108,7 @@ export const useServices = () => {
                 }));
                 const { error: pError } = await supabase
                     .from('plans')
-                    .insert(plansWithId);
+                    .insert(plansWithId) as any;
 
                 if (pError) throw pError;
             }
@@ -111,7 +125,7 @@ export const useServices = () => {
     const deleteService = async (id: string) => {
         try {
             setLoading(true);
-            // Plans will be deleted via cascade if set up, otherwise manually
+            // Plans will be deleted via cascade
             const { error } = await supabase
                 .from('services')
                 .delete()

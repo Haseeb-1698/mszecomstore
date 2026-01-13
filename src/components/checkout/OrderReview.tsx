@@ -2,6 +2,7 @@ import React from 'react';
 import type { Cart } from '../../lib/types';
 import { Button } from '../ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
+import { formatPrice } from '../../lib/utils';
 
 interface OrderReviewProps {
   cart: Cart;
@@ -29,7 +30,7 @@ const OrderReview: React.FC<OrderReviewProps> = ({ cart, isSubmitting, agreeToTe
                 </p>
               </div>
               <p className="font-medium text-charcoal-800 dark:text-cream-100">
-                ${(item.price * item.quantity).toFixed(2)}
+                {formatPrice(item.price * item.quantity)}
               </p>
             </div>
           ))}
@@ -38,20 +39,20 @@ const OrderReview: React.FC<OrderReviewProps> = ({ cart, isSubmitting, agreeToTe
         <div className="border-t border-cream-400 dark:border-charcoal-700 pt-4 space-y-2">
           <div className="flex justify-between text-charcoal-700 dark:text-cream-300">
             <span>Subtotal</span>
-            <span className="font-medium">${cart.subtotal.toFixed(2)}</span>
+            <span className="font-medium">{formatPrice(cart.subtotal)}</span>
           </div>
 
           {cart.discount > 0 && (
             <div className="flex justify-between text-coral-600 dark:text-coral-400">
               <span>Discount</span>
-              <span className="font-medium">-${cart.discount.toFixed(2)}</span>
+              <span className="font-medium">-{formatPrice(cart.discount)}</span>
             </div>
           )}
 
           <div className="border-t border-cream-400 dark:border-charcoal-700 pt-2">
             <div className="flex justify-between text-xl font-bold text-charcoal-800 dark:text-cream-100">
               <span>Total</span>
-              <span>${cart.total.toFixed(2)}</span>
+              <span>{formatPrice(cart.total)}</span>
             </div>
           </div>
         </div>

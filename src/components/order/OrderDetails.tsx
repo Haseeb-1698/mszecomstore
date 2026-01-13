@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { Button } from '../ui/Button';
+import { formatPrice } from '../../lib/utils';
 
 interface OrderDetailsProps {
   orderId?: string;
@@ -21,8 +22,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId = 'ORD-12345' }) =>
     ],
     subtotal: 219.87,
     discount: 20,
-    total: 199.87,
-    paymentMethod: 'EasyPaisa'
+    total: 199.87
   };
 
   return (
@@ -65,10 +65,6 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId = 'ORD-12345' }) =>
                     {order.status}
                   </span>
                 </div>
-                <div>
-                  <p className="text-sm text-charcoal-600 dark:text-cream-400">Payment Method</p>
-                  <p className="font-semibold text-charcoal-800 dark:text-cream-100">{order.paymentMethod}</p>
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -107,24 +103,24 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId = 'ORD-12345' }) =>
                       <p className="font-medium text-charcoal-800 dark:text-cream-100">{item.name}</p>
                       <p className="text-sm text-charcoal-600 dark:text-cream-400">{item.plan}</p>
                     </div>
-                    <p className="font-semibold text-charcoal-800 dark:text-cream-100">${item.price.toFixed(2)}</p>
+                    <p className="font-semibold text-charcoal-800 dark:text-cream-100">{formatPrice(item.price)}</p>
                   </div>
                 ))}
 
                 <div className="pt-4 space-y-2">
                   <div className="flex justify-between text-charcoal-700 dark:text-cream-300">
                     <span>Subtotal</span>
-                    <span>${order.subtotal.toFixed(2)}</span>
+                    <span>{formatPrice(order.subtotal)}</span>
                   </div>
                   {order.discount > 0 && (
                     <div className="flex justify-between text-coral-600 dark:text-coral-400">
                       <span>Discount</span>
-                      <span>-${order.discount.toFixed(2)}</span>
+                      <span>-{formatPrice(order.discount)}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-xl font-bold text-charcoal-800 dark:text-cream-100 pt-2 border-t border-cream-400 dark:border-charcoal-700">
                     <span>Total</span>
-                    <span>${order.total.toFixed(2)}</span>
+                    <span>{formatPrice(order.total)}</span>
                   </div>
                 </div>
               </div>
@@ -138,11 +134,11 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId = 'ORD-12345' }) =>
               <ul className="space-y-2 text-sm text-charcoal-700 dark:text-cream-300">
                 <li className="flex items-start gap-2">
                   <span className="text-purple-600 dark:text-purple-400 mt-0.5">1.</span>
-                  <span>Complete payment using the instructions sent to your WhatsApp</span>
+                  <span>We will contact you via WhatsApp with further instructions</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-purple-600 dark:text-purple-400 mt-0.5">2.</span>
-                  <span>Once payment is confirmed, we&apos;ll activate your subscription</span>
+                  <span>Once confirmed, we&apos;ll activate your subscription</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-purple-600 dark:text-purple-400 mt-0.5">3.</span>

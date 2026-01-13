@@ -1,5 +1,6 @@
 import React from 'react';
 import type { CartItem as CartItemType } from '../../lib/types';
+import { formatPrice } from '../../lib/utils';
 
 interface CartItemProps {
   item: CartItemType;
@@ -70,10 +71,10 @@ const CartItem: React.FC<CartItemProps> = ({ item, onUpdateQuantity, onRemoveIte
         {/* Price */}
         <div className="text-right">
           <p className="text-2xl font-bold text-charcoal-800 dark:text-cream-100">
-            ${(item.price * item.quantity).toFixed(2)}
+            {formatPrice(item.price * item.quantity)}
           </p>
           <p className="text-sm text-charcoal-600 dark:text-cream-400">
-            ${item.price.toFixed(2)} each
+            {formatPrice(item.price)} each
           </p>
         </div>
       </div>

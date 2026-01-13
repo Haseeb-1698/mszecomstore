@@ -1,34 +1,42 @@
 ---
+export async function getStaticPaths() {
+  const services = await getServices();
+  return services.map(service => ({
+    params: { slug: service.slug || service.name.toLowerCase().replace(/ /g, '-') },
+  }));
+}
+
 import Layout from '../../layouts/Layout.astro';
 import { getServices, getServiceBySlug } from '../../lib/api/services';
 import { Check } from 'lucide-react';
 
-export async function getStaticPaths() {
-  const services = await getServices();
-  return services.map(service => ({
-    params: { slug: service.slug },
-  }));
-}
-
 const { slug } = Astro.params;
 const service = await getServiceBySlug(slug as string);
 
+// Since getStaticPaths only generates paths for existing services, service should always exist
+// But we'll handle the case gracefully
 if (!service) {
-  return new Response(null, {
-    status: 404,
-    statusText: 'Not Found'
-  });
+  return Astro.redirect('/404');
 }
+
+// Transform plans to pricing tiers format for display
+const pricingTiers = (service.plans || []).map(plan => ({
+  name: plan.name,
+  price: `Rs ${(plan.price / plan.duration_months).toFixed(0)}/mo`,
+  quality: plan.duration_months === 1 ? 'Standard' : plan.duration_months >= 12 ? 'Premium' : 'Extended',
+  duration: `${plan.duration_months} Month${plan.duration_months > 1 ? 's' : ''}`,
+  isPopular: plan.is_popular
+}));
 ---
 
-<Layout title={`${service.name} - SubHub`}>
+<Layout title="Service Details - MSZ Ecom Store">
   <div class="bg-cream-50 dark:bg-charcoal-900">
     <div class="max-w-7xl mx-auto px-6 py-16">
       <div class="grid md:grid-cols-2 gap-12 items-center">
         <div class="flex flex-col items-start">
-          <img src={service.logo} alt={service.name} class="h-20 w-auto mb-6" />
+          <img src={service.icon_url || '/icons/default-service.svg'} alt={service.name} class="h-20 w-auto mb-6" />
           <h1 class="text-5xl sm:text-6xl font-bold text-charcoal-900 dark:text-white tracking-tighter">{service.name}</h1>
-          <p class="mt-4 text-xl text-charcoal-800/80 dark:text-gray-300">{service.longDescription}</p>
+          <p class="mt-4 text-xl text-charcoal-800/80 dark:text-gray-300">{service.long_description || service.description}</p>
           <a href="/signup" class="mt-8 inline-block px-8 py-4 rounded-full bg-coral-500 text-white font-medium hover:bg-coral-600 transition-all shadow-soft-light dark:shadow-soft-dark">
             Subscribe Now
           </a>
@@ -36,17 +44,24 @@ if (!service) {
         <div class="bg-cream-50 dark:bg-charcoal-800 rounded-2xl p-8 border border-cream-400 dark:border-charcoal-700">
           <h2 class="text-3xl font-bold text-charcoal-900 dark:text-white tracking-tighter">Pricing Tiers</h2>
           <div class="mt-6 space-y-6">
-            {service.pricingTiers.map(tier => (
-              <div class="bg-white dark:bg-charcoal-700 rounded-xl p-6 border border-cream-300 dark:border-charcoal-600">
+            {pricingTiers.length > 0 ? pricingTiers.map(tier => (
+              <div class={`bg-white dark:bg-charcoal-700 rounded-xl p-6 border ${tier.isPopular ? 'border-coral-500 ring-2 ring-coral-500' : 'border-cream-300 dark:border-charcoal-600'}`}>
+                {tier.isPopular && (
+                  <span class="inline-block mb-2 px-3 py-1 bg-coral-500 text-white text-xs font-medium rounded-full">Popular</span>
+                )}
                 <div class="flex justify-between items-start">
                   <div>
                     <h3 class="text-xl font-medium text-charcoal-900 dark:text-white">{tier.name}</h3>
-                    <p class="text-charcoal-800/70 dark:text-gray-400">Quality: {tier.quality}</p>
+                    <p class="text-charcoal-800/70 dark:text-gray-400">{tier.duration}</p>
                   </div>
                   <p class="text-2xl font-bold text-charcoal-900 dark:text-white">{tier.price}</p>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div class="bg-white dark:bg-charcoal-700 rounded-xl p-6 border border-cream-300 dark:border-charcoal-600">
+                <p class="text-charcoal-800/70 dark:text-gray-400">No pricing plans available yet.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
