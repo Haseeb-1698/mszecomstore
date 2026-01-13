@@ -1,4 +1,4 @@
-import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
+import { useSupabaseAuth, SupabaseAuthProvider } from '../../contexts/SupabaseAuthContext';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { useEffect } from 'react';
 
@@ -7,7 +7,7 @@ interface ProtectedRouteProps {
   requireAdmin?: boolean;
 }
 
-export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
+function ProtectedRouteContent({ children, requireAdmin = false }: ProtectedRouteProps) {
   const { user, loading, isAdmin } = useSupabaseAuth();
 
   useEffect(() => {
@@ -33,4 +33,12 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
   }
 
   return <>{children}</>;
+}
+
+export function ProtectedRoute(props: ProtectedRouteProps) {
+  return (
+    <SupabaseAuthProvider>
+      <ProtectedRouteContent {...props} />
+    </SupabaseAuthProvider>
+  );
 }

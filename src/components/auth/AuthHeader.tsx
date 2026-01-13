@@ -1,7 +1,7 @@
-import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
+import { useSupabaseAuth, SupabaseAuthProvider } from '../../contexts/SupabaseAuthContext';
 import { Button } from '../ui/Button';
 
-export function AuthHeader() {
+function AuthHeaderContent() {
   const { user, signOut, loading } = useSupabaseAuth();
 
   if (loading) {
@@ -36,5 +36,13 @@ export function AuthHeader() {
         Sign Out
       </Button>
     </div>
+  );
+}
+
+export function AuthHeader() {
+  return (
+    <SupabaseAuthProvider>
+      <AuthHeaderContent />
+    </SupabaseAuthProvider>
   );
 }

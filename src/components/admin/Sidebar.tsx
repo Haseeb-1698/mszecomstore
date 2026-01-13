@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 
 const Sidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const currentPath = globalThis.window === undefined ? '' : globalThis.location.pathname;
+  const { signOut } = useSupabaseAuth(); // Use context for auth
 
   const menuItems = [
     {
@@ -63,11 +65,11 @@ const Sidebar: React.FC = () => {
       {/* Logo */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-charcoal-700">
         {!isCollapsed && (
-          <span className="text-xl font-bold text-coral-500">MSZ Admin</span>
+          <span className="text-xl font-bold text-coral-500">MSZ Admin</span>      
         )}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-2 rounded-lg hover:bg-charcoal-700 transition-colors"
+          className="p-2 rounded-lg hover:bg-charcoal-700 transition-colors"       
           aria-label="Toggle sidebar"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -89,7 +91,7 @@ const Sidebar: React.FC = () => {
             } ${isCollapsed ? 'justify-center' : ''}`}
           >
             {item.icon}
-            {!isCollapsed && <span className="font-medium">{item.name}</span>}
+            {!isCollapsed && <span className="font-medium">{item.name}</span>}     
           </a>
         ))}
       </nav>
@@ -97,6 +99,7 @@ const Sidebar: React.FC = () => {
       {/* Logout */}
       <div className="p-4 border-t border-charcoal-700">
         <button
+          onClick={() => signOut()}
           className={`flex items-center gap-3 px-3 py-3 rounded-xl text-red-400 hover:bg-charcoal-700 hover:text-red-300 transition-all w-full ${
             isCollapsed ? 'justify-center' : ''
           }`}

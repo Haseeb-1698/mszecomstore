@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
+import { useSupabaseAuth, SupabaseAuthProvider } from '../../contexts/SupabaseAuthContext';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { ErrorMessage } from '../ui/ErrorMessage';
 
-export function SignupForm() {
+function SignupFormContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -118,4 +118,12 @@ export function SignupForm() {
       </p>
     </form>
   );
+}
+
+export function SignupForm() {
+    return (
+        <SupabaseAuthProvider>
+            <SignupFormContent />
+        </SupabaseAuthProvider>
+    )
 }

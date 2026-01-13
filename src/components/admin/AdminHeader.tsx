@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 
 const AdminHeader: React.FC = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const { user, signOut } = useSupabaseAuth(); // Use context for auth
+
+  const handleLogout = async () => {
+    await signOut();
+    // Redirect or handle post-logout as needed
+  };
 
   return (
     <header className="h-16 bg-cream-50 dark:bg-charcoal-800 border-b border-cream-400 dark:border-charcoal-700 flex items-center justify-between px-6">
@@ -56,9 +63,9 @@ const AdminHeader: React.FC = () => {
             className="flex items-center gap-2 p-2 rounded-xl hover:bg-cream-200 dark:hover:bg-charcoal-700 transition-colors"
           >
             <div className="w-8 h-8 bg-coral-500 rounded-full flex items-center justify-center text-white font-semibold">
-              A
+              {user?.email?.charAt(0).toUpperCase() || 'A'}
             </div>
-            <span className="text-sm font-medium text-charcoal-800 dark:text-cream-100">Admin</span>
+            <span className="text-sm font-medium text-charcoal-800 dark:text-cream-100">{user?.email || 'Admin'}</span>
             <svg className="w-4 h-4 text-charcoal-600 dark:text-cream-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
@@ -78,13 +85,13 @@ const AdminHeader: React.FC = () => {
               >
                 View Site
               </a>
-              <hr className="my-2 border-cream-400 dark:border-charcoal-700" />
-              <a
-                href="/login"
-                className="block px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-cream-200 dark:hover:bg-charcoal-700"
+              <hr className="my-2 border-cream-400 dark:border-charcoal-700" />    
+              <button
+                onClick={handleLogout}
+                className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-cream-200 dark:hover:bg-charcoal-700"
               >
                 Logout
-              </a>
+              </button>
             </div>
           )}
         </div>
