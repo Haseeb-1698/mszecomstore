@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
+import { useSupabaseAuth, SupabaseAuthProvider } from '../../contexts/SupabaseAuthContext';
 
-const Sidebar: React.FC = () => {
+const SidebarContent: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const currentPath = globalThis.window === undefined ? '' : globalThis.location.pathname;
   const { signOut } = useSupabaseAuth(); // Use context for auth
@@ -113,5 +113,12 @@ const Sidebar: React.FC = () => {
     </aside>
   );
 };
+
+// Wrapped component with auth provider
+const Sidebar: React.FC = () => (
+  <SupabaseAuthProvider>
+    <SidebarContent />
+  </SupabaseAuthProvider>
+);
 
 export default Sidebar;

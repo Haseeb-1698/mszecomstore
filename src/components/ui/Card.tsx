@@ -1,107 +1,54 @@
 import React, { type ReactNode, type HTMLAttributes } from 'react';
 
+// Card style constants
+const CARD_BASE = 'rounded-2xl transition-all duration-200';
+const CARD_VARIANTS = {
+  default: 'bg-cream-50 dark:bg-charcoal-800 border border-cream-400 dark:border-charcoal-700',
+  elevated: 'bg-cream-50 dark:bg-charcoal-800 shadow-soft hover:shadow-soft-lg',
+  outlined: 'bg-transparent border-2 border-cream-400 dark:border-charcoal-700'
+} as const;
+const CARD_PADDING = { none: '', sm: 'p-4', md: 'p-6', lg: 'p-8' } as const;
+
+// Shared text styles
+const TITLE_STYLE = 'text-xl font-semibold text-charcoal-800 dark:text-cream-100';
+const DESC_STYLE = 'text-sm text-charcoal-700 dark:text-cream-400 mt-1';
+
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
-  variant?: 'default' | 'elevated' | 'outlined';
-  padding?: 'none' | 'sm' | 'md' | 'lg';
+  variant?: keyof typeof CARD_VARIANTS;
+  padding?: keyof typeof CARD_PADDING;
   hover?: boolean;
 }
 
 export const Card: React.FC<CardProps> = ({
-  children,
-  variant = 'default',
-  padding = 'md',
-  hover = false,
-  className = '',
-  ...props
-}) => {
-  const baseStyles = 'rounded-2xl transition-all duration-200';
-  
-  const variantStyles = {
-    default: 'bg-cream-50 dark:bg-charcoal-800 border border-cream-400 dark:border-charcoal-700',
-    elevated: 'bg-cream-50 dark:bg-charcoal-800 shadow-soft hover:shadow-soft-lg',
-    outlined: 'bg-transparent border-2 border-cream-400 dark:border-charcoal-700'
-  };
-  
-  const paddingStyles = {
-    none: '',
-    sm: 'p-4',
-    md: 'p-6',
-    lg: 'p-8'
-  };
-  
-  const hoverStyles = hover ? 'hover:shadow-soft-lg hover:scale-[1.02] cursor-pointer' : '';
-  
-  const combinedStyles = `${baseStyles} ${variantStyles[variant]} ${paddingStyles[padding]} ${hoverStyles} ${className}`;
-  
-  return (
-    <div className={combinedStyles} {...props}>
-      {children}
-    </div>
-  );
-};
+  children, variant = 'default', padding = 'md', hover = false, className = '', ...props
+}) => (
+  <div 
+    className={`${CARD_BASE} ${CARD_VARIANTS[variant]} ${CARD_PADDING[padding]} ${hover ? 'hover:shadow-soft-lg hover:scale-[1.02] cursor-pointer' : ''} ${className}`} 
+    {...props}
+  >
+    {children}
+  </div>
+);
 
-export interface CardHeaderProps {
-  children: ReactNode;
-  className?: string;
-}
+interface SimpleCardProps { children: ReactNode; className?: string; }
 
-export const CardHeader: React.FC<CardHeaderProps> = ({ children, className = '' }) => {
-  return (
-    <div className={`mb-4 ${className}`}>
-      {children}
-    </div>
-  );
-};
+export const CardHeader: React.FC<SimpleCardProps> = ({ children, className = '' }) => (
+  <div className={`mb-4 ${className}`}>{children}</div>
+);
 
-export interface CardTitleProps {
-  children: ReactNode;
-  className?: string;
-}
+export const CardTitle: React.FC<SimpleCardProps> = ({ children, className = '' }) => (
+  <h3 className={`${TITLE_STYLE} ${className}`}>{children}</h3>
+);
 
-export const CardTitle: React.FC<CardTitleProps> = ({ children, className = '' }) => {
-  return (
-    <h3 className={`text-xl font-semibold text-charcoal-800 dark:text-cream-100 ${className}`}>
-      {children}
-    </h3>
-  );
-};
+export const CardDescription: React.FC<SimpleCardProps> = ({ children, className = '' }) => (
+  <p className={`${DESC_STYLE} ${className}`}>{children}</p>
+);
 
-export interface CardDescriptionProps {
-  children: ReactNode;
-  className?: string;
-}
+export const CardContent: React.FC<SimpleCardProps> = ({ children, className = '' }) => (
+  <div className={className}>{children}</div>
+);
 
-export const CardDescription: React.FC<CardDescriptionProps> = ({ children, className = '' }) => {
-  return (
-    <p className={`text-sm text-charcoal-700 dark:text-cream-400 mt-1 ${className}`}>
-      {children}
-    </p>
-  );
-};
-
-export interface CardContentProps {
-  children: ReactNode;
-  className?: string;
-}
-
-export const CardContent: React.FC<CardContentProps> = ({ children, className = '' }) => {
-  return (
-    <div className={className}>
-      {children}
-    </div>
-  );
-};
-
-export interface CardFooterProps {
-  children: ReactNode;
-  className?: string;
-}
-
-export const CardFooter: React.FC<CardFooterProps> = ({ children, className = '' }) => {
-  return (
-    <div className={`mt-4 pt-4 border-t border-cream-400 dark:border-charcoal-700 ${className}`}>
-      {children}
-    </div>
-  );
-};
+export const CardFooter: React.FC<SimpleCardProps> = ({ children, className = '' }) => (
+  <div className={`mt-4 pt-4 border-t border-cream-400 dark:border-charcoal-700 ${className}`}>{children}</div>
+);

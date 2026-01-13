@@ -32,29 +32,16 @@ export const useCart = (): UseCartReturn => {
   // Load cart from localStorage on mount
   useEffect(() => {
     const loadCart = () => {
-      console.log('🛒 loadCart started');
       try {
         const savedCart = cartUtils.load();
-        console.log('🛒 savedCart from storage:', savedCart);
-
-        let cartToUse = cartUtils.create();
-        console.log('🛒 empty cart created:', cartToUse);
-
-        if (savedCart) {
-          const validatedCart = cartUtils.validate(savedCart);
-          console.log('🛒 validatedCart:', validatedCart);
-          cartToUse = validatedCart;
-        }
-
+        const cartToUse = savedCart ? cartUtils.validate(savedCart) : cartUtils.create();
         setCart(cartToUse);
-        console.log('🛒 setCart called');
         setError(null);
       } catch (err) {
-        console.error('🛒 loadCart error:', err);
+        console.error('Failed to load cart:', err);
         setError('Failed to load your cart. Starting with an empty cart.');
         setCart(cartUtils.create());
       } finally {
-        console.log('🛒 Setting isLoading to false');
         setIsLoading(false);
       }
     };

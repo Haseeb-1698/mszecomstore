@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
+import { useSupabaseAuth, SupabaseAuthProvider } from '../../contexts/SupabaseAuthContext';
 
-const AdminHeader: React.FC = () => {
+const AdminHeaderContent: React.FC = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { user, signOut } = useSupabaseAuth(); // Use context for auth
 
@@ -99,5 +99,12 @@ const AdminHeader: React.FC = () => {
     </header>
   );
 };
+
+// Wrapped component with auth provider
+const AdminHeader: React.FC = () => (
+  <SupabaseAuthProvider>
+    <AdminHeaderContent />
+  </SupabaseAuthProvider>
+);
 
 export default AdminHeader;

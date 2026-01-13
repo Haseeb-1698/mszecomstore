@@ -1,23 +1,5 @@
 // TypeScript type definitions for MSZ Ecom Store
-// Integrates with Supabase database types
-
-import type { 
-  DbService, 
-  DbPlan, 
-  DbSubscription, 
-  DbOrder,
-  SubscriptionStatus,
-  PaymentStatus 
-} from './database.types'
-
-export type ServiceCategory = 
-  | "streaming" 
-  | "professional" 
-  | "vpn" 
-  | "gaming" 
-  | "education";
-
-// Re-export database types for convenience
+// Re-exports database types for convenience
 export type { 
   DbService, 
   DbPlan, 
@@ -26,6 +8,15 @@ export type {
   SubscriptionStatus,
   PaymentStatus 
 } from './database.types'
+
+import type { SubscriptionStatus, PaymentStatus } from './database.types'
+
+export type ServiceCategory = 
+  | "streaming" 
+  | "professional" 
+  | "vpn" 
+  | "gaming" 
+  | "education";
 
 export interface Plan {
   id: string;
