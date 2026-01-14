@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
+import { SubscriptionStatusBadge, getDaysRemaining } from '../ui/StatusBadge';
+import { formatDate } from '../../lib/utils';
 
 const AllSubscriptionsPage: React.FC = () => {
   const [subscriptions, setSubscriptions] = useState<any[]>([]);
@@ -43,32 +45,6 @@ const AllSubscriptionsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const getDaysRemaining = (expiresAt: string) => {
-    const days = Math.floor((new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-    return days;
-  };
-
-  const getStatusBadge = (status: string, daysRemaining?: number) => {
-    if (status === 'expired' || (daysRemaining !== undefined && daysRemaining < 0)) {
-      return <span className="px-3 py-1 text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-full">Expired</span>;
-    }
-    if (status === 'cancelled') {
-      return <span className="px-3 py-1 text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400 rounded-full">Cancelled</span>;
-    }
-    if (daysRemaining !== undefined && daysRemaining <= 7) {
-      return <span className="px-3 py-1 text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 rounded-full">Expiring Soon</span>;
-    }
-    return <span className="px-3 py-1 text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-full">Active</span>;
-  };
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
   };
 
   return (
@@ -204,7 +180,7 @@ const AllSubscriptionsPage: React.FC = () => {
                           {plan?.name || 'Unknown Plan'}
                         </p>
                       </div>
-                      {getStatusBadge(subscription.status, daysRemaining)}
+                      <SubscriptionStatusBadge status={subscription.status} daysRemaining={daysRemaining} />
                     </div>
                   </div>
 

@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import type { OrderStatus } from '../../lib/database.types';
 import { formatPrice } from '../../lib/utils';
 import { withTimeout, DEFAULT_QUERY_TIMEOUT } from '../../lib/utils/timeout';
+import { OrderStatusBadge } from '../ui/StatusBadge';
 
 interface Order {
   id: string;
@@ -37,10 +38,7 @@ const RecentOrders: React.FC = () => {
       const { data, error: queryError } = await withTimeout(
         supabase
           .from('orders')
-          .select(`
-            *,
-            items:order_items (service_name, plan_name)
-          `)
+          .select('*, items:order_items (service_name, plan_name)')
           .order('created_at', { ascending: false })
           .limit(5),
         DEFAULT_QUERY_TIMEOUT,
@@ -78,22 +76,6 @@ const RecentOrders: React.FC = () => {
         setLoading(false);
       }
     }
-  };
-
-  const getStatusBadge = (status: OrderStatus) => {
-    const styles: Record<OrderStatus, string> = {
-      completed: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-      delivered: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-      processing: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-      pending: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-      cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-    };
-
-    return (
-      <span className={`px-3 py-1 rounded-full text-xs font-medium ${styles[status] || styles.pending}`}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </span>
-    );
   };
 
   if (loading) {
@@ -191,7 +173,7 @@ const RecentOrders: React.FC = () => {
                   <td className="py-3 px-4 text-sm text-charcoal-700 dark:text-cream-300">{order.customer}</td>
                   <td className="py-3 px-4 text-sm text-charcoal-700 dark:text-cream-300">{order.service}</td>
                   <td className="py-3 px-4 text-sm font-semibold text-charcoal-800 dark:text-cream-100">{order.amount}</td>
-                  <td className="py-3 px-4">{getStatusBadge(order.status)}</td>
+                  <td className="py-3 px-4"><OrderStatusBadge status={order.status} /></td>
                   <td className="py-3 px-4 text-sm text-charcoal-600 dark:text-cream-400">{order.date}</td>
                 </tr>
               ))}

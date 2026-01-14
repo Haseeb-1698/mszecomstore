@@ -1,60 +1,12 @@
 import React from 'react';
+import { OrderStatusBadge } from '../ui/StatusBadge';
+import { formatDate, formatPriceWithDecimals } from '../../lib/utils';
 
 interface RecentOrdersProps {
   orders: any[];
 }
 
 const RecentOrders: React.FC<RecentOrdersProps> = React.memo(({ orders }) => {
-  const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      pending: {
-        bg: 'bg-yellow-100 dark:bg-yellow-900/30',
-        text: 'text-yellow-700 dark:text-yellow-400',
-        label: 'Pending',
-      },
-      confirmed: {
-        bg: 'bg-blue-100 dark:bg-blue-900/30',
-        text: 'text-blue-700 dark:text-blue-400',
-        label: 'Confirmed',
-      },
-      processing: {
-        bg: 'bg-purple-100 dark:bg-purple-900/30',
-        text: 'text-purple-700 dark:text-purple-400',
-        label: 'Processing',
-      },
-      delivered: {
-        bg: 'bg-green-100 dark:bg-green-900/30',
-        text: 'text-green-700 dark:text-green-400',
-        label: 'Delivered',
-      },
-      cancelled: {
-        bg: 'bg-red-100 dark:bg-red-900/30',
-        text: 'text-red-700 dark:text-red-400',
-        label: 'Cancelled',
-      },
-    };
-
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
-
-    return (
-      <span className={`px-3 py-1 text-xs font-medium ${config.bg} ${config.text} rounded-full`}>
-        {config.label}
-      </span>
-    );
-  };
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
-  const formatPrice = (price: number) => {
-    return `Rs ${price.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  };
-
   return (
     <div className="bg-cream-100 dark:bg-charcoal-800 rounded-2xl border border-cream-300 dark:border-charcoal-700 overflow-hidden">
       <div className="p-6 border-b border-cream-300 dark:border-charcoal-700">
@@ -145,11 +97,11 @@ const RecentOrders: React.FC<RecentOrdersProps> = React.memo(({ orders }) => {
                     </td>
                     <td className="py-4 px-4">
                       <span className="text-sm font-semibold text-charcoal-900 dark:text-cream-50">
-                        {formatPrice(Number(order.amount))}
+                        {formatPriceWithDecimals(Number(order.amount))}
                       </span>
                     </td>
                     <td className="py-4 px-4">
-                      {getStatusBadge(order.status)}
+                      <OrderStatusBadge status={order.status} />
                     </td>
                     <td className="py-4 px-4 text-right">
                       <a

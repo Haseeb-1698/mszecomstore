@@ -11,6 +11,9 @@ import {
   type CartData
 } from '../lib/api/cart';
 
+// BroadcastChannel for cross-tab cart synchronization
+const CART_CHANNEL_NAME = 'cart-sync';
+
 export interface ItemData {
   serviceId: string;
   serviceName: string;
@@ -27,6 +30,7 @@ export interface UseCartReturn {
   updateQuantity: (itemId: string, quantity: number) => Promise<void>;
   applyDiscountCode: (code: string) => Promise<boolean>;
   clearCart: () => Promise<void>;
+  refreshCart: () => Promise<void>;
   itemCount: number;
   isEmpty: boolean;
   isLoading: boolean;
@@ -40,6 +44,22 @@ export const useCart = (): UseCartReturn => {
   const [error, setError] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const loadingRef = useRef(false);
+  const broadcastChannelRef = useRef<BroadcastChannel | null>(null);
+
+  // Initialize BroadcastChannel for cross-tab synchronization
+  useEffect(() => {
+    if (typeof BroadcastChannel !== 'undefined') {
+      broadcastChannelRef.current = new BroadcastChannel(CART_CHANNEL_NAME);
+    }
+    return () => {
+      broadcastChannelRef.current?.close();
+    };
+  }, []);
+
+  // Broadcast cart update to other tabs
+  const broadcastCartUpdate = useCallback(() => {
+    broadcastChannelRef.current?.postMessage({ type: 'cart-updated' });
+  }, []);
 
   // Load cart from database
   const loadCart = useCallback(async (uid: string) => {
@@ -72,6 +92,13 @@ export const useCart = (): UseCartReturn => {
       loadingRef.current = false;
     }
   }, []);
+
+  // Refresh cart (exposed for manual refresh and cross-tab sync)
+  const refreshCart = useCallback(async () => {
+    if (userId) {
+      await loadCart(userId);
+    }
+  }, [userId, loadCart]);
 
   // Check auth and load cart on mount
   useEffect(() => {
@@ -111,7 +138,7 @@ export const useCart = (): UseCartReturn => {
       }
     });
 
-    // Listen for cart updates from other components
+    // Listen for cart updates from other components (same tab)
     const handleCartUpdate = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
@@ -120,6 +147,18 @@ export const useCart = (): UseCartReturn => {
     };
 
     globalThis.addEventListener('cartUpdated', handleCartUpdate);
+
+    // Listen for cart updates from other tabs (cross-tab sync)
+    const handleBroadcastMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'cart-updated') {
+        console.log('[useCart] Received cross-tab cart update');
+        handleCartUpdate();
+      }
+    };
+
+    if (broadcastChannelRef.current) {
+      broadcastChannelRef.current.onmessage = handleBroadcastMessage;
+    }
 
     return () => {
       isActive = false;
@@ -147,13 +186,14 @@ export const useCart = (): UseCartReturn => {
       if (result) {
         setCart(toCartData(result));
         globalThis.dispatchEvent(new CustomEvent('cartUpdated'));
+        broadcastCartUpdate(); // Notify other tabs
       }
       setError(null);
     } catch (err) {
       console.error('Add to cart failed:', err);
       setError(err instanceof Error ? err.message : 'Failed to add item to cart');
     }
-  }, [userId]);
+  }, [userId, broadcastCartUpdate]);
 
   const removeItem = useCallback(async (itemId: string) => {
     if (!userId) return;
@@ -163,13 +203,14 @@ export const useCart = (): UseCartReturn => {
       if (result) {
         setCart(toCartData(result));
         globalThis.dispatchEvent(new CustomEvent('cartUpdated'));
+        broadcastCartUpdate(); // Notify other tabs
       }
       setError(null);
     } catch (err) {
       console.error('Remove from cart failed:', err);
       setError('Failed to remove item from cart');
     }
-  }, [userId]);
+  }, [userId, broadcastCartUpdate]);
 
   const updateQuantity = useCallback(async (itemId: string, quantity: number) => {
     if (!userId) return;
@@ -179,13 +220,14 @@ export const useCart = (): UseCartReturn => {
       if (result) {
         setCart(toCartData(result));
         globalThis.dispatchEvent(new CustomEvent('cartUpdated'));
+        broadcastCartUpdate(); // Notify other tabs
       }
       setError(null);
     } catch (err) {
       console.error('Update quantity failed:', err);
       setError('Failed to update quantity');
     }
-  }, [userId]);
+  }, [userId, broadcastCartUpdate]);
 
   const applyDiscountCodeFn = useCallback(async (code: string): Promise<boolean> => {
     if (!userId || !cart) return false;
@@ -218,13 +260,14 @@ export const useCart = (): UseCartReturn => {
       if (result) {
         setCart(toCartData(result));
         globalThis.dispatchEvent(new CustomEvent('cartUpdated'));
+        broadcastCartUpdate(); // Notify other tabs
       }
       setError(null);
     } catch (err) {
       console.error('Clear cart failed:', err);
       setError('Failed to clear cart');
     }
-  }, [userId]);
+  }, [userId, broadcastCartUpdate]);
 
   const itemCount = useMemo(
     () => cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0,
@@ -243,6 +286,7 @@ export const useCart = (): UseCartReturn => {
     updateQuantity,
     applyDiscountCode: applyDiscountCodeFn,
     clearCart: clearCartFn,
+    refreshCart,
     itemCount,
     isEmpty,
     isLoading,
@@ -255,6 +299,7 @@ export const useCart = (): UseCartReturn => {
     updateQuantity, 
     applyDiscountCodeFn, 
     clearCartFn, 
+    refreshCart,
     itemCount, 
     isEmpty, 
     isLoading, 

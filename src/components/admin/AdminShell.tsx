@@ -1,5 +1,5 @@
 import React, { type ReactNode } from 'react';
-import { AdminProviders } from './AdminProviders';
+import { AppProviders } from '../../providers/AppProviders';
 import Sidebar from './Sidebar';
 import AdminHeader from './AdminHeader';
 
@@ -14,7 +14,7 @@ interface AdminShellProps {
  */
 export const AdminShell: React.FC<AdminShellProps> = ({ children }) => {
   return (
-    <AdminProviders>
+    <AppProviders includeCart={false}>
       <div className="flex h-screen overflow-hidden">
         {/* Sidebar */}
         <Sidebar />
@@ -30,7 +30,7 @@ export const AdminShell: React.FC<AdminShellProps> = ({ children }) => {
           </main>
         </div>
       </div>
-    </AdminProviders>
+    </AppProviders>
   );
 };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import OrderStatusBadge from './OrderStatusBadge';
+import { OrderStatusBadge } from '../ui/StatusBadge';
 import { supabase } from '../../lib/supabase';
 import type { OrderStatus } from '../../lib/database.types';
 import { formatPrice } from '../../lib/utils';

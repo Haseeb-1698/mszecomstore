@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
+import { OrderStatusBadge } from '../ui/StatusBadge';
+import { formatDateTime, formatPriceWithDecimals } from '../../lib/utils';
 
 const AllOrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<any[]>([]);
@@ -40,58 +42,6 @@ const AllOrdersPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      pending: {
-        bg: 'bg-yellow-100 dark:bg-yellow-900/30',
-        text: 'text-yellow-700 dark:text-yellow-400',
-        label: 'Pending',
-      },
-      confirmed: {
-        bg: 'bg-blue-100 dark:bg-blue-900/30',
-        text: 'text-blue-700 dark:text-blue-400',
-        label: 'Confirmed',
-      },
-      processing: {
-        bg: 'bg-purple-100 dark:bg-purple-900/30',
-        text: 'text-purple-700 dark:text-purple-400',
-        label: 'Processing',
-      },
-      delivered: {
-        bg: 'bg-green-100 dark:bg-green-900/30',
-        text: 'text-green-700 dark:text-green-400',
-        label: 'Delivered',
-      },
-      cancelled: {
-        bg: 'bg-red-100 dark:bg-red-900/30',
-        text: 'text-red-700 dark:text-red-400',
-        label: 'Cancelled',
-      },
-    };
-
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
-
-    return (
-      <span className={`px-3 py-1 text-xs font-medium ${config.bg} ${config.text} rounded-full`}>
-        {config.label}
-      </span>
-    );
-  };
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
-  const formatPrice = (price: number) => {
-    return `Rs ${price.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   return (
@@ -228,7 +178,7 @@ const AllOrdersPage: React.FC = () => {
                       </td>
                       <td className="py-4 px-6">
                         <span className="text-sm text-charcoal-700 dark:text-cream-200">
-                          {formatDate(order.created_at)}
+                          {formatDateTime(order.created_at)}
                         </span>
                       </td>
                       <td className="py-4 px-6">
@@ -246,11 +196,11 @@ const AllOrdersPage: React.FC = () => {
                       </td>
                       <td className="py-4 px-6">
                         <span className="text-sm font-bold text-charcoal-900 dark:text-cream-50">
-                          {formatPrice(Number(order.amount))}
+                          {formatPriceWithDecimals(Number(order.amount))}
                         </span>
                       </td>
                       <td className="py-4 px-6">
-                        {getStatusBadge(order.status)}
+                        <OrderStatusBadge status={order.status} />
                       </td>
                       <td className="py-4 px-6 text-right">
                         <a
@@ -288,7 +238,7 @@ const AllOrdersPage: React.FC = () => {
             <div className="bg-cream-100 dark:bg-charcoal-800 rounded-xl border border-cream-300 dark:border-charcoal-700 p-4">
               <p className="text-sm text-charcoal-600 dark:text-cream-300 mb-1">Total Spent</p>
               <p className="text-2xl font-bold text-charcoal-900 dark:text-cream-50">
-                {formatPrice(orders.reduce((sum, order) => sum + Number(order.amount), 0))}
+                {formatPriceWithDecimals(orders.reduce((sum, order) => sum + Number(order.amount), 0))}
               </p>
             </div>
           </div>

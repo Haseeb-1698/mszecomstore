@@ -34,7 +34,7 @@ export class TimeoutError extends Error {
  * Wraps a promise with a timeout. If the promise doesn't resolve
  * within the specified time, it rejects with a TimeoutError.
  * 
- * @param promise - The promise to wrap
+ * @param promise - The promise or promise-like object to wrap
  * @param ms - Timeout in milliseconds
  * @param errorMessage - Custom error message for timeout
  * @returns The result of the promise if it resolves in time
@@ -47,7 +47,7 @@ export class TimeoutError extends Error {
  * );
  */
 export async function withTimeout<T>(
-  promise: Promise<T>,
+  promise: PromiseLike<T>,
   ms: number = DEFAULT_QUERY_TIMEOUT,
   errorMessage?: string
 ): Promise<T> {

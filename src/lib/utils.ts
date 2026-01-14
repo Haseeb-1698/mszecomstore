@@ -38,6 +38,31 @@ export function formatPrice(price: number): string {
   return `Rs ${price.toLocaleString('en-PK')}`
 }
 
+// Format price with decimals
+export function formatPriceWithDecimals(price: number): string {
+  return `Rs ${price.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+
+// Format date for display (short format: Jan 1, 2024)
+export function formatDate(date: string): string {
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+// Format date with time (Jan 1, 2024, 12:00 PM)
+export function formatDateTime(date: string): string {
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 // Type guard for checking if error is from Supabase
 export function isSupabaseError(error: unknown): error is { message: string; code: string } {
   return (

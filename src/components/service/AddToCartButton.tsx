@@ -51,16 +51,8 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
   }, []);
 
   const handleAddToCart = async () => {
-    // If not logged in, redirect to login
+    // If not logged in, redirect to login - user must be authenticated to add items
     if (!user) {
-      // Store the intended action in sessionStorage
-      sessionStorage.setItem('pendingCartItem', JSON.stringify({
-        serviceId,
-        serviceName,
-        planId: plan.id,
-        planName: `${plan.duration_months} Month${plan.duration_months > 1 ? 's' : ''}`,
-        price: plan.price
-      }));
       globalThis.location.href = '/login?redirect=' + encodeURIComponent(globalThis.location.pathname);
       return;
     }

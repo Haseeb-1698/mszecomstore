@@ -1,4 +1,6 @@
 import React from 'react';
+import { SubscriptionStatusBadge, getDaysRemaining } from '../ui/StatusBadge';
+import { formatDate } from '../../lib/utils';
 
 interface ActiveSubscriptionsProps {
   subscriptions: any[];
@@ -7,29 +9,6 @@ interface ActiveSubscriptionsProps {
 
 const ActiveSubscriptions: React.FC<ActiveSubscriptionsProps> = React.memo(({ subscriptions, onRefresh }) => {
   const activeSubscriptions = subscriptions.filter(sub => sub.status === 'active');
-
-  const getDaysRemaining = (expiresAt: string) => {
-    const days = Math.floor((new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-    return days;
-  };
-
-  const getStatusBadge = (daysRemaining: number) => {
-    if (daysRemaining < 0) {
-      return <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-lg">Expired</span>;
-    }
-    if (daysRemaining <= 7) {
-      return <span className="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 rounded-lg">Expiring Soon</span>;
-    }
-    return <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-lg">Active</span>;
-  };
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
-    });
-  };
 
   return (
     <div className="bg-cream-100 dark:bg-charcoal-800 rounded-2xl border border-cream-300 dark:border-charcoal-700 overflow-hidden">
@@ -111,7 +90,7 @@ const ActiveSubscriptions: React.FC<ActiveSubscriptionsProps> = React.memo(({ su
                             {plan?.name || 'Unknown Plan'}
                           </p>
                         </div>
-                        {getStatusBadge(daysRemaining)}
+                        <SubscriptionStatusBadge status={subscription.status} daysRemaining={daysRemaining} />
                       </div>
 
                       <div className="grid grid-cols-2 gap-4 mt-3">
