@@ -4,6 +4,7 @@ import { Button } from '../ui/Button';
 import CheckoutForm from './CheckoutForm';
 import OrderReview from './OrderReview';
 import { supabase } from '../../lib/supabase';
+import type { DbOrderInsert, DbOrderItemInsert } from '../../lib/database.types';
 
 interface CustomerInfo {
   name: string;
@@ -13,7 +14,7 @@ interface CustomerInfo {
 }
 
 const CheckoutPage: React.FC = () => {
-  const { cart, isLoading, clearCart } = useCartContext();
+  const { cart, isLoading, clearCart, isAuthenticated } = useCartContext();
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: '',
     email: '',
@@ -45,6 +46,8 @@ const CheckoutPage: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const items = cart?.items ?? [];
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -63,58 +66,64 @@ const CheckoutPage: React.FC = () => {
 
       if (!user) {
         alert('Please log in to place an order');
-        globalThis.location.href = '/login';
+        globalThis.location.href = '/login?redirect=/checkout';
         return;
       }
       
-      const firstItem = cart.items[0];
+      const firstItem = items[0];
       if (!firstItem) {
         alert('Cart is empty');
         return;
       }
 
       // Create order in database
+      const orderInsert: DbOrderInsert = {
+        user_id: user.id,
+        plan_id: firstItem.planId,
+        amount: cart?.total ?? 0,
+        customer_name: customerInfo.name,
+        customer_email: customerInfo.email,
+        customer_whatsapp: customerInfo.whatsapp,
+        special_instructions: customerInfo.instructions || null,
+        status: 'pending'
+      };
+      
       const { data: order, error: orderError } = await supabase
         .from('orders')
-        .insert([{
-          user_id: user.id,
-          plan_id: firstItem.planId,
-          amount: cart.total,
-          customer_name: customerInfo.name,
-          customer_email: customerInfo.email,
-          customer_whatsapp: customerInfo.whatsapp,
-          special_instructions: customerInfo.instructions || null,
-          status: 'pending'
-        }])
+        .insert(orderInsert)
         .select()
-        .single() as any;
+        .single();
 
       if (orderError) {
         console.error('Order creation error:', orderError);
         throw new Error('Failed to create order');
       }
+      
+      if (!order) {
+        throw new Error('No order returned after creation');
+      }
 
       // Create order items
-      const orderItems = cart.items.map(item => ({
+      const orderItems: DbOrderItemInsert[] = items.map(item => ({
         order_id: order.id,
         plan_id: item.planId,
         service_name: item.serviceName,
-        plan_name: item.planDuration,
-        duration_months: parseInt(item.planDuration) || 1,
+        plan_name: item.planName,
+        duration_months: 1, // Default duration
         price: item.price,
         quantity: item.quantity
       }));
 
       const { error: itemsError } = await supabase
         .from('order_items')
-        .insert(orderItems) as any;
+        .insert(orderItems);
 
       if (itemsError) {
         console.error('Order items error:', itemsError);
       }
 
       // Clear the cart after successful order
-      clearCart();
+      await clearCart();
 
       // Redirect to order details page
       globalThis.location.href = `/order/${order.id}`;
@@ -134,10 +143,33 @@ const CheckoutPage: React.FC = () => {
     );
   }
 
-  if (cart.items.length === 0) {
+  // If not authenticated, redirect to login
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-cream-50 dark:bg-charcoal-900 py-16">
-        <div className="container mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center py-16">
+            <h1 className="text-3xl font-bold text-charcoal-800 dark:text-cream-100 mb-4">
+              Please sign in to continue
+            </h1>
+            <p className="text-charcoal-700 dark:text-cream-300 mb-8">
+              You need to be logged in to complete checkout.
+            </p>
+            <a href="/login?redirect=/checkout">
+              <Button variant="primary" size="lg">
+                Sign In
+              </Button>
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="min-h-screen bg-cream-50 dark:bg-charcoal-900 py-16">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center py-16">
             <h1 className="text-3xl font-bold text-charcoal-800 dark:text-cream-100 mb-4">
               Your cart is empty
@@ -158,7 +190,7 @@ const CheckoutPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-cream-50 dark:bg-charcoal-900 py-16">
-      <div className="container mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-6">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">

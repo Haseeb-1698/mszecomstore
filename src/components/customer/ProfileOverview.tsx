@@ -9,7 +9,7 @@ interface UserProfile {
   created_at: string;
 }
 
-const ProfileOverview: React.FC = () => {
+const ProfileOverview: React.FC = React.memo(() => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -23,11 +23,15 @@ const ProfileOverview: React.FC = () => {
       
       if (user) {
         // Try to get additional profile data from user_profiles table
-        const { data: profileData } = await supabase
+        const { data: profileData, error: profileError } = await supabase
           .from('user_profiles')
           .select('*')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
+        
+        if (profileError && profileError.code !== 'PGRST116') {
+          console.error('Error fetching profile data:', profileError);
+        }
 
         setProfile({
           id: user.id,
@@ -46,7 +50,7 @@ const ProfileOverview: React.FC = () => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    window.location.href = '/login';
+    globalThis.location.href = '/login';
   };
 
   if (loading) {
@@ -94,7 +98,7 @@ const ProfileOverview: React.FC = () => {
             </span>
           </div>
           <h3 className="text-lg font-semibold text-charcoal-900 dark:text-cream-50 mb-1">
-            {profile?.full_name || 'User'}
+            {profile?.email}
           </h3>
           <p className="text-sm text-charcoal-600 dark:text-cream-300">
             Member since {memberSince}
@@ -103,19 +107,7 @@ const ProfileOverview: React.FC = () => {
 
         {/* Profile Details */}
         <div className="space-y-4 mb-6">
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-purple-600 dark:text-purple-400 flex-shrink-0">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-charcoal-500 dark:text-cream-400 mb-1">Email</p>
-              <p className="text-sm font-medium text-charcoal-900 dark:text-cream-50 break-all">
-                {profile?.email}
-              </p>
-            </div>
-          </div>
+        
 
           {profile?.phone && (
             <div className="flex items-start gap-3">
@@ -133,35 +125,11 @@ const ProfileOverview: React.FC = () => {
             </div>
           )}
 
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-purple-600 dark:text-purple-400 flex-shrink-0">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
-              </svg>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-charcoal-500 dark:text-cream-400 mb-1">Account ID</p>
-              <p className="text-xs font-mono text-charcoal-900 dark:text-cream-50 break-all">
-                {profile?.id.slice(0, 16)}...
-              </p>
-            </div>
-          </div>
+
         </div>
 
         {/* Quick Actions */}
         <div className="space-y-2">
-          <a
-            href="/profile/edit"
-            className="block w-full text-center px-4 py-2 bg-cream-200 hover:bg-cream-300 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-charcoal-900 dark:text-cream-50 rounded-lg font-medium transition-colors"
-          >
-            Edit Profile
-          </a>
-          <a
-            href="/profile/security"
-            className="block w-full text-center px-4 py-2 bg-cream-200 hover:bg-cream-300 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-charcoal-900 dark:text-cream-50 rounded-lg font-medium transition-colors"
-          >
-            Security Settings
-          </a>
           <button
             onClick={handleSignOut}
             className="block w-full text-center px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 rounded-lg font-medium transition-colors"
@@ -172,9 +140,7 @@ const ProfileOverview: React.FC = () => {
 
         {/* Support Section */}
         <div className="mt-6 pt-6 border-t border-cream-300 dark:border-charcoal-700">
-          <h4 className="text-sm font-semibold text-charcoal-900 dark:text-cream-50 mb-3">
-            Need Help?
-          </h4>
+        
           <div className="space-y-2">
             <a
               href="/contact"
@@ -185,20 +151,14 @@ const ProfileOverview: React.FC = () => {
               </svg>
               Contact Support
             </a>
-            <a
-              href="/how-it-works"
-              className="flex items-center gap-2 text-sm text-charcoal-600 dark:text-cream-300 hover:text-coral-600 dark:hover:text-coral-400 transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              How It Works
-            </a>
+
           </div>
         </div>
       </div>
     </div>
   );
-};
+});
+
+ProfileOverview.displayName = 'ProfileOverview';
 
 export default ProfileOverview;

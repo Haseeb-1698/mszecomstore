@@ -4,7 +4,6 @@ import ActiveSubscriptions from './ActiveSubscriptions';
 import RecentOrders from './RecentOrders';
 import ProfileOverview from './ProfileOverview';
 import { supabase } from '../../lib/supabase';
-import type { DbSubscription, DbOrder } from '../../lib/database.types';
 
 interface CustomerStats {
   activeSubscriptions: number;
@@ -20,8 +19,8 @@ const CustomerDashboard: React.FC = () => {
     expiringSubscriptions: 0,
     totalSpent: 0
   });
-  const [subscriptions, setSubscriptions] = useState<DbSubscription[]>([]);
-  const [orders, setOrders] = useState<DbOrder[]>([]);
+  const [subscriptions, setSubscriptions] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
 
@@ -94,9 +93,9 @@ const CustomerDashboard: React.FC = () => {
         totalSpent
       });
 
-      setSubscriptions(subsData as any || []);
-      setOrders(ordersData as any || []);
-    } catch (err: any) {
+      setSubscriptions(subsData ?? []);
+      setOrders(ordersData ?? []);
+    } catch (err) {
       console.error('Error fetching dashboard data:', err);
     } finally {
       setLoading(false);

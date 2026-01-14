@@ -38,8 +38,9 @@ const AdminDashboard: React.FC = () => {
       setLoading(true);
 
       // Fetch dashboard stats using the RPC function
+      // Note: Type assertion needed as RPC function types aren't in generated types
       const { data: dashboardStats, error: statsError } = await supabase
-        .rpc('get_admin_dashboard_stats' as any);
+        .rpc('get_admin_dashboard_stats');
 
       if (statsError) {
         console.error('Error fetching dashboard stats:', statsError);

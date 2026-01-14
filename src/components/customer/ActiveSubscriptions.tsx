@@ -1,12 +1,11 @@
 import React from 'react';
-import type { DbSubscription } from '../../lib/database.types';
 
 interface ActiveSubscriptionsProps {
   subscriptions: any[];
   onRefresh: () => void;
 }
 
-const ActiveSubscriptions: React.FC<ActiveSubscriptionsProps> = ({ subscriptions, onRefresh }) => {
+const ActiveSubscriptions: React.FC<ActiveSubscriptionsProps> = React.memo(({ subscriptions, onRefresh }) => {
   const activeSubscriptions = subscriptions.filter(sub => sub.status === 'active');
 
   const getDaysRemaining = (expiresAt: string) => {
@@ -41,7 +40,7 @@ const ActiveSubscriptions: React.FC<ActiveSubscriptionsProps> = ({ subscriptions
               Active Subscriptions
             </h2>
             <p className="text-sm text-charcoal-600 dark:text-cream-300">
-              {activeSubscriptions.length} active subscription{activeSubscriptions.length !== 1 ? 's' : ''}
+              {activeSubscriptions.length} active subscription{activeSubscriptions.length === 1 ? '' : 's'}
             </p>
           </div>
           <button
@@ -196,6 +195,8 @@ const ActiveSubscriptions: React.FC<ActiveSubscriptionsProps> = ({ subscriptions
       </div>
     </div>
   );
-};
+});
+
+ActiveSubscriptions.displayName = 'ActiveSubscriptions';
 
 export default ActiveSubscriptions;

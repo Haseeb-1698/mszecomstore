@@ -61,7 +61,7 @@ export function SignupForm() {
           Please check your email to verify your account and start your journey with SubHub.
         </p>
         <button
-          onClick={() => window.location.href = '/login'}
+          onClick={() => globalThis.location.href = '/login'}
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-coral-500 px-8 py-3.5 font-medium text-white shadow-soft hover:bg-coral-600 focus:outline-none focus:ring-2 focus:ring-coral-500 focus:ring-offset-2 transition-all"
         >
           <span>Go to Login</span>

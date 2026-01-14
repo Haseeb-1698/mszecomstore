@@ -5,7 +5,7 @@ import CartItem from './CartItem';
 import CartSummary from './CartSummary';
 
 const CartPage: React.FC = () => {
-  const { cart, removeItem, updateQuantity, applyDiscountCode, isLoading } = useCartContext();
+  const { cart, removeItem, updateQuantity, applyDiscountCode, clearCart, isLoading, isAuthenticated } = useCartContext();
 
   if (isLoading) {
     return (
@@ -15,15 +15,54 @@ const CartPage: React.FC = () => {
     );
   }
 
-  const itemCount = cart.items.reduce((count, item) => count + item.quantity, 0);
-  // avoid nested ternary by extracting pluralization and message into separate constants
+  // If not authenticated, show login prompt
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-cream-50 dark:bg-charcoal-900 py-16">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center py-16">
+            <div className="bg-cream-100 dark:bg-charcoal-800 border border-cream-400 dark:border-charcoal-700 rounded-2xl p-12 max-w-md mx-auto">
+              <div className="w-24 h-24 bg-coral-500/20 dark:bg-coral-400/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-12 h-12 text-coral-500 dark:text-coral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+
+              <h2 className="text-2xl font-semibold text-charcoal-800 dark:text-cream-100 mb-4">
+                Sign in to view your cart
+              </h2>
+
+              <p className="text-charcoal-700 dark:text-cream-300 mb-8">
+                Please log in to access your shopping cart and complete your purchase.
+              </p>
+
+              <a href="/login?redirect=/cart">
+                <Button variant="primary" size="lg" fullWidth>
+                  Sign In
+                </Button>
+              </a>
+              
+              <p className="mt-4 text-sm text-charcoal-600 dark:text-cream-400">
+                Don't have an account?{' '}
+                <a href="/signup" className="text-coral-500 hover:underline">Sign up</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const items = cart?.items ?? [];
+  const itemCount = items.reduce((count, item) => count + item.quantity, 0);
   const pluralSuffix = itemCount === 1 ? '' : 's';
-  const cartMessage =
-    cart.items.length === 0 ? 'Your cart is empty' : `${itemCount} item${pluralSuffix} in your cart`;
+  const cartMessage = items.length === 0 
+    ? 'Your cart is empty' 
+    : `${itemCount} item${pluralSuffix} in your cart`;
 
   return (
     <div className="min-h-screen bg-cream-50 dark:bg-charcoal-900 py-16">
-      <div className="container mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-6">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
@@ -50,7 +89,7 @@ const CartPage: React.FC = () => {
         </div>
 
         {/* Cart Content */}
-        {cart.items.length === 0 ? (
+        {items.length === 0 ? (
           <div className="text-center py-16">
             <div className="bg-cream-100 dark:bg-charcoal-800 border border-cream-400 dark:border-charcoal-700 rounded-2xl p-12 max-w-md mx-auto">
               <div className="w-24 h-24 bg-coral-500/20 dark:bg-coral-400/20 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -78,7 +117,7 @@ const CartPage: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
             <div className="lg:col-span-2 space-y-4">
-              {cart.items.map((item) => (
+              {items.map((item) => (
                 <CartItem
                   key={item.id}
                   item={item}
@@ -87,7 +126,7 @@ const CartPage: React.FC = () => {
                 />
               ))}
 
-              <div className="mt-6">
+              <div className="mt-6 flex gap-4">
                 <a href="/services">
                   <Button variant="outline" size="md">
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,6 +135,17 @@ const CartPage: React.FC = () => {
                     Continue Shopping
                   </Button>
                 </a>
+                <Button 
+                  variant="ghost" 
+                  size="md"
+                  onClick={clearCart}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Clear Cart
+                </Button>
               </div>
             </div>
 
@@ -109,7 +159,7 @@ const CartPage: React.FC = () => {
         )}
 
         {/* Trust Indicators */}
-        {cart.items.length > 0 && (
+        {items.length > 0 && (
           <div className="mt-12">
             <div className="bg-cream-100 dark:bg-charcoal-800 border border-cream-400 dark:border-charcoal-700 rounded-2xl p-6">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">

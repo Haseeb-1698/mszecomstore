@@ -1,16 +1,21 @@
 import React from 'react';
-import type { Cart } from '../../lib/types';
+import type { CartData } from '../../lib/api/cart';
 import { Button } from '../ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { formatPrice } from '../../lib/utils';
 
 interface OrderReviewProps {
-  cart: Cart;
+  cart: CartData | null;
   isSubmitting: boolean;
   agreeToTerms: boolean;
 }
 
 const OrderReview: React.FC<OrderReviewProps> = ({ cart, isSubmitting, agreeToTerms }) => {
+  const items = cart?.items ?? [];
+  const subtotal = cart?.subtotal ?? 0;
+  const discount = cart?.discount ?? 0;
+  const total = cart?.total ?? 0;
+
   return (
     <Card variant="elevated" className="sticky top-4">
       <CardHeader>
@@ -19,14 +24,14 @@ const OrderReview: React.FC<OrderReviewProps> = ({ cart, isSubmitting, agreeToTe
       <CardContent className="space-y-4">
         {/* Items */}
         <div className="space-y-3">
-          {cart.items.map((item) => (
+          {items.map((item) => (
             <div key={item.id} className="flex justify-between text-sm">
               <div className="flex-1">
                 <p className="font-medium text-charcoal-800 dark:text-cream-100">
                   {item.serviceName}
                 </p>
                 <p className="text-charcoal-600 dark:text-cream-400 text-xs">
-                  {item.planDuration} × {item.quantity}
+                  {item.planName} × {item.quantity}
                 </p>
               </div>
               <p className="font-medium text-charcoal-800 dark:text-cream-100">
@@ -39,20 +44,20 @@ const OrderReview: React.FC<OrderReviewProps> = ({ cart, isSubmitting, agreeToTe
         <div className="border-t border-cream-400 dark:border-charcoal-700 pt-4 space-y-2">
           <div className="flex justify-between text-charcoal-700 dark:text-cream-300">
             <span>Subtotal</span>
-            <span className="font-medium">{formatPrice(cart.subtotal)}</span>
+            <span className="font-medium">{formatPrice(subtotal)}</span>
           </div>
 
-          {cart.discount > 0 && (
+          {discount > 0 && (
             <div className="flex justify-between text-coral-600 dark:text-coral-400">
               <span>Discount</span>
-              <span className="font-medium">-{formatPrice(cart.discount)}</span>
+              <span className="font-medium">-{formatPrice(discount)}</span>
             </div>
           )}
 
           <div className="border-t border-cream-400 dark:border-charcoal-700 pt-2">
             <div className="flex justify-between text-xl font-bold text-charcoal-800 dark:text-cream-100">
               <span>Total</span>
-              <span>{formatPrice(cart.total)}</span>
+              <span>{formatPrice(total)}</span>
             </div>
           </div>
         </div>

@@ -14,7 +14,7 @@ export const useServices = () => {
     const fetchServices = async () => {
         try {
             setLoading(true);
-            const { data, error } = await supabase
+            const { data, error: fetchError } = await supabase
                 .from('services')
                 .select(`
           *,
@@ -23,10 +23,18 @@ export const useServices = () => {
                 .order('display_order')
                 .order('name');
 
-            if (error) throw error;
-            setServices(data as ServiceWithPlans[] || []);
-        } catch (err: any) {
-            setError(err.message);
+            if (fetchError) throw fetchError;
+            
+            // Transform the data to ensure plans is always an array
+            const transformedData: ServiceWithPlans[] = (data as any[] ?? []).map(service => ({
+                ...service,
+                plans: (service.plans ?? []) as DbPlan[]
+            })) as ServiceWithPlans[];
+            
+            setServices(transformedData);
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Unknown error fetching services';
+            setError(message);
         } finally {
             setLoading(false);
         }
@@ -38,39 +46,44 @@ export const useServices = () => {
     ) => {
         try {
             setLoading(true);
+            
+            const serviceInsert: DbServiceInsert = {
+                name: serviceData.name,
+                category: serviceData.category,
+                description: serviceData.description,
+                long_description: serviceData.long_description,
+                icon_url: serviceData.icon_url,
+                badge: serviceData.badge,
+                display_order: serviceData.display_order,
+                is_active: serviceData.is_active ?? true
+            };
+            
             const { data: service, error: sError } = await supabase
                 .from('services')
-                .insert([{
-                    name: serviceData.name,
-                    category: serviceData.category,
-                    description: serviceData.description,
-                    long_description: serviceData.long_description,
-                    icon_url: serviceData.icon_url,
-                    badge: serviceData.badge,
-                    display_order: serviceData.display_order,
-                    is_active: serviceData.is_active ?? true
-                }])
+                .insert(serviceInsert)
                 .select()
-                .single() as any;
+                .single();
 
             if (sError) throw sError;
+            if (!service) throw new Error('No service returned after creation');
 
             if (plansData && plansData.length > 0) {
-                const plansWithId = plansData.map(plan => ({
+                const plansWithId: DbPlanInsert[] = plansData.map(plan => ({
                     ...plan,
                     service_id: service.id
                 }));
                 const { error: pError } = await supabase
                     .from('plans')
-                    .insert(plansWithId) as any;
+                    .insert(plansWithId);
 
                 if (pError) throw pError;
             }
 
             await fetchServices();
             return { data: service, error: null };
-        } catch (err: any) {
-            return { data: null, error: err.message };
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Unknown error creating service';
+            return { data: null, error: message };
         } finally {
             setLoading(false);
         }
@@ -83,18 +96,21 @@ export const useServices = () => {
     ) => {
         try {
             setLoading(true);
+            
+            const updateData: DbServiceUpdate = {
+                name: serviceData.name,
+                category: serviceData.category,
+                description: serviceData.description,
+                long_description: serviceData.long_description,
+                icon_url: serviceData.icon_url,
+                badge: serviceData.badge,
+                display_order: serviceData.display_order,
+                is_active: serviceData.is_active
+            };
+            
             const { error: sError } = await supabase
                 .from('services')
-                .update({
-                    name: serviceData.name,
-                    category: serviceData.category,
-                    description: serviceData.description,
-                    long_description: serviceData.long_description,
-                    icon_url: serviceData.icon_url,
-                    badge: serviceData.badge,
-                    display_order: serviceData.display_order,
-                    is_active: serviceData.is_active
-                } as any)
+                .update(updateData)
                 .eq('id', id);
 
             if (sError) throw sError;
@@ -102,21 +118,22 @@ export const useServices = () => {
             // Handle plans update if provided (delete and re-insert)
             if (plansData) {
                 await supabase.from('plans').delete().eq('service_id', id);
-                const plansWithId = plansData.map(plan => ({
+                const plansWithId: DbPlanInsert[] = plansData.map(plan => ({
                     ...plan,
                     service_id: id
                 }));
                 const { error: pError } = await supabase
                     .from('plans')
-                    .insert(plansWithId) as any;
+                    .insert(plansWithId);
 
                 if (pError) throw pError;
             }
 
             await fetchServices();
             return { error: null };
-        } catch (err: any) {
-            return { error: err.message };
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Unknown error updating service';
+            return { error: message };
         } finally {
             setLoading(false);
         }
@@ -134,8 +151,9 @@ export const useServices = () => {
             if (error) throw error;
             await fetchServices();
             return { error: null };
-        } catch (err: any) {
-            return { error: err.message };
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Unknown error deleting service';
+            return { error: message };
         } finally {
             setLoading(false);
         }

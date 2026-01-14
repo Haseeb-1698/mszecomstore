@@ -279,6 +279,67 @@ export interface Database {
           updated_at?: string
         }
       }
+      carts: {
+        Row: {
+          id: string
+          user_id: string
+          discount: number
+          discount_code: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          discount?: number
+          discount_code?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          discount?: number
+          discount_code?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      cart_items: {
+        Row: {
+          id: string
+          cart_id: string
+          plan_id: string
+          service_name: string
+          plan_name: string
+          price: number
+          quantity: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          cart_id: string
+          plan_id: string
+          service_name: string
+          plan_name: string
+          price: number
+          quantity?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          cart_id?: string
+          plan_id?: string
+          service_name?: string
+          plan_name?: string
+          price?: number
+          quantity?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       services_with_plans: {
@@ -373,6 +434,16 @@ export type DbOrderItemUpdate = Database['public']['Tables']['order_items']['Upd
 export type DbSubscription = Database['public']['Tables']['subscriptions']['Row']
 export type DbSubscriptionInsert = Database['public']['Tables']['subscriptions']['Insert']
 export type DbSubscriptionUpdate = Database['public']['Tables']['subscriptions']['Update']
+
+// Carts
+export type DbCart = Database['public']['Tables']['carts']['Row']
+export type DbCartInsert = Database['public']['Tables']['carts']['Insert']
+export type DbCartUpdate = Database['public']['Tables']['carts']['Update']
+
+// Cart Items
+export type DbCartItem = Database['public']['Tables']['cart_items']['Row']
+export type DbCartItemInsert = Database['public']['Tables']['cart_items']['Insert']
+export type DbCartItemUpdate = Database['public']['Tables']['cart_items']['Update']
 
 // Views
 export type DbServiceWithPlans = Database['public']['Views']['services_with_plans']['Row']

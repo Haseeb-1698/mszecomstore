@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import type { DbOrder } from '../../lib/database.types';
 
 const AllOrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<any[]>([]);
@@ -28,7 +27,7 @@ const AllOrdersPage: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (filter !== 'all') {
-        query = query.eq('status', filter as any);
+        query = query.eq('status', filter as 'pending' | 'processing' | 'completed' | 'cancelled' | 'delivered');
       }
 
       const { data, error } = await query;
@@ -146,36 +145,43 @@ const AllOrdersPage: React.FC = () => {
 
         {/* Orders List */}
         <div className="bg-cream-100 dark:bg-charcoal-800 rounded-2xl border border-cream-300 dark:border-charcoal-700 overflow-hidden">
-          {loading ? (
-            <div className="p-8 text-center">
-              <div className="inline-block w-12 h-12 border-4 border-coral-500 border-t-transparent rounded-full animate-spin"></div>
-              <p className="mt-4 text-charcoal-600 dark:text-cream-300">Loading orders...</p>
-            </div>
-          ) : orders.length === 0 ? (
-            <div className="p-12 text-center">
-              <div className="w-20 h-20 bg-cream-200 dark:bg-charcoal-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-10 h-10 text-charcoal-400 dark:text-cream-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-charcoal-900 dark:text-cream-50 mb-2">
-                No orders found
-              </h3>
-              <p className="text-charcoal-600 dark:text-cream-300 mb-6">
-                {filter === 'all' 
-                  ? "You haven't placed any orders yet"
-                  : `No ${filter} orders found`}
-              </p>
-              {filter === 'all' && (
-                <a
-                  href="/services"
-                  className="inline-block px-6 py-3 bg-coral-500 hover:bg-coral-600 dark:bg-coral-600 dark:hover:bg-coral-700 text-white rounded-lg font-medium transition-colors"
-                >
-                  Browse Services
-                </a>
-              )}
-            </div>
-          ) : (
+          {(() => {
+            if (loading) {
+              return (
+                <div className="p-8 text-center">
+                  <div className="inline-block w-12 h-12 border-4 border-coral-500 border-t-transparent rounded-full animate-spin"></div>
+                  <p className="mt-4 text-charcoal-600 dark:text-cream-300">Loading orders...</p>
+                </div>
+              );
+            }
+            if (orders.length === 0) {
+              return (
+                <div className="p-12 text-center">
+                  <div className="w-20 h-20 bg-cream-200 dark:bg-charcoal-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-10 h-10 text-charcoal-400 dark:text-cream-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold text-charcoal-900 dark:text-cream-50 mb-2">
+                    No orders found
+                  </h3>
+                  <p className="text-charcoal-600 dark:text-cream-300 mb-6">
+                    {filter === 'all' 
+                      ? "You haven't placed any orders yet"
+                      : `No ${filter} orders found`}
+                  </p>
+                  {filter === 'all' && (
+                    <a
+                      href="/services"
+                      className="inline-block px-6 py-3 bg-coral-500 hover:bg-coral-600 dark:bg-coral-600 dark:hover:bg-coral-700 text-white rounded-lg font-medium transition-colors"
+                    >
+                      Browse Services
+                    </a>
+                  )}
+                </div>
+              );
+            }
+            return (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -228,7 +234,7 @@ const AllOrdersPage: React.FC = () => {
                       <td className="py-4 px-6">
                         <div>
                           <p className="text-sm font-medium text-charcoal-900 dark:text-cream-50">
-                            {order.items?.length || 0} item{order.items?.length !== 1 ? 's' : ''}
+                            {order.items?.length || 0} item{order.items?.length === 1 ? '' : 's'}
                           </p>
                           {order.items && order.items.length > 0 && (
                             <p className="text-xs text-charcoal-600 dark:text-cream-300 mt-1">
@@ -262,7 +268,8 @@ const AllOrdersPage: React.FC = () => {
                 </tbody>
               </table>
             </div>
-          )}
+            );
+          })()}
         </div>
 
         {/* Stats Summary */}

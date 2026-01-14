@@ -8,7 +8,7 @@ export async function getStaticPaths() {
 
 import Layout from '../../layouts/Layout.astro';
 import { getServices, getServiceBySlug } from '../../lib/api/services';
-import { Check } from 'lucide-react';
+import ServiceDetail from '../../components/service/ServiceDetail';
 
 const { slug } = Astro.params;
 const service = await getServiceBySlug(slug as string);
@@ -19,77 +19,29 @@ if (!service) {
   return Astro.redirect('/404');
 }
 
-// Transform plans to pricing tiers format for display
-const pricingTiers = (service.plans || []).map(plan => ({
+// Transform plans for the component
+const plans = (service.plans || []).map(plan => ({
+  id: plan.id,
   name: plan.name,
-  price: `Rs ${(plan.price / plan.duration_months).toFixed(0)}/mo`,
-  quality: plan.duration_months === 1 ? 'Standard' : plan.duration_months >= 12 ? 'Premium' : 'Extended',
-  duration: `${plan.duration_months} Month${plan.duration_months > 1 ? 's' : ''}`,
-  isPopular: plan.is_popular
+  tier: plan.type,
+  duration_months: plan.duration_months,
+  price: plan.price,
+  original_price: plan.original_price ?? undefined,
+  savings: plan.savings ?? undefined,
+  features: Array.isArray(plan.features) ? plan.features.filter((f): f is string => typeof f === 'string') : [],
+  is_popular: plan.is_popular,
+  is_available: plan.is_available,
 }));
 ---
 
-<Layout title="Service Details - MSZ Ecom Store">
-  <div class="bg-cream-50 dark:bg-charcoal-900">
-    <div class="max-w-7xl mx-auto px-6 py-16">
-      <div class="grid md:grid-cols-2 gap-12 items-center">
-        <div class="flex flex-col items-start">
-          <img src={service.icon_url || '/icons/default-service.svg'} alt={service.name} class="h-20 w-auto mb-6" />
-          <h1 class="text-5xl sm:text-6xl font-bold text-charcoal-900 dark:text-white tracking-tighter">{service.name}</h1>
-          <p class="mt-4 text-xl text-charcoal-800/80 dark:text-gray-300">{service.long_description || service.description}</p>
-          <a href="/signup" class="mt-8 inline-block px-8 py-4 rounded-full bg-coral-500 text-white font-medium hover:bg-coral-600 transition-all shadow-soft-light dark:shadow-soft-dark">
-            Subscribe Now
-          </a>
-        </div>
-        <div class="bg-cream-50 dark:bg-charcoal-800 rounded-2xl p-8 border border-cream-400 dark:border-charcoal-700">
-          <h2 class="text-3xl font-bold text-charcoal-900 dark:text-white tracking-tighter">Pricing Tiers</h2>
-          <div class="mt-6 space-y-6">
-            {pricingTiers.length > 0 ? pricingTiers.map(tier => (
-              <div class={`bg-white dark:bg-charcoal-700 rounded-xl p-6 border ${tier.isPopular ? 'border-coral-500 ring-2 ring-coral-500' : 'border-cream-300 dark:border-charcoal-600'}`}>
-                {tier.isPopular && (
-                  <span class="inline-block mb-2 px-3 py-1 bg-coral-500 text-white text-xs font-medium rounded-full">Popular</span>
-                )}
-                <div class="flex justify-between items-start">
-                  <div>
-                    <h3 class="text-xl font-medium text-charcoal-900 dark:text-white">{tier.name}</h3>
-                    <p class="text-charcoal-800/70 dark:text-gray-400">{tier.duration}</p>
-                  </div>
-                  <p class="text-2xl font-bold text-charcoal-900 dark:text-white">{tier.price}</p>
-                </div>
-              </div>
-            )) : (
-              <div class="bg-white dark:bg-charcoal-700 rounded-xl p-6 border border-cream-300 dark:border-charcoal-600">
-                <p class="text-charcoal-800/70 dark:text-gray-400">No pricing plans available yet.</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="bg-cream-100 dark:bg-charcoal-800 py-24 sm:py-32">
-    <div class="max-w-4xl mx-auto px-6 text-center">
-      <h2 class="text-4xl sm:text-5xl font-bold text-charcoal-900 dark:text-white tracking-tighter">
-        Why Subscribe to {service.name} with SubHub?
-      </h2>
-      <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
-        <div class="bg-white dark:bg-charcoal-700 p-6 rounded-xl border border-cream-300 dark:border-charcoal-600">
-          <Check className="w-8 h-8 text-green-500 bg-green-100 dark:bg-green-900 dark:text-green-400 p-1 rounded-full mb-4" />
-          <h3 class="font-medium text-charcoal-900 dark:text-white">Consolidated Billing</h3>
-          <p class="text-charcoal-800/70 dark:text-gray-400">Manage all your subscriptions in one place with a single monthly bill.</p>
-        </div>
-        <div class="bg-white dark:bg-charcoal-700 p-6 rounded-xl border border-cream-300 dark:border-charcoal-600">
-          <Check className="w-8 h-8 text-green-500 bg-green-100 dark:bg-green-900 dark:text-green-400 p-1 rounded-full mb-4" />
-          <h3 class="font-medium text-charcoal-900 dark:text-white">Exclusive Savings</h3>
-          <p class="text-charcoal-800/70 dark:text-gray-400">Unlock special discounts and bundle offers you won't find anywhere else.</p>
-        </div>
-        <div class="bg-white dark:bg-charcoal-700 p-6 rounded-xl border border-cream-300 dark:border-charcoal-600">
-          <Check className="w-8 h-8 text-green-500 bg-green-100 dark:bg-green-900 dark:text-green-400 p-1 rounded-full mb-4" />
-          <h3 class="font-medium text-charcoal-900 dark:text-white">Flexible Management</h3>
-          <p class="text-charcoal-800/70 dark:text-gray-400">Easily upgrade, downgrade, or pause your subscription at any time.</p>
-        </div>
-      </div>
-    </div>
-  </div>
+<Layout title={`${service.name} - MSZ Ecom Store`}>
+  <ServiceDetail
+    client:load
+    serviceId={service.id}
+    serviceName={service.name}
+    serviceDescription={service.description || ''}
+    serviceLongDescription={service.long_description ?? undefined}
+    serviceIcon={service.icon_url ?? undefined}
+    plans={plans}
+  />
 </Layout>

@@ -1,12 +1,9 @@
 <!-- filepath: src/pages/dashboard.astro -->
 ---
 import Layout from '../layouts/Layout.astro';
-import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 import CustomerDashboard from '../components/customer/CustomerDashboard';
 ---
 
 <Layout title="Dashboard - MSZ Ecom Store">
-  <ProtectedRoute client:load>
-    <CustomerDashboard client:load />
-  </ProtectedRoute>
+  <CustomerDashboard client:load />
 </Layout>

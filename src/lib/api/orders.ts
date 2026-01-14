@@ -2,6 +2,9 @@ import { supabase } from '../supabase';
 import type { 
     DbOrder, 
     DbOrderItem,
+    DbOrderInsert,
+    DbOrderItemInsert,
+    DbOrderUpdate,
     OrderStatus
 } from '../database.types';
 
@@ -27,30 +30,33 @@ export interface CreateOrderInput {
     }[];
 }
 
-export async function createOrder(input: CreateOrderInput): Promise<{ order: DbOrder | null; error: string | null }> {
+export async function createOrder(input: CreateOrderInput): Promise<{ order: any; error: string | null }> {
     try {
-        // Create the order
+        // Create the order with properly typed insert object
+        const orderInsert: DbOrderInsert = {
+            user_id: input.userId,
+            plan_id: input.planId,
+            amount: input.amount,
+            customer_name: input.customerName,
+            customer_email: input.customerEmail,
+            customer_whatsapp: input.customerWhatsapp,
+            special_instructions: input.specialInstructions ?? null,
+            status: 'pending'
+        };
+
         const { data: order, error: orderError } = await supabase
             .from('orders')
-            .insert({
-                user_id: input.userId,
-                plan_id: input.planId,
-                amount: input.amount,
-                customer_name: input.customerName,
-                customer_email: input.customerEmail,
-                customer_whatsapp: input.customerWhatsapp,
-                special_instructions: input.specialInstructions,
-                status: 'pending' as OrderStatus
-            } as any)
+            .insert(orderInsert)
             .select()
             .single();
 
         if (orderError) throw orderError;
+        if (!order) throw new Error('No order returned after creation');
 
         // Create order items
         if (input.items.length > 0) {
-            const orderItems = input.items.map(item => ({
-                order_id: (order as any).id,
+            const orderItems: DbOrderItemInsert[] = input.items.map(item => ({
+                order_id: order.id,
                 plan_id: item.planId,
                 service_name: item.serviceName,
                 plan_name: item.planName,
@@ -61,7 +67,7 @@ export async function createOrder(input: CreateOrderInput): Promise<{ order: DbO
 
             const { error: itemsError } = await supabase
                 .from('order_items')
-                .insert(orderItems as any);
+                .insert(orderItems);
 
             if (itemsError) {
                 console.error('Error creating order items:', itemsError);
@@ -69,10 +75,11 @@ export async function createOrder(input: CreateOrderInput): Promise<{ order: DbO
             }
         }
 
-        return { order: order as DbOrder, error: null };
-    } catch (err: any) {
+        return { order, error: null };
+    } catch (err) {
+        const message = err instanceof Error ? err.message : 'Unknown error creating order';
         console.error('Error creating order:', err);
-        return { order: null, error: err.message };
+        return { order: null, error: message };
     }
 }
 
@@ -96,7 +103,11 @@ export async function getOrders(userId?: string): Promise<OrderWithItems[]> {
         return [];
     }
 
-    return (data as any[]) || [];
+    // Transform the response to match OrderWithItems type
+    return (data ?? []).map(order => ({
+        ...order,
+        items: order.items ?? []
+    })) as OrderWithItems[];
 }
 
 export async function getOrderById(orderId: string): Promise<OrderWithItems | null> {
@@ -114,7 +125,12 @@ export async function getOrderById(orderId: string): Promise<OrderWithItems | nu
         return null;
     }
 
-    return data as any;
+    if (!data) return null;
+
+    return {
+        ...data,
+        items: data.items ?? []
+    } as OrderWithItems;
 }
 
 export async function updateOrderStatus(
@@ -122,21 +138,22 @@ export async function updateOrderStatus(
     status: OrderStatus
 ): Promise<{ error: string | null }> {
     try {
-        const updateData: Record<string, any> = { status };
+        const updateData: DbOrderUpdate = { status };
         
         if (status === 'delivered') {
             updateData.delivered_at = new Date().toISOString();
         }
 
-        const { error } = await (supabase
-            .from('orders') as any)
+        const { error } = await supabase
+            .from('orders')
             .update(updateData)
             .eq('id', orderId);
 
         if (error) throw error;
         return { error: null };
-    } catch (err: any) {
-        return { error: err.message };
+    } catch (err) {
+        const message = err instanceof Error ? err.message : 'Unknown error updating order';
+        return { error: message };
     }
 }
 
@@ -147,12 +164,15 @@ export async function getAdminDashboardStats(): Promise<{
     delivered_today: number;
 } | null> {
     try {
-        const { data, error } = await supabase
-            .rpc('get_admin_dashboard_stats' as any);
+        // Use type assertion for the RPC function name since it's defined in the database
+        const { data, error } = await supabase.rpc('get_admin_dashboard_stats');
 
         if (error) throw error;
-        return (data as any)?.[0] || null;
-    } catch (err: any) {
+        
+        // The RPC returns an array, get the first item
+        const stats = Array.isArray(data) ? data[0] : data;
+        return stats ?? null;
+    } catch (err) {
         console.error('Error fetching dashboard stats:', err);
         return null;
     }

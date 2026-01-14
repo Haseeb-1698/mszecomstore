@@ -119,57 +119,67 @@ const AllSubscriptionsPage: React.FC = () => {
         </div>
 
         {/* Subscriptions Grid */}
-        {loading ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-cream-100 dark:bg-charcoal-800 rounded-2xl border border-cream-300 dark:border-charcoal-700 p-6 animate-pulse">
-                <div className="w-16 h-16 bg-cream-200 dark:bg-charcoal-700 rounded-lg mb-4"></div>
-                <div className="space-y-3">
-                  <div className="h-4 bg-cream-200 dark:bg-charcoal-700 rounded w-3/4"></div>
-                  <div className="h-3 bg-cream-200 dark:bg-charcoal-700 rounded w-1/2"></div>
-                  <div className="h-2 bg-cream-200 dark:bg-charcoal-700 rounded w-full"></div>
-                </div>
+        {(() => {
+          if (loading) {
+            return (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="bg-cream-100 dark:bg-charcoal-800 rounded-2xl border border-cream-300 dark:border-charcoal-700 p-6 animate-pulse">
+                    <div className="w-16 h-16 bg-cream-200 dark:bg-charcoal-700 rounded-lg mb-4"></div>
+                    <div className="space-y-3">
+                      <div className="h-4 bg-cream-200 dark:bg-charcoal-700 rounded w-3/4"></div>
+                      <div className="h-3 bg-cream-200 dark:bg-charcoal-700 rounded w-1/2"></div>
+                      <div className="h-2 bg-cream-200 dark:bg-charcoal-700 rounded w-full"></div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        ) : subscriptions.length === 0 ? (
-          <div className="bg-cream-100 dark:bg-charcoal-800 rounded-2xl border border-cream-300 dark:border-charcoal-700 p-12 text-center">
-            <div className="w-20 h-20 bg-cream-200 dark:bg-charcoal-700 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-10 h-10 text-charcoal-400 dark:text-cream-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-charcoal-900 dark:text-cream-50 mb-2">
-              No subscriptions found
-            </h3>
-            <p className="text-charcoal-600 dark:text-cream-300 mb-6">
-              {filter === 'all'
-                ? "You don't have any subscriptions yet"
-                : `No ${filter} subscriptions found`}
-            </p>
-            {filter === 'all' && (
-              <a
-                href="/services"
-                className="inline-block px-6 py-3 bg-coral-500 hover:bg-coral-600 dark:bg-coral-600 dark:hover:bg-coral-700 text-white rounded-lg font-medium transition-colors"
-              >
-                Browse Services
-              </a>
-            )}
-          </div>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {subscriptions.map((subscription) => {
-              const daysRemaining = getDaysRemaining(subscription.expires_at);
-              const service = subscription.plan?.service;
-              const plan = subscription.plan;
-              const totalDays = Math.floor(
-                (new Date(subscription.expires_at).getTime() -
-                  new Date(subscription.started_at).getTime()) /
-                  (1000 * 60 * 60 * 24)
-              );
-              const progress = Math.min(100, Math.max(0, (daysRemaining / totalDays) * 100));
+            );
+          }
+          if (subscriptions.length === 0) {
+            return (
+              <div className="bg-cream-100 dark:bg-charcoal-800 rounded-2xl border border-cream-300 dark:border-charcoal-700 p-12 text-center">
+                <div className="w-20 h-20 bg-cream-200 dark:bg-charcoal-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-10 h-10 text-charcoal-400 dark:text-cream-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-charcoal-900 dark:text-cream-50 mb-2">
+                  No subscriptions found
+                </h3>
+                <p className="text-charcoal-600 dark:text-cream-300 mb-6">
+                  {filter === 'all'
+                    ? "You don't have any subscriptions yet"
+                    : `No ${filter} subscriptions found`}
+                </p>
+                {filter === 'all' && (
+                  <a
+                    href="/services"
+                    className="inline-block px-6 py-3 bg-coral-500 hover:bg-coral-600 dark:bg-coral-600 dark:hover:bg-coral-700 text-white rounded-lg font-medium transition-colors"
+                  >
+                    Browse Services
+                  </a>
+                )}
+              </div>
+            );
+          }
+          return (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {subscriptions.map((subscription) => {
+                const daysRemaining = getDaysRemaining(subscription.expires_at);
+                const service = subscription.plan?.service;
+                const plan = subscription.plan;
+                const totalDays = Math.floor(
+                  (new Date(subscription.expires_at).getTime() -
+                    new Date(subscription.started_at).getTime()) /
+                    (1000 * 60 * 60 * 24)
+                );
+                // Prevent division by zero - default to 0% progress if totalDays is 0
+                const progress = totalDays > 0 
+                  ? Math.min(100, Math.max(0, (daysRemaining / totalDays) * 100))
+                  : 0;
 
-              return (
+                return (
                 <div
                   key={subscription.id}
                   className="bg-cream-100 dark:bg-charcoal-800 rounded-2xl border border-cream-300 dark:border-charcoal-700 overflow-hidden hover:shadow-soft-lg transition-shadow"
@@ -297,8 +307,9 @@ const AllSubscriptionsPage: React.FC = () => {
                 </div>
               );
             })}
-          </div>
-        )}
+            </div>
+          );
+        })()}
 
         {/* Stats Summary */}
         {!loading && subscriptions.length > 0 && (

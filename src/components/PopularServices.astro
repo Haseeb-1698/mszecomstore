@@ -20,7 +20,12 @@ const services = await getServices();
       {services.slice(0, 6).map(service => (
         <div class="bg-white dark:bg-charcoal-800 rounded-2xl p-8 border border-cream-400 dark:border-charcoal-700 shadow-soft-light-inset dark:shadow-soft-dark-inset transition-all duration-300 hover:shadow-soft-light-hover dark:hover:shadow-soft-dark-hover hover:-translate-y-1">
             <div class="flex-shrink-0">
-              <img src={service.logo} alt={service.name} class="h-10 w-auto" />
+              <img 
+                src={service.icon_url || '/icons/default-service.svg'} 
+                alt={service.name} 
+                class="h-10 w-auto" 
+                onerror="this.src='/icons/default-service.svg'"
+              />
             </div>
             <h3 class="mt-6 text-xl font-medium text-charcoal-900 dark:text-white">{service.name}</h3>
             <p class="mt-2 text-charcoal-800/80 dark:text-gray-400">{service.description}</p>

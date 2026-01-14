@@ -12,7 +12,7 @@ interface ProtectedRouteProps {
  * ProtectedRoute - Self-contained protected route that doesn't rely on React context.
  * This avoids hydration issues with Astro's client:load directive.
  */
-export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
+export function ProtectedRoute({ children, requireAdmin = false }: Readonly<ProtectedRouteProps>) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -50,10 +50,10 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
     if (!loading) {
       if (!user) {
         // Not logged in - redirect to login
-        window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+        globalThis.location.href = '/login?redirect=' + encodeURIComponent(globalThis.location.pathname);
       } else if (requireAdmin && !isAdmin) {
         // Not admin but admin required - redirect to dashboard
-        window.location.href = '/dashboard';
+        globalThis.location.href = '/dashboard';
       }
     }
   }, [user, loading, requireAdmin, isAdmin]);

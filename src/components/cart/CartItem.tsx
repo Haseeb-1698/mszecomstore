@@ -1,22 +1,46 @@
-import React from 'react';
-import type { CartItem as CartItemType } from '../../lib/types';
+import React, { useState } from 'react';
 import { formatPrice } from '../../lib/utils';
 
+interface CartItemData {
+  id: string;
+  planId: string;
+  serviceName: string;
+  planName: string;
+  price: number;
+  quantity: number;
+}
+
 interface CartItemProps {
-  item: CartItemType;
-  onUpdateQuantity: (itemId: string, quantity: number) => void;
-  onRemoveItem: (itemId: string) => void;
+  item: CartItemData;
+  onUpdateQuantity: (itemId: string, quantity: number) => Promise<void>;
+  onRemoveItem: (itemId: string) => Promise<void>;
 }
 
 const CartItem: React.FC<CartItemProps> = ({ item, onUpdateQuantity, onRemoveItem }) => {
-  const handleDecrement = () => {
-    if (item.quantity > 1) {
-      onUpdateQuantity(item.id, item.quantity - 1);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleDecrement = async () => {
+    if (item.quantity > 1 && !isUpdating) {
+      setIsUpdating(true);
+      await onUpdateQuantity(item.id, item.quantity - 1);
+      setIsUpdating(false);
     }
   };
 
-  const handleIncrement = () => {
-    onUpdateQuantity(item.id, item.quantity + 1);
+  const handleIncrement = async () => {
+    if (!isUpdating) {
+      setIsUpdating(true);
+      await onUpdateQuantity(item.id, item.quantity + 1);
+      setIsUpdating(false);
+    }
+  };
+
+  const handleRemove = async () => {
+    if (!isUpdating) {
+      setIsUpdating(true);
+      await onRemoveItem(item.id);
+      setIsUpdating(false);
+    }
   };
 
   return (
@@ -28,7 +52,7 @@ const CartItem: React.FC<CartItemProps> = ({ item, onUpdateQuantity, onRemoveIte
             {item.serviceName}
           </h3>
           <p className="text-charcoal-600 dark:text-cream-400 mb-4">
-            {item.planDuration}
+            {item.planName}
           </p>
 
           {/* Quantity Controls */}
@@ -36,7 +60,8 @@ const CartItem: React.FC<CartItemProps> = ({ item, onUpdateQuantity, onRemoveIte
             <div className="flex items-center gap-2">
               <button
                 onClick={handleDecrement}
-                className="w-8 h-8 rounded-lg bg-cream-200 dark:bg-charcoal-700 hover:bg-cream-300 dark:hover:bg-charcoal-600 text-charcoal-800 dark:text-cream-100 flex items-center justify-center transition-colors"
+                disabled={isUpdating || item.quantity <= 1}
+                className="w-8 h-8 rounded-lg bg-cream-200 dark:bg-charcoal-700 hover:bg-cream-300 dark:hover:bg-charcoal-600 text-charcoal-800 dark:text-cream-100 flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Decrease quantity"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,7 +75,8 @@ const CartItem: React.FC<CartItemProps> = ({ item, onUpdateQuantity, onRemoveIte
 
               <button
                 onClick={handleIncrement}
-                className="w-8 h-8 rounded-lg bg-cream-200 dark:bg-charcoal-700 hover:bg-cream-300 dark:hover:bg-charcoal-600 text-charcoal-800 dark:text-cream-100 flex items-center justify-center transition-colors"
+                disabled={isUpdating}
+                className="w-8 h-8 rounded-lg bg-cream-200 dark:bg-charcoal-700 hover:bg-cream-300 dark:hover:bg-charcoal-600 text-charcoal-800 dark:text-cream-100 flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Increase quantity"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -60,10 +86,11 @@ const CartItem: React.FC<CartItemProps> = ({ item, onUpdateQuantity, onRemoveIte
             </div>
 
             <button
-              onClick={() => onRemoveItem(item.id)}
-              className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm font-medium transition-colors"
+              onClick={handleRemove}
+              disabled={isUpdating}
+              className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Remove
+              {isUpdating ? 'Removing...' : 'Remove'}
             </button>
           </div>
         </div>

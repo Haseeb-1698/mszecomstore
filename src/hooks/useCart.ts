@@ -1,6 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
-import type { Cart } from '../lib/types';
-import { cartUtils } from '../lib/cart';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { supabase } from '../lib/supabase';
+import { 
+  getOrCreateCart, 
+  addItemToCart as apiAddItem, 
+  removeItemFromCart as apiRemoveItem,
+  updateItemQuantity as apiUpdateQuantity,
+  clearCart as apiClearCart,
+  applyDiscountCode as apiApplyDiscount,
+  toCartData,
+  type CartData
+} from '../lib/api/cart';
 
 export interface ItemData {
   serviceId: string;
@@ -12,117 +21,210 @@ export interface ItemData {
 }
 
 export interface UseCartReturn {
-  cart: Cart;
-  addItem: (item: ItemData) => void;
-  removeItem: (itemId: string) => void;
-  updateQuantity: (itemId: string, quantity: number) => void;
-  applyDiscountCode: (code: string) => boolean;
-  clearCart: () => void;
+  cart: CartData | null;
+  addItem: (item: ItemData) => Promise<void>;
+  removeItem: (itemId: string) => Promise<void>;
+  updateQuantity: (itemId: string, quantity: number) => Promise<void>;
+  applyDiscountCode: (code: string) => Promise<boolean>;
+  clearCart: () => Promise<void>;
   itemCount: number;
   isEmpty: boolean;
   isLoading: boolean;
   error: string | null;
+  isAuthenticated: boolean;
 }
 
 export const useCart = (): UseCartReturn => {
-  const [cart, setCart] = useState<Cart>(() => cartUtils.create());
+  const [cart, setCart] = useState<CartData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // Load cart from localStorage on mount
+  // Load cart from database
+  const loadCart = useCallback(async (uid: string) => {
+    try {
+      setIsLoading(true);
+      console.log('[useCart] Loading cart for user:', uid);
+      const dbCart = await getOrCreateCart(uid);
+      console.log('[useCart] Cart loaded:', dbCart);
+      if (dbCart) {
+        setCart(toCartData(dbCart));
+      } else {
+        // If getOrCreateCart returns null, something went wrong
+        console.error('[useCart] getOrCreateCart returned null');
+        setCart(null);
+      }
+      setError(null);
+    } catch (err) {
+      console.error('[useCart] Failed to load cart:', err);
+      setError('Failed to load your cart.');
+      setCart(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Check auth and load cart on mount
   useEffect(() => {
-    const loadCart = () => {
-      try {
-        const savedCart = cartUtils.load();
-        const cartToUse = savedCart ? cartUtils.validate(savedCart) : cartUtils.create();
-        setCart(cartToUse);
-        setError(null);
-      } catch (err) {
-        console.error('Failed to load cart:', err);
-        setError('Failed to load your cart. Starting with an empty cart.');
-        setCart(cartUtils.create());
-      } finally {
+    let isActive = true;
+    
+    const initializeCart = async () => {
+      console.log('[useCart] Initializing cart...');
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('[useCart] Session:', session?.user?.id);
+      if (isActive && session?.user) {
+        setUserId(session.user.id);
+        await loadCart(session.user.id);
+      } else if (isActive) {
+        console.log('[useCart] No session, setting loading to false');
         setIsLoading(false);
       }
     };
 
-    loadCart();
-  }, []);
-  // Save cart to localStorage whenever it changes
-  useEffect(() => {
-    if (!isLoading) {
-      try {
-        cartUtils.save(cart);
-        setError(null);
-      } catch (err) {
-        console.error('Failed to save cart:', err);
-        setError('Failed to save your cart.');
-      }
-    }
-  }, [cart, isLoading]);
+    initializeCart();
 
-  const addItem = useCallback((item: ItemData) => {
+    // Listen for auth changes (skip INITIAL_SESSION as we handle it in initializeCart)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('[useCart] Auth state changed:', event, session?.user?.id);
+      
+      // Skip INITIAL_SESSION to avoid duplicate loading
+      if (event === 'INITIAL_SESSION') {
+        return;
+      }
+      
+      if (isActive && session?.user) {
+        setUserId(session.user.id);
+        await loadCart(session.user.id);
+      } else if (isActive) {
+        setUserId(null);
+        setCart(null);
+        setIsLoading(false);
+      }
+    });
+
+    // Listen for cart updates from other components
+    const handleCartUpdate = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        await loadCart(session.user.id);
+      }
+    };
+
+    globalThis.addEventListener('cartUpdated', handleCartUpdate);
+
+    return () => {
+      isActive = false;
+      subscription.unsubscribe();
+      globalThis.removeEventListener('cartUpdated', handleCartUpdate);
+    };
+  }, [loadCart]);
+
+  const addItem = useCallback(async (item: ItemData) => {
+    if (!userId) {
+      setError('Please log in to add items to cart');
+      return;
+    }
+
     try {
-      setCart(currentCart => cartUtils.addItem(currentCart, item));
+      const price = typeof item.price === 'string' ? Number.parseFloat(item.price) : item.price;
+      const result = await apiAddItem(userId, {
+        planId: item.planId,
+        serviceName: item.serviceName,
+        planName: item.planName,
+        price,
+        quantity: item.quantity
+      });
+      
+      if (result) {
+        setCart(toCartData(result));
+        globalThis.dispatchEvent(new CustomEvent('cartUpdated'));
+      }
       setError(null);
     } catch (err) {
       console.error('Add to cart failed:', err);
       setError(err instanceof Error ? err.message : 'Failed to add item to cart');
     }
-  }, []);
+  }, [userId]);
 
-  const removeItem = useCallback((itemId: string) => {
+  const removeItem = useCallback(async (itemId: string) => {
+    if (!userId) return;
+
     try {
-      setCart(currentCart => cartUtils.removeItem(currentCart, itemId));
+      const result = await apiRemoveItem(userId, itemId);
+      if (result) {
+        setCart(toCartData(result));
+        globalThis.dispatchEvent(new CustomEvent('cartUpdated'));
+      }
       setError(null);
     } catch (err) {
       console.error('Remove from cart failed:', err);
       setError('Failed to remove item from cart');
     }
-  }, []);
+  }, [userId]);
 
-  const updateQuantity = useCallback((itemId: string, quantity: number) => {
+  const updateQuantity = useCallback(async (itemId: string, quantity: number) => {
+    if (!userId) return;
+
     try {
-      setCart(currentCart => cartUtils.updateQuantity(currentCart, itemId, quantity));
+      const result = await apiUpdateQuantity(userId, itemId, quantity);
+      if (result) {
+        setCart(toCartData(result));
+        globalThis.dispatchEvent(new CustomEvent('cartUpdated'));
+      }
       setError(null);
     } catch (err) {
       console.error('Update quantity failed:', err);
       setError('Failed to update quantity');
     }
-  }, []);
+  }, [userId]);
 
-  const applyDiscountCodeFn = useCallback((code: string): boolean => {
+  const applyDiscountCodeFn = useCallback(async (code: string): Promise<boolean> => {
+    if (!userId || !cart) return false;
+
     try {
-      const updatedCart = cartUtils.applyDiscountCode(cart, code);
-      const discountApplied = updatedCart.discount > cart.discount;
-
-      if (discountApplied) {
-        setCart(updatedCart);
+      const { success } = await apiApplyDiscount(userId, code, cart.subtotal);
+      
+      if (success) {
+        // Reload cart to get updated discount
+        await loadCart(userId);
         setError(null);
       }
 
-      return discountApplied;
+      return success;
     } catch (err) {
       console.error('Apply discount failed:', err);
       setError('Failed to apply discount code');
       return false;
     }
-  }, [cart]);
+  }, [userId, cart, loadCart]);
 
-  const clearCartFn = useCallback(() => {
+  const clearCartFn = useCallback(async () => {
+    if (!userId) return;
+
     try {
-      setCart(currentCart => cartUtils.clear(currentCart));
+      const result = await apiClearCart(userId);
+      if (result) {
+        setCart(toCartData(result));
+        globalThis.dispatchEvent(new CustomEvent('cartUpdated'));
+      }
       setError(null);
     } catch (err) {
       console.error('Clear cart failed:', err);
       setError('Failed to clear cart');
     }
-  }, []);
+  }, [userId]);
 
-  const itemCount = cartUtils.getItemCount(cart);
-  const isEmpty = cartUtils.isEmpty(cart);
+  const itemCount = useMemo(
+    () => cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0,
+    [cart?.items]
+  );
+  
+  const isEmpty = useMemo(
+    () => !cart || cart.items.length === 0,
+    [cart]
+  );
 
-  return {
+  return useMemo(() => ({
     cart,
     addItem,
     removeItem,
@@ -132,6 +234,19 @@ export const useCart = (): UseCartReturn => {
     itemCount,
     isEmpty,
     isLoading,
-    error
-  };
+    error,
+    isAuthenticated: !!userId
+  }), [
+    cart, 
+    addItem, 
+    removeItem, 
+    updateQuantity, 
+    applyDiscountCodeFn, 
+    clearCartFn, 
+    itemCount, 
+    isEmpty, 
+    isLoading, 
+    error, 
+    userId
+  ]);
 };

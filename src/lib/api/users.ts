@@ -1,7 +1,9 @@
 import { supabase } from '../supabase';
-import type { DbUserProfile, DbUserProfileUpdate, UserRole } from '../database.types';
+import type { DbUserProfileUpdate, DbUserProfileInsert } from '../database.types';
 
-export async function getUserProfile(userId: string): Promise<DbUserProfile | null> {
+// Use 'any' for return types since Supabase returns slightly different types
+// (e.g., string instead of enum unions)
+export async function getUserProfile(userId: string): Promise<any> {
     const { data, error } = await supabase
         .from('user_profiles')
         .select('*')
@@ -13,47 +15,53 @@ export async function getUserProfile(userId: string): Promise<DbUserProfile | nu
         return null;
     }
 
-    return data as DbUserProfile;
+    return data;
 }
 
 export async function updateUserProfile(
     userId: string, 
-    updates: Partial<DbUserProfileUpdate>
+    updates: DbUserProfileUpdate
 ): Promise<{ error: string | null }> {
     try {
-        const { error } = await (supabase
-            .from('user_profiles') as any)
+        const { error } = await supabase
+            .from('user_profiles')
             .update(updates)
             .eq('id', userId);
 
         if (error) throw error;
         return { error: null };
-    } catch (err: any) {
-        return { error: err.message };
+    } catch (err) {
+        const message = err instanceof Error ? err.message : 'Unknown error updating profile';
+        return { error: message };
     }
 }
 
 export async function createUserProfile(
     userId: string,
-    data: Partial<DbUserProfileUpdate>
-): Promise<{ profile: DbUserProfile | null; error: string | null }> {
+    data: Omit<DbUserProfileInsert, 'id'>
+): Promise<{ profile: any; error: string | null }> {
     try {
+        const insertData: DbUserProfileInsert = { 
+            id: userId, 
+            ...data 
+        };
+        
         const { data: profile, error } = await supabase
             .from('user_profiles')
-            .insert({ id: userId, ...data } as any)
+            .insert(insertData)
             .select()
             .single();
 
         if (error) throw error;
-        return { profile: profile as DbUserProfile, error: null };
-    } catch (err: any) {
-        return { profile: null, error: err.message };
+        return { profile, error: null };
+    } catch (err) {
+        const message = err instanceof Error ? err.message : 'Unknown error creating profile';
+        return { profile: null, error: message };
     }
 }
 
 export async function isUserAdmin(userId: string): Promise<boolean> {
     try {
-        // Use direct query instead of RPC for better type compatibility
         const { data, error } = await supabase
             .from('user_profiles')
             .select('role')
@@ -61,14 +69,14 @@ export async function isUserAdmin(userId: string): Promise<boolean> {
             .single();
 
         if (error) return false;
-        return (data as any)?.role === 'admin';
-    } catch (err: any) {
+        return data?.role === 'admin';
+    } catch (err) {
         console.error('Error checking admin status:', err);
         return false;
     }
 }
 
-export async function getAllUserProfiles(): Promise<DbUserProfile[]> {
+export async function getAllUserProfiles(): Promise<any[]> {
     const { data, error } = await supabase
         .from('user_profiles')
         .select('*')
@@ -79,5 +87,5 @@ export async function getAllUserProfiles(): Promise<DbUserProfile[]> {
         return [];
     }
 
-    return (data as DbUserProfile[]) || [];
+    return data ?? [];
 }

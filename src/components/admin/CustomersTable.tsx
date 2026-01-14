@@ -7,8 +7,10 @@ interface Customer {
   email: string | null;
   phone: string | null;
   whatsapp: string | null;
+  avatar_url: string | null;
   role: string;
-  created_at: string;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 const CustomersTable: React.FC = () => {
@@ -75,7 +77,7 @@ const CustomersTable: React.FC = () => {
             />
           </div>
           <div className="text-sm text-charcoal-600 dark:text-cream-400">
-            {filteredCustomers.length} customer{filteredCustomers.length !== 1 ? 's' : ''}
+            {filteredCustomers.length} customer{filteredCustomers.length === 1 ? '' : 's'}
           </div>
         </div>
       </div>
@@ -109,7 +111,7 @@ const CustomersTable: React.FC = () => {
                     {customer.whatsapp || 'N/A'}
                   </td>
                   <td className="py-4 px-6 text-sm text-charcoal-700 dark:text-cream-300">
-                    {new Date(customer.created_at).toLocaleDateString()}
+                    {customer.created_at ? new Date(customer.created_at).toLocaleDateString() : 'N/A'}
                   </td>
                 </tr>
               ))

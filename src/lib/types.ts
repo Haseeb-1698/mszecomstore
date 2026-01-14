@@ -1,58 +1,66 @@
 // TypeScript type definitions for MSZ Ecom Store
-// Re-exports database types for convenience
+// This file contains UI-specific types and re-exports database types
+
+// ============================================================================
+// RE-EXPORTS FROM DATABASE TYPES (Source of truth for DB-related types)
+// ============================================================================
 export type { 
+  // Database table types
   DbService, 
   DbPlan, 
   DbSubscription, 
   DbOrder,
   DbOrderItem,
   DbUserProfile,
+  DbCart,
+  DbCartItem,
+  // View types
   DbServiceWithPlans,
   DbOrderDetails,
   DbAdminDashboardStats,
+  // Extended types
   ServiceWithPlans,
   OrderWithItems,
+  // Enum types
   SubscriptionStatus,
   OrderStatus,
   ServiceCategory,
   UserRole,
-  ServiceBadge
+  ServiceBadge,
+  PlanType
 } from './database.types'
 
-import type { SubscriptionStatus, OrderStatus, UserRole } from './database.types'
+// Re-export constants
+export {
+  ORDER_STATUS,
+  ORDER_STATUS_DISPLAY,
+  ORDER_STATUS_COLORS,
+  SUBSCRIPTION_STATUS,
+  SUBSCRIPTION_STATUS_DISPLAY,
+  SERVICE_CATEGORY,
+  SERVICE_CATEGORY_DISPLAY,
+  USER_ROLE,
+  SERVICE_BADGE,
+  PLAN_TYPE,
+  ROUTES,
+  STORAGE_KEYS,
+  PAGINATION,
+  API_CONFIG,
+  type OrderStatusValue,
+  type SubscriptionStatusValue,
+  type ServiceCategoryValue,
+  type UserRoleValue,
+  type ServiceBadgeValue,
+  type PlanTypeValue,
+} from './constants'
 
-// Legacy type alias for backwards compatibility
-export type ServiceCategoryLegacy = 
-  | "streaming" 
-  | "professional" 
-  | "vpn" 
-  | "gaming" 
-  | "education";
+// ============================================================================
+// UI-ONLY TYPES (Not directly from database)
+// ============================================================================
 
-export interface Plan {
-  id: string;
-  duration: "1 month" | "3 months" | "12 months";
-  price: number;
-  originalPrice?: number;
-  savings?: number;
-  features: string[];
-  isPopular?: boolean;
-}
-
-export interface Service {
-  id: string;
-  slug: string;
-  name: string;
-  category: string;
-  logo: string;
-  description: string;
-  longDescription?: string;
-  features: string[];
-  plans: Plan[];
-  badge?: "Popular" | "Best Value" | null;
-  relatedServices: string[];
-}
-
+/**
+ * Testimonial for homepage display
+ */
 export interface Testimonial {
   id: number;
   name: string;
@@ -64,87 +72,9 @@ export interface Testimonial {
   verified: boolean;
 }
 
-export interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  whatsapp: string;
-  subscriptions: Subscription[];
-  orders: Order[];
-  totalSpent: number;
-  joinDate: Date;
-}
-
-export interface Subscription {
-  id: string;
-  serviceId: string;
-  planId: string;
-  startDate: Date;
-  expiryDate: Date;
-  status: SubscriptionStatus; // Now uses database type
-  daysRemaining: number;
-  autoRenew: boolean;
-}
-
-export interface Order {
-  id: string;
-  customerId: string;
-  customerName?: string;
-  customerEmail?: string;
-  customerWhatsapp?: string;
-  serviceName?: string;
-  serviceId: string;
-  planId: string;
-  amount: number;
-  status: OrderStatus;
-  createdAt: Date;
-  updatedAt?: Date;
-  deliveredAt?: Date;
-  specialInstructions?: string;
-}
-
-export interface CartItem {
-  id: string;
-  serviceId: string;
-  planId: string;
-  serviceName: string;
-  planDuration: string;
-  price: number;
-  quantity: number;
-}
-
-export interface Cart {
-  id: string;
-  customerId?: string;
-  items: CartItem[];
-  subtotal: number;
-  discount: number;
-  total: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface CheckoutSession {
-  id: string;
-  cartId: string;
-  customerInfo: {
-    name: string;
-    email: string;
-    whatsapp: string;
-  };
-  status: OrderStatus;
-  createdAt: Date;
-  expiresAt: Date;
-}
-
-export interface DashboardStats {
-  totalRevenue: number;
-  pendingOrders: number;
-  activeCustomers: number;
-  deliveredToday: number;
-  growthRate: number;
-}
-
+/**
+ * Customer stats for dashboard display
+ */
 export interface UserStats {
   totalSpent: number;
   activeSubscriptions: number;
@@ -152,6 +82,9 @@ export interface UserStats {
   loyaltyPoints: number;
 }
 
+/**
+ * Admin dashboard stats
+ */
 export interface AdminStats {
   totalRevenue: number;
   pendingOrders: number;
@@ -160,11 +93,9 @@ export interface AdminStats {
   growthRate?: number;
 }
 
-export interface AdminOrder extends Order {
-  customerName: string;
-  serviceName: string;
-}
-
+/**
+ * Quick action button for admin dashboard
+ */
 export interface QuickAction {
   id: string;
   label: string;
@@ -172,23 +103,75 @@ export interface QuickAction {
   action: () => void;
 }
 
-export interface User {
+/**
+ * Checkout session for tracking checkout flow
+ */
+export interface CheckoutSession {
   id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  whatsapp?: string;
-  role: UserRole;
-  avatar?: string;
+  cartId: string;
+  customerInfo: {
+    name: string;
+    email: string;
+    whatsapp: string;
+  };
+  status: import('./database.types').OrderStatus;
   createdAt: Date;
-  lastLogin?: Date;
+  expiresAt: Date;
 }
 
-// Order status display mapping
-export const OrderStatusDisplay: Record<OrderStatus, string> = {
-  pending: 'Pending',
-  processing: 'Processing',
-  completed: 'Completed',
-  cancelled: 'Cancelled',
-  delivered: 'Delivered'
+/**
+ * Cart item for UI display (simplified from DB type)
+ */
+export interface CartItemUI {
+  id: string;
+  planId: string;
+  serviceName: string;
+  planName: string;
+  price: number;
+  quantity: number;
+}
+
+/**
+ * Cart data for UI (transformed from DB)
+ */
+export interface CartDataUI {
+  id: string;
+  userId: string;
+  items: CartItemUI[];
+  subtotal: number;
+  discount: number;
+  total: number;
+}
+
+// ============================================================================
+// PAGINATION TYPES
+// ============================================================================
+
+export interface PaginationParams {
+  page: number;
+  pageSize: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+// ============================================================================
+// API RESPONSE TYPES
+// ============================================================================
+
+export interface ApiError {
+  message: string;
+  code?: string;
+  details?: string;
+}
+
+export interface ApiResponse<T> {
+  data: T | null;
+  error: ApiError | null;
+  success: boolean;
 }

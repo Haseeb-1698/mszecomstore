@@ -3,7 +3,7 @@ import { useSupabaseAuth, SupabaseAuthProvider } from '../../contexts/SupabaseAu
 
 const SidebarContent: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const currentPath = globalThis.window === undefined ? '' : globalThis.location.pathname;
+  const currentPath = globalThis.globalThis === undefined ? '' : globalThis.location.pathname;
   const { signOut } = useSupabaseAuth(); // Use context for auth
 
   const menuItems = [

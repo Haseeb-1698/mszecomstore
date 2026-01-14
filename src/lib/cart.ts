@@ -1,5 +1,26 @@
 // Cart management utilities for MSZ Ecom Store
-import type { Cart, CartItem } from './types';
+
+// Define Cart and CartItem types for local cart management
+export interface CartItem {
+  id: string;
+  serviceId: string;
+  planId: string;
+  serviceName: string;
+  planDuration: string;
+  price: number;
+  quantity: number;
+}
+
+export interface Cart {
+  id: string;
+  customerId?: string;
+  items: CartItem[];
+  subtotal: number;
+  discount: number;
+  total: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 // Generate unique cart ID
 export const generateCartId = (): string => {
@@ -59,14 +80,14 @@ export const addItemToCart = (
 
   // Check if item already exists in cart
   const existingItemIndex = cart.items.findIndex(
-    item => item.serviceId === serviceId && item.planId === planId
+    (item: CartItem) => item.serviceId === serviceId && item.planId === planId
   );
 
   let updatedItems: CartItem[];
 
   if (existingItemIndex >= 0) {
     // Update quantity of existing item
-    updatedItems = cart.items.map((item, index) =>
+    updatedItems = cart.items.map((item: CartItem, index: number) =>
       index === existingItemIndex
         ? { ...item, quantity: item.quantity + (itemData.quantity || 1) }
         : item
@@ -98,7 +119,7 @@ export const addItemToCart = (
 
 // Remove item from cart
 export const removeItemFromCart = (cart: Cart, itemId: string): Cart => {
-  const updatedItems = cart.items.filter(item => item.id !== itemId);
+  const updatedItems = cart.items.filter((item: CartItem) => item.id !== itemId);
   const { subtotal, total } = calculateCartTotals(updatedItems);
 
   return {
@@ -116,7 +137,7 @@ export const updateItemQuantity = (cart: Cart, itemId: string, quantity: number)
     return removeItemFromCart(cart, itemId);
   }
 
-  const updatedItems = cart.items.map(item =>
+  const updatedItems = cart.items.map((item: CartItem) =>
     item.id === itemId
       ? { ...item, quantity }
       : item
@@ -174,7 +195,7 @@ export const clearCart = (cart: Cart): Cart => {
 
 // Get cart item count
 export const getCartItemCount = (cart: Cart): number => {
-  return cart.items.reduce((count, item) => count + item.quantity, 0);
+  return cart.items.reduce((count: number, item: CartItem) => count + item.quantity, 0);
 };
 
 // Check if cart is empty

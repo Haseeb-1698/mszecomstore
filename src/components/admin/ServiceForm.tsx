@@ -29,7 +29,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose, onSuccess }
     price: service?.price || '',
     description: service?.description || '',
     active: service?.active ?? true,
-    iconUrl: (service as any)?.icon_url || ''
+    iconUrl: service?.icon_url ?? ''
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -57,8 +57,8 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose, onSuccess }
       newErrors.name = 'Service name is required';
     }
 
-    const priceNum = parseFloat(formData.price.replace(/[^0-9.]/g, ''));
-    if (isNaN(priceNum)) {
+    const priceNum = Number.parseFloat(formData.price.replaceAll(/[^0-9.]/g, ''));
+    if ( Number.isNaN(priceNum)) {
       newErrors.price = 'Valid price is required';
     }
 
@@ -83,7 +83,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose, onSuccess }
         icon_url: formData.iconUrl
       };
 
-      const priceNum = parseFloat(formData.price.replace(/[^0-9.]/g, ''));
+      const priceNum = Number.parseFloat(formData.price.replaceAll(/[^0-9.]/g, ''));
 
       const plansData = [
         {
@@ -258,7 +258,10 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose, onSuccess }
       {/* Actions */}
       <div className="flex items-center gap-3 pt-4 border-t border-cream-400 dark:border-charcoal-700">
         <Button type="submit" variant="primary" fullWidth disabled={isSubmitting}>
-          {isSubmitting ? 'Processing...' : (service ? 'Update Service' : 'Create Service')}
+          {(() => {
+            if (isSubmitting) return 'Processing...';
+            return service ? 'Update Service' : 'Create Service';
+          })()}
         </Button>
         <Button type="button" variant="outline" onClick={onClose} fullWidth>
           Cancel

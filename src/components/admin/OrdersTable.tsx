@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import OrderStatusBadge from './OrderStatusBadge';
 import { supabase } from '../../lib/supabase';
 import type { OrderStatus } from '../../lib/database.types';
-import { OrderStatusDisplay } from '../../lib/types';
 import { formatPrice } from '../../lib/utils';
 
 interface Order {

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
-import CartIcon from '../ui/CartIcon';
 
 /**
  * AuthButtons component - displays login/signup or profile icon based on auth state.
@@ -51,13 +50,10 @@ const AuthButtons: React.FC = () => {
     );
   }
 
-  // User is logged in - show cart icon, profile icon, and admin icon (if admin)
+  // User is logged in - show profile icon and admin icon (if admin)
   if (user) {
     return (
       <div className="flex items-center gap-2">
-        {/* Cart Icon */}
-        <CartIcon />
-        
         {/* Admin Icon - only show if user is admin */}
         {isAdmin && (
           <a 

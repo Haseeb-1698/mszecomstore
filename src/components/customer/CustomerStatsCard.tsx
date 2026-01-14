@@ -9,7 +9,7 @@ interface CustomerStatsCardProps {
   isActionCard?: boolean;
 }
 
-const CustomerStatsCard: React.FC<CustomerStatsCardProps> = ({ 
+const CustomerStatsCard: React.FC<CustomerStatsCardProps> = React.memo(({ 
   title, 
   value, 
   icon, 
@@ -110,6 +110,8 @@ const CustomerStatsCard: React.FC<CustomerStatsCardProps> = ({
       </div>
     </div>
   );
-};
+});
+
+CustomerStatsCard.displayName = 'CustomerStatsCard';
 
 export default CustomerStatsCard;

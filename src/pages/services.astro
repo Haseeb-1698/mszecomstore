@@ -1,66 +1,20 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import ServiceCard from '../components/ServiceCard.astro';
+import { getServices } from '../lib/api/services';
+import { formatPrice } from '../lib/utils';
 
-const services = [
-  {
-    name: 'Netflix',
-    description: 'Unlimited movies, TV shows, and more.',
-    icon: '/icons/netflix.svg',
-    price: 'PKR 1,100/mo',
-  },
-  {
-    name: 'Spotify',
-    description: 'Music for everyone.',
-    icon: '/icons/spotify.svg',
-    price: 'PKR 499/mo',
-  },
-  {
-    name: 'Adobe Creative Cloud',
-    description: 'The future of creativity.',
-    icon: '/icons/adobe-creative-cloud.svg',
-    price: 'PKR 8,500/mo',
-  },
-  {
-    name: 'Microsoft 365',
-    description: 'Your productivity cloud.',
-    icon: '/icons/microsoft-365.svg',
-    price: 'PKR 1,200/mo',
-  },
-  {
-    name: 'Disney+',
-    description: 'The best stories in the world, all in one place.',
-    icon: '/icons/disney-plus.svg',
-    price: 'PKR 1,100/mo',
-  },
-  {
-    name: 'Hulu',
-    description: 'Watch TV and movies online.',
-    icon: '/icons/hulu.svg',
-    price: 'PKR 999/mo',
-  },
-  {
-    name: 'Amazon Prime',
-    description: 'Get the best of shopping and entertainment.',
-    icon: '/icons/amazon-prime.svg',
-    price: 'PKR 1,500/mo',
-  },
-  {
-    name: 'YouTube Premium',
-    description: 'Watch your favorite videos without ads.',
-    icon: '/icons/youtube-premium.svg',
-    price: 'PKR 499/mo',
-  },
-  {
-    name: 'Slack',
-    description: 'Where work happens.',
-    icon: '/icons/slack.svg',
-    price: 'PKR 1,250/mo',
-  },
-];
+const services = await getServices();
+
+// Get the minimum price for each service
+const getMinPrice = (plans: any[]) => {
+  if (!plans || plans.length === 0) return null;
+  const availablePlans = plans.filter(p => p.is_available);
+  if (availablePlans.length === 0) return null;
+  return Math.min(...availablePlans.map(p => p.price));
+};
 ---
 
-<Layout title="Services - SubHub">
+<Layout title="Services - MSZ Ecom Store">
   <main class="bg-white dark:bg-charcoal-900">
     <div class="max-w-7xl mx-auto px-6 py-12">
       <div class="text-center mb-16">
@@ -69,11 +23,68 @@ const services = [
           Browse our extensive library of premium subscriptions and find the ones that best suit your needs.
         </p>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {services.map(service => (
-          <ServiceCard {...service} />
-        ))}
-      </div>
+      
+      {services.length === 0 ? (
+        <div class="text-center py-16">
+          <div class="bg-cream-100 dark:bg-charcoal-800 border border-cream-400 dark:border-charcoal-700 rounded-2xl p-12 max-w-md mx-auto">
+            <div class="w-24 h-24 bg-coral-500/20 dark:bg-coral-400/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg class="w-12 h-12 text-coral-500 dark:text-coral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-semibold text-charcoal-800 dark:text-cream-100 mb-4">
+              No services available
+            </h2>
+            <p class="text-charcoal-700 dark:text-cream-300">
+              Check back soon for new subscription services!
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {services.map(service => {
+            const minPrice = getMinPrice(service.plans);
+            return (
+              <div class="bg-cream-50 dark:bg-charcoal-800 rounded-2xl p-8 border border-cream-400 dark:border-charcoal-700 shadow-soft-light dark:shadow-soft-dark hover:shadow-soft-light-focus dark:hover:shadow-soft-dark-focus transition-all hover:-translate-y-1">
+                <img 
+                  src={service.icon_url || '/icons/default-service.svg'} 
+                  alt={service.name} 
+                  class="h-12 w-12 mb-6"
+                  onerror="this.src='/icons/default-service.svg'"
+                />
+                <h3 class="text-xl font-medium text-charcoal-900 dark:text-white">{service.name}</h3>
+                <p class="mt-2 text-charcoal-800/70 dark:text-gray-400 line-clamp-2">{service.description}</p>
+                {service.badge && (
+                  <span class={`inline-block mt-3 px-3 py-1 text-xs font-medium rounded-full ${
+                    service.badge === 'popular' 
+                      ? 'bg-coral-100 dark:bg-coral-900/30 text-coral-600 dark:text-coral-400' 
+                      : 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
+                  }`}>
+                    {service.badge === 'popular' ? 'Popular' : 'Best Value'}
+                  </span>
+                )}
+                <div class="mt-6 flex items-center justify-between">
+                  {minPrice ? (
+                    <span class="text-xl font-medium text-charcoal-900 dark:text-white">
+                      From {formatPrice(minPrice)}
+                    </span>
+                  ) : (
+                    <span class="text-lg text-charcoal-600 dark:text-cream-400">
+                      View plans
+                    </span>
+                  )}
+                  <a 
+                    href={`/services/${service.slug}`} 
+                    class="px-5 py-2 rounded-full bg-coral-500 text-white font-medium text-sm hover:bg-coral-600 transition-all"
+                  >
+                    Subscribe
+                  </a>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   </main>
 </Layout>

@@ -24,16 +24,31 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
     variant = 'primary',
     isLoading = false
 }) => {
+    React.useEffect(() => {
+        const handleEscape = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && isOpen) onClose();
+        };
+        globalThis.addEventListener('keydown', handleEscape);
+        return () => globalThis.removeEventListener('keydown', handleEscape);
+    }, [isOpen, onClose]);
+
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-charcoal-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div
-                className="w-full max-w-md bg-cream-50 dark:bg-charcoal-800 rounded-3xl border border-cream-400 dark:border-charcoal-700 shadow-soft-lg overflow-hidden animate-in zoom-in-95 duration-200"
-                onClick={(e) => e.stopPropagation()}
+            <button
+                type="button"
+                className="absolute inset-0 w-full h-full cursor-default bg-transparent border-none"
+                onClick={onClose}
+                aria-label="Close backdrop"
+            />
+            <dialog
+                className="relative w-full max-w-md bg-cream-50 dark:bg-charcoal-800 rounded-3xl border border-cream-400 dark:border-charcoal-700 shadow-soft-lg overflow-hidden animate-in zoom-in-95 duration-200"
+                aria-labelledby="modal-title"
+                open={isOpen}
             >
                 <div className="p-8">
-                    <h3 className="text-2xl font-bold text-charcoal-800 dark:text-cream-100 tracking-tighter mb-4">
+                    <h3 id="modal-title" className="text-2xl font-bold text-charcoal-800 dark:text-cream-100 tracking-tighter mb-4">
                         {title}
                     </h3>
                     <p className="text-charcoal-700 dark:text-cream-300 mb-8 leading-relaxed">
@@ -50,7 +65,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                             {cancelText}
                         </Button>
                         <Button
-                            variant={variant === 'danger' ? 'primary' : 'primary'}
+                            variant='primary'
                             className={variant === 'danger' ? 'bg-red-500 hover:bg-red-600 border-red-500' : ''}
                             onClick={onConfirm}
                             fullWidth
@@ -60,7 +75,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                         </Button>
                     </div>
                 </div>
-            </div>
+            </dialog>
         </div>
     );
 };

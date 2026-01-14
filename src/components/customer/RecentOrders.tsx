@@ -1,11 +1,10 @@
 import React from 'react';
-import type { DbOrder } from '../../lib/database.types';
 
 interface RecentOrdersProps {
   orders: any[];
 }
 
-const RecentOrders: React.FC<RecentOrdersProps> = ({ orders }) => {
+const RecentOrders: React.FC<RecentOrdersProps> = React.memo(({ orders }) => {
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       pending: {
@@ -65,7 +64,7 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({ orders }) => {
               Recent Orders
             </h2>
             <p className="text-sm text-charcoal-600 dark:text-cream-300">
-              Your last {orders.length} order{orders.length !== 1 ? 's' : ''}
+              Your last {orders.length} order{orders.length === 1 ? '' : 's'}
             </p>
           </div>
           <a
@@ -141,7 +140,7 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({ orders }) => {
                     </td>
                     <td className="py-4 px-4">
                       <span className="text-sm text-charcoal-700 dark:text-cream-200">
-                        {order.items?.length || 0} item{order.items?.length !== 1 ? 's' : ''}
+                        {order.items?.length || 0} item{order.items?.length === 1 ? '' : 's'}
                       </span>
                     </td>
                     <td className="py-4 px-4">
@@ -172,6 +171,8 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({ orders }) => {
       </div>
     </div>
   );
-};
+});
+
+RecentOrders.displayName = 'RecentOrders';
 
 export default RecentOrders;

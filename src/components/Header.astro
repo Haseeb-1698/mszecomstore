@@ -1,16 +1,14 @@
 ---
-import { Menu } from 'lucide-react';
 import ThemeSwitcher from './ThemeSwitcher.tsx';
 import AnnouncementStrip from './AnnouncementStrip.astro';
 import AuthButtons from './auth/AuthButtons';
-import MobileAuthButtons from './auth/MobileAuthButtons';
+import CartIcon from './ui/CartIcon';
 
 const links = [
   { href: '/', label: 'Home' },
   { href: '/services', label: 'Services' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
-  { href: '/cart', label: 'Cart' },
 ];
 ---
 
@@ -20,12 +18,11 @@ const links = [
     <nav class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       <a href="/" class="text-2xl font-bold text-charcoal-900 dark:text-white">MSZ Software House</a>
 
-      <div class="hidden md:flex items-center gap-8">
+      <div class="flex items-center gap-8">
         {links.map(link => (
           <a href={link.href} class="text-charcoal-800 dark:text-cream-100 hover:text-coral-500 dark:hover:text-coral-400 transition-colors">{link.label}</a>
         ))}
         
-        <!-- Terms & Policy Dropdown -->
         <div class="relative group">
           <button class="text-charcoal-800 dark:text-cream-100 hover:text-coral-500 dark:hover:text-coral-400 transition-colors flex items-center gap-1">
             Legal
@@ -50,17 +47,10 @@ const links = [
         </div>
       </div>
 
-      <div class="hidden md:flex items-center gap-4">
+      <div class="flex items-center gap-4">
+        <CartIcon client:load />
         <AuthButtons client:load />
         <ThemeSwitcher client:load />
-      </div>
-
-      <div class="md:hidden flex items-center gap-4">
-        <MobileAuthButtons client:load />
-        <ThemeSwitcher client:load />
-        <button id="mobile-menu-toggle">
-          <Menu className="w-6 h-6 text-charcoal-800 dark:text-white" />
-        </button>
       </div>
     </nav>
   </div>

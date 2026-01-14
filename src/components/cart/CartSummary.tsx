@@ -1,35 +1,45 @@
 import React, { useState } from 'react';
-import type { Cart } from '../../lib/types';
+import type { CartData } from '../../lib/api/cart';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { formatPrice } from '../../lib/utils';
 
 interface CartSummaryProps {
-  cart: Cart;
-  onApplyDiscount: (code: string) => boolean;
+  cart: CartData | null;
+  onApplyDiscount: (code: string) => Promise<boolean>;
 }
 
 const CartSummary: React.FC<CartSummaryProps> = ({ cart, onApplyDiscount }) => {
   const [discountCode, setDiscountCode] = useState('');
   const [discountMessage, setDiscountMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [isApplying, setIsApplying] = useState(false);
 
-  const handleApplyDiscount = () => {
+  const handleApplyDiscount = async () => {
     if (!discountCode.trim()) {
       setDiscountMessage({ type: 'error', text: 'Please enter a discount code' });
       return;
     }
 
-    const applied = onApplyDiscount(discountCode);
-    if (applied) {
-      setDiscountMessage({ type: 'success', text: 'Discount code applied!' });
-      setDiscountCode('');
-    } else {
-      setDiscountMessage({ type: 'error', text: 'Invalid discount code' });
+    setIsApplying(true);
+    try {
+      const applied = await onApplyDiscount(discountCode);
+      if (applied) {
+        setDiscountMessage({ type: 'success', text: 'Discount code applied!' });
+        setDiscountCode('');
+      } else {
+        setDiscountMessage({ type: 'error', text: 'Invalid discount code' });
+      }
+    } finally {
+      setIsApplying(false);
     }
 
     setTimeout(() => setDiscountMessage(null), 3000);
   };
+
+  const subtotal = cart?.subtotal ?? 0;
+  const discount = cart?.discount ?? 0;
+  const total = cart?.total ?? 0;
 
   return (
     <Card variant="elevated" className="sticky top-4">
@@ -40,14 +50,14 @@ const CartSummary: React.FC<CartSummaryProps> = ({ cart, onApplyDiscount }) => {
         {/* Subtotal */}
         <div className="flex justify-between text-charcoal-700 dark:text-cream-300">
           <span>Subtotal</span>
-          <span className="font-medium">{formatPrice(cart.subtotal)}</span>
+          <span className="font-medium">{formatPrice(subtotal)}</span>
         </div>
 
         {/* Discount */}
-        {cart.discount > 0 && (
+        {discount > 0 && (
           <div className="flex justify-between text-coral-600 dark:text-coral-400">
             <span>Discount</span>
-            <span className="font-medium">-{formatPrice(cart.discount)}</span>
+            <span className="font-medium">-{formatPrice(discount)}</span>
           </div>
         )}
 
@@ -55,7 +65,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({ cart, onApplyDiscount }) => {
         <div className="border-t border-cream-400 dark:border-charcoal-700 pt-4">
           <div className="flex justify-between text-xl font-bold text-charcoal-800 dark:text-cream-100">
             <span>Total</span>
-            <span>{formatPrice(cart.total)}</span>
+            <span>{formatPrice(total)}</span>
           </div>
         </div>
 
@@ -74,8 +84,9 @@ const CartSummary: React.FC<CartSummaryProps> = ({ cart, onApplyDiscount }) => {
               variant="outline"
               size="md"
               onClick={handleApplyDiscount}
+              disabled={isApplying}
             >
-              Apply
+              {isApplying ? 'Applying...' : 'Apply'}
             </Button>
           </div>
 

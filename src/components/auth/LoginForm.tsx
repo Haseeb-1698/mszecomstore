@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { ArrowRight } from 'lucide-react';
 import { ErrorMessage } from '../ui/ErrorMessage';
+import { addItemToCart } from '../../lib/api/cart';
 
 /**
  * LoginForm - Self-contained login form that doesn't rely on React context.
@@ -12,6 +13,16 @@ export function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [redirectUrl, setRedirectUrl] = useState('/dashboard');
+
+  useEffect(() => {
+    // Check for redirect URL in query params
+    const urlParams = new URLSearchParams(globalThis.location.search);
+    const redirect = urlParams.get('redirect');
+    if (redirect) {
+      setRedirectUrl(redirect);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,7 +30,7 @@ export function LoginForm() {
     setLoading(true);
 
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -27,12 +38,35 @@ export function LoginForm() {
       if (signInError) {
         setError(signInError.message);
         setLoading(false);
-      } else {
-        // Redirect to dashboard on success
-        window.location.href = '/dashboard';
+      } else if (data.user) {
+        // Check for pending cart item from sessionStorage
+        const pendingItem = sessionStorage.getItem('pendingCartItem');
+        if (pendingItem) {
+          try {
+            const itemData = JSON.parse(pendingItem);
+            // Add to cart using the API (Supabase)
+            await addItemToCart(data.user.id, {
+              planId: itemData.planId,
+              serviceName: itemData.serviceName,
+              planName: itemData.planName,
+              price: typeof itemData.price === 'string' ? Number.parseFloat(itemData.price) : itemData.price,
+              quantity: itemData.quantity || 1
+            });
+            sessionStorage.removeItem('pendingCartItem');
+            
+            // Dispatch event to update cart icon
+            globalThis.dispatchEvent(new CustomEvent('cartUpdated'));
+          } catch (err) {
+            console.error('Failed to add pending item to cart:', err);
+          }
+        }
+
+        // Redirect to the intended page
+        globalThis.location.href = redirectUrl;
       }
-    } catch (err: any) {
-      setError(err.message || 'An error occurred during login');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'An error occurred during login';
+      setError(message);
       setLoading(false);
     }
   };

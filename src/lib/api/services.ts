@@ -24,7 +24,7 @@ export async function getServices(): Promise<ServiceWithPlansResponse[]> {
     return (data as ServiceWithPlansResponse[]).map(service => ({
         ...service,
         // Ensure slug is always present (fallback for legacy data)
-        slug: service.slug || service.name.toLowerCase().replace(/ /g, '-'),
+        slug: service.slug || service.name.toLowerCase().replaceAll(' ', '-'),
         // Map icon_url to logo for backwards compatibility
         icon_url: service.icon_url || '/icons/default-service.svg',
     }));
@@ -58,21 +58,21 @@ export async function getServiceBySlug(slug: string): Promise<ServiceWithPlansRe
         }
 
         const service = (allServices as ServiceWithPlansResponse[]).find(
-            s => s.slug === slug || s.name.toLowerCase().replace(/ /g, '-') === slug
+            s => s.slug === slug || s.name.toLowerCase().replaceAll(' ', '-') === slug
         );
 
         if (!service) return null;
 
         return {
             ...service,
-            slug: service.slug || service.name.toLowerCase().replace(/ /g, '-'),
+            slug: service.slug || service.name.toLowerCase().replaceAll(' ', '-'),
             icon_url: service.icon_url || '/icons/default-service.svg',
         };
     }
 
     return {
         ...data,
-        slug: data.slug || data.name.toLowerCase().replace(/ /g, '-'),
+        slug: data.slug || data.name.toLowerCase().replaceAll(' ', '-'),
         icon_url: data.icon_url || '/icons/default-service.svg',
     } as ServiceWithPlansResponse;
 }

@@ -22,7 +22,14 @@ const ServicesTable: React.FC = () => {
   const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const { services: dbServices, loading, toggleActiveStatus, deleteService, refresh } = useServices();
+  const { services: dbServices, toggleActiveStatus, deleteService, refresh } = useServices();
+
+  const getDuration = (plan: typeof dbServices[0]['plans'][0] | undefined): string => {
+    if (!plan) return 'N/A';
+    const months = plan.duration_months;
+    const suffix = months === 1 ? '' : 's';
+    return `${months} Month${suffix}`;
+  };
 
   const services: Service[] = dbServices.map(s => {
     const defaultPlan = s.plans?.[0];
@@ -31,7 +38,7 @@ const ServicesTable: React.FC = () => {
       name: s.name,
       category: s.category,
       price: defaultPlan ? formatPrice(defaultPlan.price) : 'N/A',
-      duration: defaultPlan ? `${defaultPlan.duration_months} Month${defaultPlan.duration_months > 1 ? 's' : ''}` : 'N/A',
+      duration: getDuration(defaultPlan),
       active: s.is_active,
       totalSales: 0, // In a real app, this would come from a view or aggregation
       description: s.description || ''
