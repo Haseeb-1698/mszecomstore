@@ -44,11 +44,12 @@ export async function getOrCreateCart(userId: string): Promise<CartWithItems | n
         .select('*')
         .eq('user_id', userId)
         .maybeSingle(),
-      15, // 15 seconds to account for Supabase cold start
+      15000, // 15 seconds to account for Supabase cold start
       'Fetch cart'
     );
 
     if (fetchError) {
+      console.error('[getOrCreateCart] Fetch cart error:', fetchError);
       return null;
     }
 
@@ -89,6 +90,7 @@ export async function getOrCreateCart(userId: string): Promise<CartWithItems | n
     );
 
     if (createError) {
+      console.error('[getOrCreateCart] Create cart error:', createError);
       // Check if cart was created by another concurrent request
       if (createError.code === '23505') {
         return getOrCreateCart(userId);
@@ -97,13 +99,15 @@ export async function getOrCreateCart(userId: string): Promise<CartWithItems | n
     }
 
     if (!newCart) {
+      console.error('[getOrCreateCart] No cart returned after insert');
       return null;
     }
     return {
       ...newCart,
       cart_items: []
     } as CartWithItems;
-
+console.error('[getOrCreateCart] Unexpected error:', err);
+    
   } catch (err) {
     return null;
   }
