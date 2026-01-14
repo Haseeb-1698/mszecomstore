@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
+import { withTimeout, DEFAULT_QUERY_TIMEOUT } from '../../lib/utils/timeout';
 
 interface Customer {
   id: string;
@@ -16,27 +17,51 @@ interface Customer {
 const CustomersTable: React.FC = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const mountedRef = useRef(true);
 
   useEffect(() => {
+    mountedRef.current = true;
     fetchCustomers();
+    
+    return () => {
+      mountedRef.current = false;
+    };
   }, []);
 
   const fetchCustomers = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('role', 'customer')
-        .order('created_at', { ascending: false });
+      setError(null);
+      
+      const { data, error: queryError } = await withTimeout(
+        supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('role', 'customer')
+          .order('created_at', { ascending: false }),
+        DEFAULT_QUERY_TIMEOUT,
+        'Customers fetch timed out'
+      );
 
-      if (error) throw error;
+      if (!mountedRef.current) return;
+
+      if (queryError) {
+        setError(queryError.message);
+        return;
+      }
+      
       setCustomers(data || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching customers:', err);
+      if (mountedRef.current) {
+        setError(err instanceof Error ? err.message : 'Failed to load customers');
+      }
     } finally {
-      setLoading(false);
+      if (mountedRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -57,6 +82,25 @@ const CustomersTable: React.FC = () => {
               <div key={i} className="h-12 bg-cream-200 dark:bg-charcoal-700 rounded"></div>
             ))}
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-cream-50 dark:bg-charcoal-800 rounded-2xl p-6 border border-cream-400 dark:border-charcoal-700">
+        <div className="text-center py-8">
+          <svg className="w-12 h-12 mx-auto text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <p className="text-charcoal-600 dark:text-cream-400 mb-4">{error}</p>
+          <button
+            onClick={fetchCustomers}
+            className="px-4 py-2 bg-coral-500 hover:bg-coral-600 text-white rounded-lg transition-colors"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );

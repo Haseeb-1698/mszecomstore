@@ -1,21 +1,35 @@
 import { supabase } from '../supabase';
 import type { DbUserProfileUpdate, DbUserProfileInsert } from '../database.types';
+import { withTimeout, SHORT_TIMEOUT } from '../utils/timeout';
 
 // Use 'any' for return types since Supabase returns slightly different types
 // (e.g., string instead of enum unions)
 export async function getUserProfile(userId: string): Promise<any> {
-    const { data, error } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+    try {
+        const { data, error } = await withTimeout(
+            supabase
+                .from('user_profiles')
+                .select('*')
+                .eq('id', userId)
+                .single(),
+            SHORT_TIMEOUT,
+            'User profile fetch timed out'
+        );
 
-    if (error) {
-        console.error('Error fetching user profile:', error);
+        if (error) {
+            // PGRST116 = no rows found - this is expected for new users
+            if (error.code === 'PGRST116') {
+                return null;
+            }
+            console.error('Error fetching user profile:', error);
+            return null;
+        }
+
+        return data;
+    } catch (err) {
+        console.error('Error fetching user profile:', err);
         return null;
     }
-
-    return data;
 }
 
 export async function updateUserProfile(
@@ -62,16 +76,30 @@ export async function createUserProfile(
 
 export async function isUserAdmin(userId: string): Promise<boolean> {
     try {
-        const { data, error } = await supabase
-            .from('user_profiles')
-            .select('role')
-            .eq('id', userId)
-            .single();
+        // Add timeout to prevent hanging - default to false if times out
+        const { data, error } = await withTimeout(
+            supabase
+                .from('user_profiles')
+                .select('role')
+                .eq('id', userId)
+                .single(),
+            SHORT_TIMEOUT,
+            'Admin check timed out'
+        );
 
-        if (error) return false;
+        // Any error (including no profile found) = not admin
+        if (error) {
+            // PGRST116 = no rows found - user has no profile yet
+            if (error.code !== 'PGRST116') {
+                console.warn('Error checking admin status:', error.message);
+            }
+            return false;
+        }
+        
         return data?.role === 'admin';
     } catch (err) {
-        console.error('Error checking admin status:', err);
+        // Timeout or other error - default to non-admin for safety
+        console.warn('Admin check failed, defaulting to non-admin:', err);
         return false;
     }
 }

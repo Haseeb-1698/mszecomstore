@@ -1,0 +1,31 @@
+<!-- filepath: src/pages/admin/signup.astro -->
+---
+import Layout from '../../layouts/Layout.astro';
+import { SignupForm } from '../../components/auth/SignupForm';
+---
+
+<Layout title="Admin Signup | SubHub">
+  <main class="py-24 sm:py-32 px-6 bg-white dark:bg-charcoal-900">
+    <div class="max-w-md mx-auto bg-cream-100 dark:bg-charcoal-800 rounded-2xl shadow-soft p-8 sm:p-10 border border-cream-200 dark:border-charcoal-700">
+      <div class="text-center">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-coral-500/10 mb-4">
+          <svg class="w-6 h-6 text-coral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+        </div>
+        <h1 class="text-4xl sm:text-5xl font-bold text-charcoal-900 dark:text-white tracking-tighter">Admin Signup</h1>
+        <p class="mt-4 text-lg text-charcoal-800/80 dark:text-gray-300">Create an admin account to manage SubHub.</p>
+      </div>
+
+      <div class="mt-12">
+        <SignupForm role="admin" redirectTo="/login" client:load />
+      </div>
+
+      <div class="mt-8 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+        <p class="text-sm text-amber-800 dark:text-amber-200">
+          <strong>Note:</strong> Admin accounts have full access to the admin panel and all management features.
+        </p>
+      </div>
+    </div>
+  </main>
+</Layout>

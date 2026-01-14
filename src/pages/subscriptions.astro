@@ -1,22 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { ProtectedRoute } from '../components/auth/ProtectedRoute';
+import SubscriptionsPageWrapper from '../components/customer/SubscriptionsPageWrapper';
 ---
 
 <Layout title="My Subscriptions - MSZ Ecom Store">
-  <ProtectedRoute client:load>
-    <div id="subscriptions-page-root"></div>
-  </ProtectedRoute>
+  <SubscriptionsPageWrapper client:only="react" />
 </Layout>
-
-<script>
-  import { createRoot } from 'react-dom/client';
-  import React from 'react';
-  import AllSubscriptionsPage from '../components/customer/AllSubscriptionsPage';
-
-  const container = document.getElementById('subscriptions-page-root');
-  if (container) {
-    const root = createRoot(container);
-    root.render(React.createElement(AllSubscriptionsPage));
-  }
-</script>

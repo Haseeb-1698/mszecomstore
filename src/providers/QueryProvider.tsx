@@ -3,42 +3,51 @@
  * 
  * This provider wraps the application with React Query's QueryClientProvider,
  * enabling efficient data fetching, caching, and state synchronization.
+ * 
+ * IMPORTANT: QueryClient is created inside the component using useState
+ * to prevent state leaks between SSR requests in Astro.
  */
 
-import React, { type ReactNode } from 'react';
+import React, { useState, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { API_CONFIG } from '../lib/constants';
 
-// Create a client with sensible defaults
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: API_CONFIG.STALE_TIME,
-      gcTime: API_CONFIG.CACHE_TIME, // Previously cacheTime
-      retry: API_CONFIG.RETRY_COUNT,
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: true,
+/**
+ * Creates a new QueryClient with app-specific defaults.
+ * Called once per component instance to avoid SSR state leaks.
+ */
+function createQueryClient(): QueryClient {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: API_CONFIG.STALE_TIME,
+        gcTime: API_CONFIG.CACHE_TIME, // Previously cacheTime
+        retry: API_CONFIG.RETRY_COUNT,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: true,
+      },
+      mutations: {
+        retry: 1,
+      },
     },
-    mutations: {
-      retry: 1,
-    },
-  },
-});
+  });
+}
 
 interface QueryProviderProps {
   children: ReactNode;
 }
 
 export const QueryProvider: React.FC<QueryProviderProps> = ({ children }) => {
+  // Create QueryClient inside component state to prevent SSR state leaks
+  // The factory function ensures it's only created once per component lifecycle
+  const [queryClient] = useState(() => createQueryClient());
+  
   return (
     <QueryClientProvider client={queryClient}>
       {children}
     </QueryClientProvider>
   );
 };
-
-// Export the client for direct access in specific use cases
-export { queryClient };
 
 // Query key factory for consistent key generation
 export const queryKeys = {

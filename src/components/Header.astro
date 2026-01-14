@@ -48,9 +48,11 @@ const links = [
       </div>
 
       <div class="flex items-center gap-4">
-        <CartIcon client:load />
-        <AuthButtons client:load />
-        <ThemeSwitcher client:load />
+        <!-- Using client:only="react" to prevent hydration mismatches -->
+        <!-- These components fetch auth state client-side, so server rendering would cause flicker -->
+        <CartIcon client:only="react" />
+        <AuthButtons client:only="react" />
+        <ThemeSwitcher client:only="react" />
       </div>
     </nav>
   </div>

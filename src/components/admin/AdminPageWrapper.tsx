@@ -1,6 +1,5 @@
 import React, { type ReactNode } from 'react';
 import AdminShell from './AdminShell';
-import { ProtectedRoute } from '../auth/ProtectedRoute';
 
 interface AdminPageWrapperProps {
   children: ReactNode;
@@ -8,10 +7,12 @@ interface AdminPageWrapperProps {
 }
 
 /**
- * AdminPageWrapper - Complete admin page wrapper with shell, providers, and protection.
+ * AdminPageWrapper - Complete admin page wrapper with shell and providers.
  * Use this as the single client:only="react" component in admin .astro pages.
  * This prevents hydration race conditions by ensuring all React components
  * share the same context and hydrate together.
+ * 
+ * Note: ProtectedRoute removed - authentication will be handled separately.
  */
 export const AdminPageWrapper: React.FC<AdminPageWrapperProps> = ({ 
   children, 
@@ -19,9 +20,7 @@ export const AdminPageWrapper: React.FC<AdminPageWrapperProps> = ({
 }) => {
   return (
     <AdminShell>
-      <ProtectedRoute requireAdmin={requireAdmin}>
-        {children}
-      </ProtectedRoute>
+      {children}
     </AdminShell>
   );
 };

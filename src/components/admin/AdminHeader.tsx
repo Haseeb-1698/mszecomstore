@@ -10,8 +10,14 @@ const AdminHeader: React.FC = () => {
   const { user, signOut } = useSupabaseAuth(); // Use context for auth
 
   const handleLogout = async () => {
-    await signOut();
-    // Redirect or handle post-logout as needed
+    try {
+      await signOut();
+      // Redirect to login page after successful logout
+      globalThis.location.href = '/login';
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Could show an error message here if needed
+    }
   };
 
   return (

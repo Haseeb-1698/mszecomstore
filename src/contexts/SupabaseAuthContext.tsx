@@ -1,16 +1,26 @@
-import { createContext, useContext, useEffect, useState, useCallback, useMemo, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef, type ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
 import { isUserAdmin } from '../lib/api/users';
+import { withTimeout, SHORT_TIMEOUT } from '../lib/utils/timeout';
 import type { User, Session } from '@supabase/supabase-js';
+
+/**
+ * Maximum time to wait for auth initialization before forcing ready state.
+ * This prevents infinite loading if auth or admin check hangs.
+ */
+const AUTH_INIT_TIMEOUT = 8000; // 8 seconds
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  isReady: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
+  /** True if there was an error during initialization */
+  authError: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,47 +29,136 @@ export function SupabaseAuthProvider({ children }: Readonly<{ children: ReactNod
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isReady, setIsReady] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  
+  // Track if we've already completed initialization
+  const initCompleted = useRef(false);
 
-  // Check admin status from user_profiles table
-  const checkAdminStatus = useCallback(async (userId: string | undefined) => {
+  // Check admin status from user_profiles table - non-blocking
+  const checkAdminStatus = useCallback(async (userId: string | undefined): Promise<boolean> => {
     if (!userId) {
-      setIsAdmin(false);
-      return;
+      return false;
     }
     
     try {
+      // isUserAdmin already has its own timeout
       const adminStatus = await isUserAdmin(userId);
-      setIsAdmin(adminStatus);
+      return adminStatus;
     } catch (error) {
-      console.error('Error checking admin status:', error);
-      setIsAdmin(false);
+      console.warn('Error checking admin status, defaulting to false:', error);
+      return false;
+    }
+  }, []);
+
+  // Force ready state after timeout to prevent infinite loading
+  const forceReady = useCallback(() => {
+    if (!initCompleted.current) {
+      console.warn('[Auth] Forcing ready state due to timeout');
+      initCompleted.current = true;
+      setLoading(false);
+      setIsReady(true);
+      setAuthError('Auth initialization timed out. Some features may be limited.');
     }
   }, []);
 
   useEffect(() => {
+    let mounted = true;
+    
+    // Safety timeout - force ready state if init takes too long
+    const safetyTimeout = setTimeout(forceReady, AUTH_INIT_TIMEOUT);
+
     // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      await checkAdminStatus(session?.user?.id);
-      setLoading(false);
-    });
+    const initAuth = async () => {
+      try {
+        // Wrap getSession with timeout
+        const { data: { session }, error } = await withTimeout(
+          supabase.auth.getSession(),
+          SHORT_TIMEOUT,
+          'Session fetch timed out'
+        );
+        
+        if (!mounted || initCompleted.current) return;
+
+        if (error) {
+          console.error('Error getting session:', error);
+          setSession(null);
+          setUser(null);
+          setIsAdmin(false);
+          setAuthError(error.message);
+        } else {
+          setSession(session);
+          setUser(session?.user ?? null);
+          
+          // Check admin status - but DON'T block ready state on it
+          // Set ready first, then update admin status when it comes back
+          if (session?.user?.id) {
+            // Fire and forget - don't await
+            checkAdminStatus(session.user.id).then(adminStatus => {
+              if (mounted) {
+                setIsAdmin(adminStatus);
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        if (mounted && !initCompleted.current) {
+          setSession(null);
+          setUser(null);
+          setIsAdmin(false);
+          setAuthError(error instanceof Error ? error.message : 'Auth initialization failed');
+        }
+      } finally {
+        if (mounted && !initCompleted.current) {
+          clearTimeout(safetyTimeout);
+          initCompleted.current = true;
+          setLoading(false);
+          setIsReady(true);
+        }
+      }
+    };
+
+    initAuth();
 
     // Listen for auth changes
+    // Skip INITIAL_SESSION as it's already handled by initAuth() above
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return;
+      
+      // Skip INITIAL_SESSION - already handled in initAuth()
+      if (event === 'INITIAL_SESSION') {
+        return;
+      }
+      
+      console.log('[Auth] State changed:', event);
       setSession(session);
       setUser(session?.user ?? null);
-      await checkAdminStatus(session?.user?.id);
+      setAuthError(null); // Clear any previous errors on successful auth change
+      
+      // Update admin status asynchronously
+      if (session?.user?.id) {
+        checkAdminStatus(session.user.id).then(adminStatus => {
+          if (mounted) {
+            setIsAdmin(adminStatus);
+          }
+        });
+      } else {
+        setIsAdmin(false);
+      }
+      
       setLoading(false);
     });
 
     return () => {
+      mounted = false;
+      clearTimeout(safetyTimeout);
       subscription.unsubscribe();
     };
-  }, [checkAdminStatus]);
+  }, [checkAdminStatus, forceReady]);
 
   const signIn = useCallback(async (email: string, password: string) => {
     try {
@@ -100,11 +199,13 @@ export function SupabaseAuthProvider({ children }: Readonly<{ children: ReactNod
     user,
     session,
     loading,
+    isReady,
     signIn,
     signUp,
     signOut,
-    isAdmin
-  }), [user, session, loading, signIn, signUp, signOut, isAdmin]);
+    isAdmin,
+    authError
+  }), [user, session, loading, isReady, signIn, signUp, signOut, isAdmin, authError]);
 
   return (
     <AuthContext.Provider value={value}>

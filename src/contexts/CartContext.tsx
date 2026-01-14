@@ -20,20 +20,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 export const useCartContext = (): UseCartReturn => {
   const context = useContext(CartContext);
   if (context === undefined) {
-    // During hydration or if provider not mounted, return a loading state with async no-ops
-    return {
-      cart: null,
-      addItem: async () => {},
-      removeItem: async () => {},
-      updateQuantity: async () => {},
-      applyDiscountCode: async () => false,
-      clearCart: async () => {},
-      itemCount: 0,
-      isEmpty: true,
-      isLoading: true,
-      error: null,
-      isAuthenticated: false,
-    };
+    throw new Error(
+      'useCartContext must be used within a CartProvider. ' +
+      'Wrap your component tree with <CartProvider> or use useCart() hook directly for standalone usage.'
+    );
   }
   return context;
 };

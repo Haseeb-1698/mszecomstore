@@ -32,7 +32,10 @@ function AuthHeaderContent() {
           Dashboard
         </Button>
       </a>
-      <Button variant="outline" size="sm" onClick={() => signOut()}>
+      <Button variant="outline" size="sm" onClick={async () => {
+        await signOut();
+        globalThis.location.href = '/login';
+      }}>
         Sign Out
       </Button>
     </div>

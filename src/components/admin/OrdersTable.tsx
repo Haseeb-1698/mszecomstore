@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import OrderStatusBadge from './OrderStatusBadge';
 import { supabase } from '../../lib/supabase';
 import type { OrderStatus } from '../../lib/database.types';
 import { formatPrice } from '../../lib/utils';
+import { withTimeout, DEFAULT_QUERY_TIMEOUT } from '../../lib/utils/timeout';
 
 interface Order {
   id: string;
@@ -19,24 +20,42 @@ const OrdersTable: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const ordersPerPage = 10;
+  const mountedRef = useRef(true);
 
   useEffect(() => {
+    mountedRef.current = true;
     fetchOrders();
+    
+    return () => {
+      mountedRef.current = false;
+    };
   }, []);
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          items:order_items (service_name, plan_name)
-        `)
-        .order('created_at', { ascending: false });
+      setError(null);
+      
+      const { data, error: queryError } = await withTimeout(
+        supabase
+          .from('orders')
+          .select(`
+            *,
+            items:order_items (service_name, plan_name)
+          `)
+          .order('created_at', { ascending: false }),
+        DEFAULT_QUERY_TIMEOUT,
+        'Orders fetch timed out'
+      );
 
-      if (error) throw error;
+      if (!mountedRef.current) return;
+
+      if (queryError) {
+        setError(queryError.message);
+        return;
+      }
 
       const mappedOrders: Order[] = (data || []).map((order: any) => ({
         id: order.id.substring(0, 8).toUpperCase(),
@@ -50,10 +69,15 @@ const OrdersTable: React.FC = () => {
       }));
 
       setOrders(mappedOrders);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching orders:', err);
+      if (mountedRef.current) {
+        setError(err instanceof Error ? err.message : 'Failed to load orders');
+      }
     } finally {
-      setLoading(false);
+      if (mountedRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -97,6 +121,23 @@ const OrdersTable: React.FC = () => {
       <div className="bg-cream-50 dark:bg-charcoal-800 rounded-2xl border border-cream-400 dark:border-charcoal-700 p-8 text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-coral-500 mx-auto"></div>
         <p className="mt-4 text-charcoal-600 dark:text-cream-400">Loading orders...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-cream-50 dark:bg-charcoal-800 rounded-2xl border border-cream-400 dark:border-charcoal-700 p-8 text-center">
+        <svg className="w-12 h-12 mx-auto text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <p className="text-charcoal-600 dark:text-cream-400 mb-4">{error}</p>
+        <button
+          onClick={fetchOrders}
+          className="px-4 py-2 bg-coral-500 hover:bg-coral-600 text-white rounded-lg transition-colors"
+        >
+          Retry
+        </button>
       </div>
     );
   }
