@@ -1,0 +1,22 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { ProtectedRoute } from '../components/auth/ProtectedRoute';
+---
+
+<Layout title="My Orders - MSZ Ecom Store">
+  <ProtectedRoute client:load>
+    <div id="orders-page-root"></div>
+  </ProtectedRoute>
+</Layout>
+
+<script>
+  import { createRoot } from 'react-dom/client';
+  import React from 'react';
+  import AllOrdersPage from '../components/customer/AllOrdersPage';
+
+  const container = document.getElementById('orders-page-root');
+  if (container) {
+    const root = createRoot(container);
+    root.render(React.createElement(AllOrdersPage));
+  }
+</script>

@@ -1,16 +1,19 @@
-import { useState } from 'react';
-import { useSupabaseAuth, SupabaseAuthProvider } from '../../contexts/SupabaseAuthContext';
+import React, { useState } from 'react';
+import { supabase } from '../../lib/supabase';
 import { ArrowRight } from 'lucide-react';
 import { ErrorMessage } from '../ui/ErrorMessage';
 
-function SignupFormContent() {
+/**
+ * SignupForm - Self-contained signup form that doesn't rely on React context.
+ * This avoids hydration issues with Astro's client:load directive.
+ */
+export function SignupForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const { signUp } = useSupabaseAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,13 +32,21 @@ function SignupFormContent() {
       return;
     }
 
-    const { error } = await signUp(email, password);
+    try {
+      const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+      });
 
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-    } else {
-      setSuccess(true);
+      if (signUpError) {
+        setError(signUpError.message);
+        setLoading(false);
+      } else {
+        setSuccess(true);
+        setLoading(false);
+      }
+    } catch (err: any) {
+      setError(err.message || 'An error occurred during signup');
       setLoading(false);
     }
   };
@@ -51,7 +62,7 @@ function SignupFormContent() {
         </p>
         <button
           onClick={() => window.location.href = '/login'}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-coral-500 px-8 py-3.5 font-medium text-white shadow-soft-light-focus hover:bg-coral-600 focus:outline-none focus:ring-2 focus:ring-coral-500 focus:ring-offset-2 transition-all"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-coral-500 px-8 py-3.5 font-medium text-white shadow-soft hover:bg-coral-600 focus:outline-none focus:ring-2 focus:ring-coral-500 focus:ring-offset-2 transition-all"
         >
           <span>Go to Login</span>
           <ArrowRight className="w-5 h-5" />
@@ -72,7 +83,7 @@ function SignupFormContent() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="block w-full rounded-xl border-cream-400 dark:border-charcoal-600 bg-white dark:bg-charcoal-700 px-4 py-3.5 text-charcoal-900 dark:text-white placeholder-charcoal-800/50 dark:placeholder-gray-400 focus:border-coral-500 focus:ring-coral-500 focus:outline-none transition-all"
+            className="block w-full rounded-xl border border-cream-400 dark:border-charcoal-600 bg-white dark:bg-charcoal-700 px-4 py-3.5 text-charcoal-900 dark:text-white placeholder-charcoal-800/50 dark:placeholder-gray-400 focus:border-coral-500 focus:ring-coral-500 focus:outline-none transition-all"
             placeholder="Enter your email"
           />
         </div>
@@ -86,7 +97,7 @@ function SignupFormContent() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="block w-full rounded-xl border-cream-400 dark:border-charcoal-600 bg-white dark:bg-charcoal-700 px-4 py-3.5 text-charcoal-900 dark:text-white placeholder-charcoal-800/50 dark:placeholder-gray-400 focus:border-coral-500 focus:ring-coral-500 focus:outline-none transition-all"
+            className="block w-full rounded-xl border border-cream-400 dark:border-charcoal-600 bg-white dark:bg-charcoal-700 px-4 py-3.5 text-charcoal-900 dark:text-white placeholder-charcoal-800/50 dark:placeholder-gray-400 focus:border-coral-500 focus:ring-coral-500 focus:outline-none transition-all"
             placeholder="Create a password"
           />
         </div>
@@ -100,7 +111,7 @@ function SignupFormContent() {
             required
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="block w-full rounded-xl border-cream-400 dark:border-charcoal-600 bg-white dark:bg-charcoal-700 px-4 py-3.5 text-charcoal-900 dark:text-white placeholder-charcoal-800/50 dark:placeholder-gray-400 focus:border-coral-500 focus:ring-coral-500 focus:outline-none transition-all"
+            className="block w-full rounded-xl border border-cream-400 dark:border-charcoal-600 bg-white dark:bg-charcoal-700 px-4 py-3.5 text-charcoal-900 dark:text-white placeholder-charcoal-800/50 dark:placeholder-gray-400 focus:border-coral-500 focus:ring-coral-500 focus:outline-none transition-all"
             placeholder="Confirm your password"
           />
         </div>
@@ -116,7 +127,7 @@ function SignupFormContent() {
         <button
           type="submit"
           disabled={loading}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-coral-500 px-8 py-3.5 font-medium text-white shadow-soft-light-focus hover:bg-coral-600 focus:outline-none focus:ring-2 focus:ring-coral-500 focus:ring-offset-2 transition-all disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-coral-500 px-8 py-3.5 font-medium text-white shadow-soft hover:bg-coral-600 focus:outline-none focus:ring-2 focus:ring-coral-500 focus:ring-offset-2 transition-all disabled:opacity-50"
         >
           <span>{loading ? 'Creating Account...' : 'Continue with Email'}</span>
           {!loading && <ArrowRight className="w-5 h-5" />}
@@ -133,12 +144,4 @@ function SignupFormContent() {
       </div>
     </form>
   );
-}
-
-export function SignupForm() {
-  return (
-    <SupabaseAuthProvider>
-      <SignupFormContent />
-    </SupabaseAuthProvider>
-  )
 }
