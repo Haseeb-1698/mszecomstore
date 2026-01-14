@@ -119,7 +119,7 @@ const CustomerDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-cream-50 dark:bg-charcoal-900 py-8">
-      <div className="container mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-6">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-charcoal-900 dark:text-cream-50 mb-2">
