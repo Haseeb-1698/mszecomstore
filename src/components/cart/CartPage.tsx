@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useCartContext } from '../../contexts/CartContext';
 import { Button } from '../ui/Button';
 import CartItem from './CartItem';
@@ -6,8 +6,15 @@ import CartSummary from './CartSummary';
 
 const CartPage: React.FC = () => {
   const { cart, removeItem, updateQuantity, applyDiscountCode, clearCart, isLoading, isAuthenticated } = useCartContext();
+  const [mounted, setMounted] = useState(false);
 
-  if (isLoading) {
+  // Force re-render after hydration to recover from context mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Show loading during initial hydration
+  if (!mounted || isLoading) {
     return (
       <div className="min-h-screen bg-cream-50 dark:bg-charcoal-900 flex items-center justify-center">
         <div className="text-charcoal-800 dark:text-cream-100">Loading cart...</div>

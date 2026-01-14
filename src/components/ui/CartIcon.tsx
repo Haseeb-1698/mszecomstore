@@ -1,57 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
-import { getCartItemCount } from '../../lib/api/cart';
+import React from 'react';
+import { useCart } from '../../hooks/useCart';
 
 const CartIcon: React.FC = () => {
-  const [itemCount, setItemCount] = useState(0);
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    // Check authentication and load cart
-    const initializeCart = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        const count = await getCartItemCount(session.user.id);
-        setItemCount(count);
-      }
-    };
-
-    initializeCart();
-
-    // Listen for auth changes (skip INITIAL_SESSION to avoid duplicates)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'INITIAL_SESSION') return;
-      
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        const count = await getCartItemCount(session.user.id);
-        setItemCount(count);
-      } else {
-        setItemCount(0);
-      }
-    });
-
-    // Listen for cart updates from other components
-    const handleCartUpdate = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const count = await getCartItemCount(session.user.id);
-        setItemCount(count);
-      }
-    };
-
-    globalThis.addEventListener('cartUpdated', handleCartUpdate);
-
-    return () => {
-      subscription.unsubscribe();
-      globalThis.removeEventListener('cartUpdated', handleCartUpdate);
-    };
-  }, []);
+  const { itemCount, isAuthenticated } = useCart();
 
   // Don't show cart icon if not logged in
-  if (!user) {
+  if (!isAuthenticated) {
     return null;
   }
 

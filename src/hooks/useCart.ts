@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { 
   getOrCreateCart, 
@@ -39,10 +39,18 @@ export const useCart = (): UseCartReturn => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const loadingRef = useRef(false);
 
   // Load cart from database
   const loadCart = useCallback(async (uid: string) => {
+    // Skip if already loading to prevent concurrent calls
+    if (loadingRef.current) {
+      console.log('[useCart] Load already in progress, skipping...');
+      return;
+    }
+
     try {
+      loadingRef.current = true;
       setIsLoading(true);
       console.log('[useCart] Loading cart for user:', uid);
       const dbCart = await getOrCreateCart(uid);
@@ -61,6 +69,7 @@ export const useCart = (): UseCartReturn => {
       setCart(null);
     } finally {
       setIsLoading(false);
+      loadingRef.current = false;
     }
   }, []);
 
@@ -117,7 +126,7 @@ export const useCart = (): UseCartReturn => {
       subscription.unsubscribe();
       globalThis.removeEventListener('cartUpdated', handleCartUpdate);
     };
-  }, [loadCart]);
+  }, []);
 
   const addItem = useCallback(async (item: ItemData) => {
     if (!userId) {
@@ -186,7 +195,10 @@ export const useCart = (): UseCartReturn => {
       
       if (success) {
         // Reload cart to get updated discount
-        await loadCart(userId);
+        const dbCart = await getOrCreateCart(userId);
+        if (dbCart) {
+          setCart(toCartData(dbCart));
+        }
         setError(null);
       }
 
@@ -196,7 +208,7 @@ export const useCart = (): UseCartReturn => {
       setError('Failed to apply discount code');
       return false;
     }
-  }, [userId, cart, loadCart]);
+  }, [userId, cart]);
 
   const clearCartFn = useCallback(async () => {
     if (!userId) return;

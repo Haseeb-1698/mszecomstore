@@ -27,33 +27,28 @@ export async function getOrCreateCart(userId: string): Promise<CartWithItems | n
   console.log('[cartApi] getOrCreateCart called for user:', userId);
   
   try {
-    // First try to get existing cart
-    console.log('[cartApi] Querying carts table...');
-    const { data: existingCart, error: fetchError } = await supabase
+    // First try to get existing cart with items in a single query
+    console.log('[cartApi] Querying carts table with items...');
+    const { data: existingCarts, error: fetchError } = await supabase
       .from('carts')
-      .select('*')
+      .select(`
+        *,
+        cart_items (*)
+      `)
       .eq('user_id', userId)
-      .maybeSingle();
+      .limit(1);
 
-    console.log('[cartApi] Existing cart query result:', { existingCart, fetchError });
+    console.log('[cartApi] Existing cart query result:', { existingCarts, fetchError });
 
     if (fetchError) {
       console.error('[cartApi] Error fetching cart:', fetchError);
       return null;
     }
 
-    if (existingCart) {
-      console.log('[cartApi] Found existing cart:', existingCart.id);
-      // Load cart items separately
-      const { data: cartItems } = await supabase
-        .from('cart_items')
-        .select('*')
-        .eq('cart_id', existingCart.id);
-      
-      return {
-        ...existingCart,
-        cart_items: cartItems || []
-      } as CartWithItems;
+    if (existingCarts && existingCarts.length > 0) {
+      const cart = existingCarts[0];
+      console.log('[cartApi] Found existing cart:', cart.id);
+      return cart as CartWithItems;
     }
 
     // No cart exists, create one
@@ -62,7 +57,7 @@ export async function getOrCreateCart(userId: string): Promise<CartWithItems | n
       .from('carts')
       .insert({ user_id: userId })
       .select('*')
-      .maybeSingle();
+      .single();
 
     console.log('[cartApi] Create cart result:', { newCart, createError });
 
@@ -97,7 +92,10 @@ export async function getOrCreateCart(userId: string): Promise<CartWithItems | n
 export async function getCart(userId: string): Promise<CartWithItems | null> {
   const { data, error } = await supabase
     .from('carts')
-    .select('*')
+    .select(`
+      *,
+      cart_items (*)
+    `)
     .eq('user_id', userId)
     .maybeSingle();
 
@@ -110,16 +108,7 @@ export async function getCart(userId: string): Promise<CartWithItems | null> {
     return null;
   }
 
-  // Load cart items separately
-  const { data: cartItems } = await supabase
-    .from('cart_items')
-    .select('*')
-    .eq('cart_id', data.id);
-
-  return {
-    ...data,
-    cart_items: cartItems || []
-  } as CartWithItems;
+  return data as CartWithItems;
 }
 
 // Add item to cart
