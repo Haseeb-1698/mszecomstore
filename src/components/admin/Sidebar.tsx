@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
-import { useSupabaseAuth, SupabaseAuthProvider } from '../../contexts/SupabaseAuthContext';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 
-const SidebarContent: React.FC = () => {
+/**
+ * Sidebar component for admin panel.
+ * Must be used within AdminProviders context (via AdminShell).
+ */
+const Sidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const currentPath = globalThis.globalThis === undefined ? '' : globalThis.location.pathname;
   const { signOut } = useSupabaseAuth(); // Use context for auth
@@ -113,12 +117,5 @@ const SidebarContent: React.FC = () => {
     </aside>
   );
 };
-
-// Wrapped component with auth provider
-const Sidebar: React.FC = () => (
-  <SupabaseAuthProvider>
-    <SidebarContent />
-  </SupabaseAuthProvider>
-);
 
 export default Sidebar;

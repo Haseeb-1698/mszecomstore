@@ -1,11 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { CartProvider } from '../contexts/CartContext.tsx';
 import CheckoutPage from '../components/checkout/CheckoutPage.tsx';
 ---
 
 <Layout title="Checkout - MSZ Ecom Store">
-  <CartProvider client:load>
-    <CheckoutPage client:load />
-  </CartProvider>
+  <CheckoutPage client:only="react" />
 </Layout>

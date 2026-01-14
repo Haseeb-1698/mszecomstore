@@ -1,31 +1,8 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
-import { ProtectedRoute } from '../../components/auth/ProtectedRoute';
-import ServicesTable from '../../components/admin/ServicesTable.tsx';
+import ServicesPage from '../../components/admin/ServicesPage';
 ---
 
 <AdminLayout title="Services Management - MSZ Ecom Store">
-  <ProtectedRoute requireAdmin={true} client:only="react">
-    <div class="max-w-7xl mx-auto">
-      <!-- Page Header -->
-      <div class="mb-8 flex items-center justify-between">
-        <div>
-          <h1 class="text-3xl font-bold text-charcoal-800 dark:text-cream-100 mb-2">Services Management</h1>
-          <p class="text-charcoal-600 dark:text-cream-400">Manage your subscription services catalog</p>
-        </div>
-        <button
-          id="addServiceBtn"
-          class="px-4 py-2 bg-coral-500 hover:bg-coral-600 text-white rounded-xl font-medium transition-colors flex items-center gap-2"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-          Add New Service
-        </button>
-      </div>
-
-      <!-- Services Table -->
-      <ServicesTable client:only="react" />
-    </div>
-  </ProtectedRoute>
+  <ServicesPage client:only="react" />
 </AdminLayout>

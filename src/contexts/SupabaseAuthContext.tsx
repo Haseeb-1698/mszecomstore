@@ -49,14 +49,16 @@ export function SupabaseAuthProvider({ children }: Readonly<{ children: ReactNod
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       await checkAdminStatus(session?.user?.id);
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [checkAdminStatus]);
 
   const signIn = useCallback(async (email: string, password: string) => {
@@ -67,7 +69,8 @@ export function SupabaseAuthProvider({ children }: Readonly<{ children: ReactNod
       });
       return { error };
     } catch (error) {
-      return { error: error as Error };
+      const err = error as Error;
+      return { error: err };
     }
   }, []);
 
@@ -79,12 +82,18 @@ export function SupabaseAuthProvider({ children }: Readonly<{ children: ReactNod
       });
       return { error };
     } catch (error) {
-      return { error: error as Error };
+      const err = error as Error;
+      return { error: err };
     }
   }, []);
 
   const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+      throw error;
+    }
   }, []);
 
   const value = useMemo(() => ({

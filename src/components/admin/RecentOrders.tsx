@@ -24,6 +24,7 @@ const RecentOrders: React.FC = () => {
   const fetchRecentOrders = async () => {
     try {
       setLoading(true);
+      
       const { data, error } = await supabase
         .from('orders')
         .select(`
@@ -33,7 +34,10 @@ const RecentOrders: React.FC = () => {
         .order('created_at', { ascending: false })
         .limit(5);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching recent orders:', error);
+        throw error;
+      }
 
       const mappedOrders: Order[] = (data || []).map((order: any) => ({
         id: order.id,
@@ -47,7 +51,8 @@ const RecentOrders: React.FC = () => {
 
       setOrders(mappedOrders);
     } catch (err: any) {
-      console.error('Error fetching recent orders:', err);
+      console.error('Error in fetchRecentOrders:', err);
+      setOrders([]);
     } finally {
       setLoading(false);
     }

@@ -22,68 +22,89 @@ export interface CartData {
   total: number;
 }
 
+// Helper to add timeout to promises
+function withTimeout<T>(promiseOrThenable: PromiseLike<T>, timeoutMs: number, operation: string): Promise<T> {
+  const promise = Promise.resolve(promiseOrThenable);
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => 
+      setTimeout(() => reject(new Error(`${operation} timed out after ${timeoutMs}ms`)), timeoutMs)
+    )
+  ]);
+}
+
 // Get or create cart for user
 export async function getOrCreateCart(userId: string): Promise<CartWithItems | null> {
-  console.log('[cartApi] getOrCreateCart called for user:', userId);
-  
   try {
-    // First try to get existing cart with items in a single query
-    console.log('[cartApi] Querying carts table with items...');
-    const { data: existingCarts, error: fetchError } = await supabase
-      .from('carts')
-      .select(`
-        *,
-        cart_items (*)
-      `)
-      .eq('user_id', userId)
-      .limit(1);
-
-    console.log('[cartApi] Existing cart query result:', { existingCarts, fetchError });
+    // First try to get existing cart (without nested items for now)
+    // Use longer timeout for first query (cold start can take 5-10s on Supabase free tier)
+    const { data: existingCart, error: fetchError } = await withTimeout(
+      supabase
+        .from('carts')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle(),
+      15, // 15 seconds to account for Supabase cold start
+      'Fetch cart'
+    );
 
     if (fetchError) {
-      console.error('[cartApi] Error fetching cart:', fetchError);
       return null;
     }
 
-    if (existingCarts && existingCarts.length > 0) {
-      const cart = existingCarts[0];
-      console.log('[cartApi] Found existing cart:', cart.id);
-      return cart as CartWithItems;
+    // If cart exists, fetch its items
+    if (existingCart) {
+      const { data: cartItems, error: itemsError } = await withTimeout(
+        supabase
+          .from('cart_items')
+          .select('*')
+          .eq('cart_id', existingCart.id),
+        20000, // 20 seconds for items
+        'Fetch cart items'
+      );
+
+      if (itemsError) {
+        // Return cart with empty items rather than failing completely
+        return {
+          ...existingCart,
+          cart_items: []
+        } as CartWithItems;
+      }
+
+      return {
+        ...existingCart,
+        cart_items: cartItems ?? []
+      } as CartWithItems;
     }
 
     // No cart exists, create one
-    console.log('[cartApi] No cart found, creating new cart...');
-    const { data: newCart, error: createError } = await supabase
-      .from('carts')
-      .insert({ user_id: userId })
-      .select('*')
-      .single();
-
-    console.log('[cartApi] Create cart result:', { newCart, createError });
+    const { data: newCart, error: createError } = await withTimeout(
+      supabase
+        .from('carts')
+        .insert({ user_id: userId })
+        .select('*')
+        .single(),
+      20000, // 20 seconds for insert
+      'Create cart'
+    );
 
     if (createError) {
       // Check if cart was created by another concurrent request
       if (createError.code === '23505') {
-        console.log('[cartApi] Cart already exists (race condition), fetching it...');
         return getOrCreateCart(userId);
       }
-      console.error('[cartApi] Error creating cart:', createError);
       return null;
     }
 
     if (!newCart) {
-      console.error('[cartApi] No cart returned after creation');
       return null;
     }
-
-    console.log('[cartApi] Created new cart:', newCart.id);
     return {
       ...newCart,
       cart_items: []
     } as CartWithItems;
 
   } catch (err) {
-    console.error('[cartApi] Exception in getOrCreateCart:', err);
     return null;
   }
 }
@@ -100,7 +121,6 @@ export async function getCart(userId: string): Promise<CartWithItems | null> {
     .maybeSingle();
 
   if (error) {
-    console.error('Error fetching cart:', error);
     return null;
   }
 
@@ -137,7 +157,6 @@ export async function addItemToCart(
       .eq('id', existingItem.id);
 
     if (error) {
-      console.error('Error updating cart item:', error);
       return null;
     }
   } else {
@@ -156,7 +175,6 @@ export async function addItemToCart(
       .insert(newItem);
 
     if (error) {
-      console.error('Error adding cart item:', error);
       return null;
     }
   }
@@ -176,7 +194,6 @@ export async function removeItemFromCart(
     .eq('id', itemId);
 
   if (error) {
-    console.error('Error removing cart item:', error);
     return null;
   }
 
@@ -199,7 +216,6 @@ export async function updateItemQuantity(
     .eq('id', itemId);
 
   if (error) {
-    console.error('Error updating cart item quantity:', error);
     return null;
   }
 
@@ -217,7 +233,6 @@ export async function clearCart(userId: string): Promise<CartWithItems | null> {
     .eq('cart_id', cart.id);
 
   if (error) {
-    console.error('Error clearing cart:', error);
     return null;
   }
 
@@ -264,7 +279,6 @@ export async function applyDiscountCode(
     .eq('id', cart.id);
 
   if (error) {
-    console.error('Error applying discount:', error);
     return { success: false, discount: 0 };
   }
 

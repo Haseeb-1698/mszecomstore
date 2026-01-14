@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
+import React, { useEffect } from 'react';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
-import type { User } from '@supabase/supabase-js';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -9,41 +8,11 @@ interface ProtectedRouteProps {
 }
 
 /**
- * ProtectedRoute - Self-contained protected route that doesn't rely on React context.
- * This avoids hydration issues with Astro's client:load directive.
+ * ProtectedRoute - Uses the SupabaseAuthContext for auth state.
+ * Must be used within SupabaseAuthProvider (via AdminProviders/AdminShell).
  */
 export function ProtectedRoute({ children, requireAdmin = false }: Readonly<ProtectedRouteProps>) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    // Get initial session
-    const getInitialSession = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user ?? null);
-        setIsAdmin(session?.user?.email === 'umerfarooq1105@gmail.com');
-      } catch (error) {
-        console.error('Error getting session:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getInitialSession();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setIsAdmin(session?.user?.email === 'umerfarooq1105@gmail.com');
-      setLoading(false);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+  const { user, loading, isAdmin } = useSupabaseAuth();
 
   // Handle redirects after auth state is determined
   useEffect(() => {

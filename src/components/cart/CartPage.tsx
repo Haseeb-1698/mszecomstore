@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useCartContext } from '../../contexts/CartContext';
+import { useCart } from '../../hooks/useCart';
 import { Button } from '../ui/Button';
 import CartItem from './CartItem';
 import CartSummary from './CartSummary';
 
 const CartPage: React.FC = () => {
-  const { cart, removeItem, updateQuantity, applyDiscountCode, clearCart, isLoading, isAuthenticated } = useCartContext();
+  // Use the hook directly instead of context to avoid hydration race conditions
+  const { cart, removeItem, updateQuantity, applyDiscountCode, clearCart, isLoading, isAuthenticated } = useCart();
   const [mounted, setMounted] = useState(false);
 
-  // Force re-render after hydration to recover from context mismatch
+  // Force re-render after hydration
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -17,7 +18,10 @@ const CartPage: React.FC = () => {
   if (!mounted || isLoading) {
     return (
       <div className="min-h-screen bg-cream-50 dark:bg-charcoal-900 flex items-center justify-center">
-        <div className="text-charcoal-800 dark:text-cream-100">Loading cart...</div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-coral-500"></div>
+          <div className="text-charcoal-800 dark:text-cream-100 text-lg">Loading cart...</div>
+        </div>
       </div>
     );
   }

@@ -1,19 +1,8 @@
-<!-- filepath: src/pages/admin/index.astro -->
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
-import { ProtectedRoute } from '../../components/auth/ProtectedRoute';
-import AdminDashboard from '../../components/admin/AdminDashboard';
-import RecentOrders from '../../components/admin/RecentOrders';
+import DashboardPage from '../../components/admin/DashboardPage';
 ---
 
 <AdminLayout title="Admin Dashboard">
-  <ProtectedRoute requireAdmin={true} client:load>
-    <div class="space-y-6">
-      <h1 class="text-3xl font-bold text-charcoal-800 dark:text-cream-100">Dashboard Overview</h1>
-      
-      <AdminDashboard client:load />
-      
-      <RecentOrders client:load />
-    </div>
-  </ProtectedRoute>
+  <DashboardPage client:only="react" />
 </AdminLayout>

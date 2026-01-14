@@ -1,17 +1,8 @@
-<!-- filepath: src/pages/admin/customers.astro -->
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
-import { ProtectedRoute } from '../../components/auth/ProtectedRoute';
-import CustomersTable from '../../components/admin/CustomersTable';
+import CustomersPage from '../../components/admin/CustomersPage';
 ---
 
 <AdminLayout title="Customers">
-  <ProtectedRoute requireAdmin={true} client:load>
-    <div class="space-y-6">
-      <h1 class="text-3xl font-bold text-charcoal-800 dark:text-cream-100">Customers</h1>
-      <p class="text-charcoal-600 dark:text-cream-400">Manage and view all registered customers</p>
-
-      <CustomersTable client:load />
-    </div>
-  </ProtectedRoute>
+  <CustomersPage client:only="react" />
 </AdminLayout>

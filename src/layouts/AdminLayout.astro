@@ -1,7 +1,5 @@
 ---
 import '../styles/globals.css';
-import Sidebar from '../components/admin/Sidebar.tsx';
-import AdminHeader from '../components/admin/AdminHeader.tsx';
 
 export interface Props {
     title: string;
@@ -45,20 +43,7 @@ const { title } = Astro.props;
         </script>
     </head>
     <body class="bg-cream-50 dark:bg-charcoal-900 text-charcoal-800 dark:text-cream-50 antialiased">
-        <div class="flex h-screen overflow-hidden">
-            <!-- Sidebar -->
-            <Sidebar client:only="react" />
-            
-            <!-- Main Content -->
-            <div class="flex-1 flex flex-col overflow-hidden">
-                <!-- Header -->
-                <AdminHeader client:only="react" />
-                
-                <!-- Page Content -->
-                <main class="flex-1 overflow-y-auto bg-cream-100 dark:bg-charcoal-900 p-6">
-                    <slot />
-                </main>
-            </div>
-        </div>
+        <!-- Content will be rendered by AdminShell component -->
+        <slot />
     </body>
 </html>
