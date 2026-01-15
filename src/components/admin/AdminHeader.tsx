@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 
 /**
@@ -6,19 +6,7 @@ import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
  * Must be used within AdminProviders context (via AdminShell).
  */
 const AdminHeader: React.FC = () => {
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const { user, signOut } = useSupabaseAuth(); // Use context for auth
-
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      // Redirect to login page after successful logout
-      globalThis.location.href = '/login';
-    } catch (error) {
-      console.error('Logout failed:', error);
-      // Could show an error message here if needed
-    }
-  };
+  const { user } = useSupabaseAuth(); // Use context for auth
 
   return (
     <header className="h-16 bg-cream-50 dark:bg-charcoal-800 border-b border-cream-400 dark:border-charcoal-700 flex items-center justify-between px-6">
@@ -68,42 +56,12 @@ const AdminHeader: React.FC = () => {
 
         {/* User Menu */}
         <div className="relative">
-          <button
-            onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-2 p-2 rounded-xl hover:bg-cream-200 dark:hover:bg-charcoal-700 transition-colors"
-          >
+          <div className="flex items-center gap-2 p-2">
             <div className="w-8 h-8 bg-coral-500 rounded-full flex items-center justify-center text-white font-semibold">
               {user?.email?.charAt(0).toUpperCase() || 'A'}
             </div>
             <span className="text-sm font-medium text-charcoal-800 dark:text-cream-100">{user?.email || 'Admin'}</span>
-            <svg className="w-4 h-4 text-charcoal-600 dark:text-cream-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-
-          {showUserMenu && (
-            <div className="absolute right-0 top-full mt-2 w-48 bg-cream-50 dark:bg-charcoal-800 border border-cream-400 dark:border-charcoal-700 rounded-xl shadow-soft-lg py-2 z-50">
-              <a
-                href="/admin/settings"
-                className="block px-4 py-2 text-sm text-charcoal-700 dark:text-cream-300 hover:bg-cream-200 dark:hover:bg-charcoal-700"
-              >
-                Profile Settings
-              </a>
-              <a
-                href="/"
-                className="block px-4 py-2 text-sm text-charcoal-700 dark:text-cream-300 hover:bg-cream-200 dark:hover:bg-charcoal-700"
-              >
-                View Site
-              </a>
-              <hr className="my-2 border-cream-400 dark:border-charcoal-700" />    
-              <button
-                onClick={handleLogout}
-                className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-cream-200 dark:hover:bg-charcoal-700"
-              >
-                Logout
-              </button>
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </header>

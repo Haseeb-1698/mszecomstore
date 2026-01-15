@@ -1,9 +1,22 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-const OrderFilters: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [dateRange, setDateRange] = useState('all');
+interface OrderFiltersProps {
+  searchTerm: string;
+  statusFilter: string;
+  dateRange: string;
+  onSearchChange: (value: string) => void;
+  onStatusChange: (value: string) => void;
+  onDateRangeChange: (value: string) => void;
+}
+
+const OrderFilters: React.FC<OrderFiltersProps> = ({
+  searchTerm,
+  statusFilter,
+  dateRange,
+  onSearchChange,
+  onStatusChange,
+  onDateRangeChange,
+}) => {
 
   return (
     <div className="bg-cream-50 dark:bg-charcoal-800 rounded-2xl p-6 border border-cream-400 dark:border-charcoal-700 mb-6">
@@ -19,7 +32,7 @@ const OrderFilters: React.FC = () => {
               type="text"
               placeholder="Order ID or customer name..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => onSearchChange(e.target.value)}
               className="w-full px-4 py-2 pl-10 bg-cream-100 dark:bg-charcoal-900 border border-cream-400 dark:border-charcoal-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-coral-500 text-charcoal-800 dark:text-cream-100"
             />
             <svg
@@ -41,13 +54,14 @@ const OrderFilters: React.FC = () => {
           <select
             id="status-select"
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => onStatusChange(e.target.value)}
             className="w-full px-4 py-2 bg-cream-100 dark:bg-charcoal-900 border border-cream-400 dark:border-charcoal-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-coral-500 text-charcoal-800 dark:text-cream-100"
           >
             <option value="all">All Status</option>
             <option value="pending">Pending</option>
             <option value="processing">Processing</option>
             <option value="completed">Completed</option>
+            <option value="delivered">Delivered</option>
             <option value="cancelled">Cancelled</option>
           </select>
         </div>
@@ -60,7 +74,7 @@ const OrderFilters: React.FC = () => {
           <select
             id="date-select"
             value={dateRange}
-            onChange={(e) => setDateRange(e.target.value)}
+            onChange={(e) => onDateRangeChange(e.target.value)}
             className="w-full px-4 py-2 bg-cream-100 dark:bg-charcoal-900 border border-cream-400 dark:border-charcoal-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-coral-500 text-charcoal-800 dark:text-cream-100"
           >
             <option value="all">All Time</option>
@@ -79,7 +93,7 @@ const OrderFilters: React.FC = () => {
           {searchTerm && (
             <span className="px-3 py-1 bg-coral-100 dark:bg-coral-900/30 text-coral-700 dark:text-coral-400 rounded-full text-sm flex items-center gap-2">
               Search: {searchTerm}
-              <button onClick={() => setSearchTerm('')} className="hover:text-coral-900 dark:hover:text-coral-200">
+              <button onClick={() => onSearchChange('')} className="hover:text-coral-900 dark:hover:text-coral-200">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -89,7 +103,7 @@ const OrderFilters: React.FC = () => {
           {statusFilter !== 'all' && (
             <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-full text-sm flex items-center gap-2">
               Status: {statusFilter}
-              <button onClick={() => setStatusFilter('all')} className="hover:text-purple-900 dark:hover:text-purple-200">
+              <button onClick={() => onStatusChange('all')} className="hover:text-purple-900 dark:hover:text-purple-200">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -99,7 +113,7 @@ const OrderFilters: React.FC = () => {
           {dateRange !== 'all' && (
             <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-sm flex items-center gap-2">
               Date: {dateRange}
-              <button onClick={() => setDateRange('all')} className="hover:text-green-900 dark:hover:text-green-200">
+              <button onClick={() => onDateRangeChange('all')} className="hover:text-green-900 dark:hover:text-green-200">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -108,9 +122,9 @@ const OrderFilters: React.FC = () => {
           )}
           <button
             onClick={() => {
-              setSearchTerm('');
-              setStatusFilter('all');
-              setDateRange('all');
+              onSearchChange('');
+              onStatusChange('all');
+              onDateRangeChange('all');
             }}
             className="text-sm text-coral-600 hover:text-coral-700 dark:text-coral-400 dark:hover:text-coral-300 font-medium"
           >

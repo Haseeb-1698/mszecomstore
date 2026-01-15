@@ -143,46 +143,25 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose, onSuccess }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Service Name */}
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
-          Service Name *
-        </label>
-        <Input
-          id="name"
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          placeholder="e.g., Netflix Premium"
-          error={errors.name}
-        />
-      </div>
-
-      {/* Category & Base Price */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="category" className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
-            Category *
+      {/* Service Name & Base Price */}
+      <div className="flex gap-20">
+        <div className="flex-1">
+          <label htmlFor="name" className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2 mx-2">
+            Service Name *
           </label>
-          <select
-            id="category"
-            name="category"
-            value={formData.category}
+          <Input
+            id="name"
+            type="text"
+            name="name"
+            value={formData.name}
             onChange={handleChange}
-            className="w-full px-4 py-2 bg-cream-100 dark:bg-charcoal-900 border border-cream-400 dark:border-charcoal-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-coral-500 text-charcoal-800 dark:text-cream-100"
-          >
-            <option value="Streaming">Streaming</option>
-            <option value="Music">Music</option>
-            <option value="Gaming">Gaming</option>
-            <option value="Productivity">Productivity</option>
-            <option value="Education">Education</option>
-            <option value="Other">Other</option>
-          </select>
+            placeholder="e.g., Netflix Premium"
+            error={errors.name}
+          />
         </div>
 
-        <div>
-          <label htmlFor="price" className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+        <div className="flex-[3]">
+          <label htmlFor="price" className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2 mx-2">
             Base Price (Rs) *
           </label>
           <Input
@@ -197,19 +176,42 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose, onSuccess }
         </div>
       </div>
 
-      {/* Icon URL */}
-      <div>
-        <label htmlFor="iconUrl" className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
-          Icon URL
-        </label>
-        <Input
-          id="iconUrl"
-          type="text"
-          name="iconUrl"
-          value={formData.iconUrl}
-          onChange={handleChange}
-          placeholder="e.g., /icons/netflix.svg"
-        />
+      {/* Category & Icon URL */}
+      <div className="flex gap-20">
+        <div className="flex-[2.5]">
+          <label htmlFor="category" className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2 mx-2">
+            Category *
+          </label>
+          <select
+            id="category"
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+            className="w-full px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 bg-cream-50 dark:bg-charcoal-800 border-cream-400 dark:border-charcoal-700 text-charcoal-800 dark:text-cream-100 focus:border-coral-500 focus:ring-coral-500 appearance-none"
+          >
+            <option value="Streaming">Streaming</option>
+            <option value="Music">Music</option>
+            <option value="Gaming">Gaming</option>
+            <option value="Productivity">Productivity</option>
+            <option value="Education">Education</option>
+            <option value="Other">Other</option>
+          </select>
+          
+        </div>
+
+        <div className="flex-[3]">
+          <label htmlFor="iconUrl" className="block text-sm font-medium text-charcoal-700 dark:text-cream-300 mb-2">
+            Icon URL
+          </label>
+          <Input
+            id="iconUrl"
+            type="text"
+            name="iconUrl"
+            value={formData.iconUrl}
+            onChange={handleChange}
+            placeholder="e.g., /icons/netflix.svg"
+          />
+        </div>
       </div>
 
       {/* Description */}

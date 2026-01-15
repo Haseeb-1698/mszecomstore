@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { OrderStatusBadge } from '../ui/StatusBadge';
 import { supabase } from '../../lib/supabase';
 import type { OrderStatus } from '../../lib/database.types';
@@ -7,6 +8,7 @@ import { withTimeout, DEFAULT_QUERY_TIMEOUT } from '../../lib/utils/timeout';
 
 interface Order {
   id: string;
+  fullId: string;
   customer: string;
   email: string;
   whatsapp: string;
@@ -16,28 +18,25 @@ interface Order {
   date: string;
 }
 
-const OrdersTable: React.FC = () => {
+interface OrdersTableProps {
+  searchTerm: string;
+  statusFilter: string;
+  dateRange: string;
+}
+
+const OrdersTable: React.FC<OrdersTableProps> = ({
+  searchTerm,
+  statusFilter,
+  dateRange,
+}) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const ordersPerPage = 10;
-  const mountedRef = useRef(true);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    mountedRef.current = true;
-    fetchOrders();
-    
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
-  const fetchOrders = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
+  // Fetch orders with React Query
+  const { data: orders = [], isLoading: loading, error } = useQuery({
+    queryKey: ['admin-orders'],
+    queryFn: async () => {
       const { data, error: queryError } = await withTimeout(
         supabase
           .from('orders')
@@ -50,15 +49,13 @@ const OrdersTable: React.FC = () => {
         'Orders fetch timed out'
       );
 
-      if (!mountedRef.current) return;
-
       if (queryError) {
-        setError(queryError.message);
-        return;
+        throw new Error(queryError.message);
       }
 
       const mappedOrders: Order[] = (data || []).map((order: any) => ({
         id: order.id.substring(0, 8).toUpperCase(),
+        fullId: order.id,
         customer: order.customer_name || 'Unknown',
         email: order.customer_email || '',
         whatsapp: order.customer_whatsapp || '',
@@ -68,36 +65,17 @@ const OrdersTable: React.FC = () => {
         date: new Date(order.created_at).toLocaleDateString()
       }));
 
-      setOrders(mappedOrders);
-    } catch (err: unknown) {
-      console.error('Error fetching orders:', err);
-      if (mountedRef.current) {
-        setError(err instanceof Error ? err.message : 'Failed to load orders');
-      }
-    } finally {
-      if (mountedRef.current) {
-        setLoading(false);
-      }
-    }
-  };
+      return mappedOrders;
+    },
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    refetchOnWindowFocus: false
+  });
 
-  const totalPages = Math.ceil(orders.length / ordersPerPage);
-  const indexOfLastOrder = currentPage * ordersPerPage;
-  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-  const currentOrders = orders.slice(indexOfFirstOrder, indexOfLastOrder);
-
-  const handleStatusChange = async (orderId: string, newStatus: OrderStatus) => {
-    try {
-      // Find the full order ID from the truncated display ID
-      const { data } = await supabase
-        .from('orders')
-        .select('id')
-        .ilike('id', `${orderId.toLowerCase()}%`)
-        .single();
-      
-      if (!data) return;
-
+  // Mutation for updating order status
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ fullOrderId, newStatus }: { fullOrderId: string; newStatus: OrderStatus }) => {
       const updateData: any = { status: newStatus };
+      
       if (newStatus === 'delivered') {
         updateData.delivered_at = new Date().toISOString();
       }
@@ -105,16 +83,104 @@ const OrdersTable: React.FC = () => {
       const { error } = await supabase
         .from('orders')
         .update(updateData)
-        .eq('id', data.id);
+        .eq('id', fullOrderId);
 
       if (error) throw error;
       
-      // Refresh orders
-      fetchOrders();
-    } catch (err: any) {
+      return { fullOrderId, newStatus };
+    },
+    onMutate: async ({ fullOrderId, newStatus }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['admin-orders'] });
+
+      // Snapshot the previous value
+      const previousOrders = queryClient.getQueryData<Order[]>(['admin-orders']);
+
+      // Optimistically update to the new value
+      if (previousOrders) {
+        queryClient.setQueryData<Order[]>(['admin-orders'], (old) =>
+          old?.map((order) =>
+            order.fullId === fullOrderId
+              ? { ...order, status: newStatus }
+              : order
+          ) || []
+        );
+      }
+
+      // Return a context object with the snapshotted value
+      return { previousOrders };
+    },
+    onError: (err, variables, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousOrders) {
+        queryClient.setQueryData(['admin-orders'], context.previousOrders);
+      }
       console.error('Error updating order status:', err);
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure we have the latest data
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
     }
+  });
+
+  const handleStatusChange = (fullOrderId: string, newStatus: OrderStatus) => {
+    updateStatusMutation.mutate({ fullOrderId, newStatus });
   };
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, dateRange]);
+
+  // Filter orders based on search term, status, and date range
+  const filteredOrders = React.useMemo(() => {
+    return orders.filter((order) => {
+      // Search filter
+      const matchesSearch = searchTerm === '' ||
+        order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.email.toLowerCase().includes(searchTerm.toLowerCase());
+
+      // Status filter
+      const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+
+      // Date range filter
+      let matchesDate = true;
+      if (dateRange !== 'all') {
+        const orderDate = new Date(order.date);
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        switch (dateRange) {
+          case 'today':
+            matchesDate = orderDate >= today;
+            break;
+          case 'week':
+            const weekAgo = new Date(today);
+            weekAgo.setDate(today.getDate() - 7);
+            matchesDate = orderDate >= weekAgo;
+            break;
+          case 'month':
+            const monthAgo = new Date(today);
+            monthAgo.setMonth(today.getMonth() - 1);
+            matchesDate = orderDate >= monthAgo;
+            break;
+          case 'year':
+            const yearAgo = new Date(today);
+            yearAgo.setFullYear(today.getFullYear() - 1);
+            matchesDate = orderDate >= yearAgo;
+            break;
+        }
+      }
+
+      return matchesSearch && matchesStatus && matchesDate;
+    });
+  }, [orders, searchTerm, statusFilter, dateRange]);
+
+  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+  const indexOfLastOrder = currentPage * ordersPerPage;
+  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
+  const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
 
   if (loading) {
     return (
@@ -131,9 +197,9 @@ const OrdersTable: React.FC = () => {
         <svg className="w-12 h-12 mx-auto text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
-        <p className="text-charcoal-600 dark:text-cream-400 mb-4">{error}</p>
+        <p className="text-charcoal-600 dark:text-cream-400 mb-4">{error instanceof Error ? error.message : 'Failed to load orders'}</p>
         <button
-          onClick={fetchOrders}
+          onClick={() => queryClient.invalidateQueries({ queryKey: ['admin-orders'] })}
           className="px-4 py-2 bg-coral-500 hover:bg-coral-600 text-white rounded-lg transition-colors"
         >
           Retry
@@ -210,7 +276,7 @@ const OrdersTable: React.FC = () => {
                     </button>
                     <select
                       value={order.status}
-                      onChange={(e) => handleStatusChange(order.id, e.target.value as OrderStatus)}
+                      onChange={(e) => handleStatusChange(order.fullId, e.target.value as OrderStatus)}
                       className="text-xs px-2 py-1 bg-cream-100 dark:bg-charcoal-900 border border-cream-400 dark:border-charcoal-700 rounded-lg text-charcoal-700 dark:text-cream-300 focus:outline-none focus:ring-2 focus:ring-coral-500"
                     >
                       <option value="pending">Pending</option>
@@ -230,7 +296,7 @@ const OrdersTable: React.FC = () => {
       {/* Pagination */}
       <div className="bg-cream-200 dark:bg-charcoal-900 px-6 py-4 flex items-center justify-between">
         <p className="text-sm text-charcoal-600 dark:text-cream-400">
-          Showing {indexOfFirstOrder + 1} to {Math.min(indexOfLastOrder, orders.length)} of {orders.length} orders
+          Showing {indexOfFirstOrder + 1} to {Math.min(indexOfLastOrder, filteredOrders.length)} of {filteredOrders.length} orders
         </p>
         <div className="flex items-center gap-2">
           <button

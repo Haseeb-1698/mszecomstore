@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AdminPageWrapper from './AdminPageWrapper';
 import OrdersTable from './OrdersTable';
 import OrderFilters from './OrderFilters';
@@ -8,6 +8,10 @@ import OrderFilters from './OrderFilters';
  * This component handles all hydration in a single tree to avoid race conditions.
  */
 export const OrdersPage: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [dateRange, setDateRange] = useState('all');
+
   return (
     <AdminPageWrapper requireAdmin={true}>
       <div className="max-w-7xl mx-auto">
@@ -26,10 +30,21 @@ export const OrdersPage: React.FC = () => {
         </div>
 
         {/* Filters */}
-        <OrderFilters />
+        <OrderFilters
+          searchTerm={searchTerm}
+          statusFilter={statusFilter}
+          dateRange={dateRange}
+          onSearchChange={setSearchTerm}
+          onStatusChange={setStatusFilter}
+          onDateRangeChange={setDateRange}
+        />
 
         {/* Orders Table */}
-        <OrdersTable />
+        <OrdersTable
+          searchTerm={searchTerm}
+          statusFilter={statusFilter}
+          dateRange={dateRange}
+        />
       </div>
     </AdminPageWrapper>
   );

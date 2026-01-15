@@ -75,42 +75,27 @@ const ServicesTable: React.FC = () => {
     }
   };
 
-  const handleAddNew = () => {
-    setEditingService(null);
-    setIsModalOpen(true);
-  };
-
   return (
     <>
       <div className="bg-cream-50 dark:bg-charcoal-800 rounded-2xl border border-cream-400 dark:border-charcoal-700 overflow-hidden">
         {/* Stats Summary */}
-        <div className="bg-cream-200 dark:bg-charcoal-900 px-6 py-4 grid grid-cols-3 gap-4">
-          <div>
+        <div className="bg-cream-200 dark:bg-charcoal-900 px-6 py-4 flex justify-around items-center border-b border-cream-400 dark:border-charcoal-700">
+          <div className="text-center">
             <p className="text-xs text-charcoal-600 dark:text-cream-400 mb-1">Total Services</p>
             <p className="text-2xl font-bold text-charcoal-800 dark:text-cream-100">{services.length}</p>
           </div>
-          <div>
+          <div className="text-center">
             <p className="text-xs text-charcoal-600 dark:text-cream-400 mb-1">Active Services</p>
             <p className="text-2xl font-bold text-green-600 dark:text-green-400">
               {services.filter(s => s.active).length}
             </p>
           </div>
-          <div>
+          <div className="text-center">
             <p className="text-xs text-charcoal-600 dark:text-cream-400 mb-1">Total Sales</p>
             <p className="text-2xl font-bold text-coral-600 dark:text-coral-400">
               {services.reduce((sum, s) => sum + s.totalSales, 0)}
             </p>
           </div>
-        </div>
-
-        {/* Add New Button */}
-        <div className="px-6 py-4 border-b border-cream-400 dark:border-charcoal-700">
-          <button
-            onClick={handleAddNew}
-            className="px-4 py-2 bg-coral-500 hover:bg-coral-600 text-white rounded-lg font-medium transition-colors"
-          >
-            Add New Service
-          </button>
         </div>
 
         {/* Table */}
