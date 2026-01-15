@@ -75,7 +75,7 @@ export function SignupForm({ role = 'customer', redirectTo }: SignupFormProps) {
         <p className="text-charcoal-800/80 dark:text-gray-300">
           {role === 'admin' 
             ? 'Your admin account has been created. Please check your email to verify your account.'
-            : 'Please check your email to verify your account and start your journey with SubHub.'
+            : 'Please check your email to verify your account and start your journey with MSZ Software House.'
           }
         </p>
         <button
