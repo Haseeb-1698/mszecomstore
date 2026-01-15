@@ -1,14 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef, type ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
 import { isUserAdmin } from '../lib/api/users';
-import { withTimeout, SHORT_TIMEOUT } from '../lib/utils/timeout';
 import type { User, Session } from '@supabase/supabase-js';
-
-/**
- * Maximum time to wait for auth initialization before forcing ready state.
- * This prevents infinite loading if auth or admin check hangs.
- */
-const AUTH_INIT_TIMEOUT = 8000; // 8 seconds
 
 interface AuthContextType {
   user: User | null;
@@ -43,7 +36,6 @@ export function SupabaseAuthProvider({ children }: Readonly<{ children: ReactNod
     }
     
     try {
-      // isUserAdmin already has its own timeout
       const adminStatus = await isUserAdmin(userId);
       return adminStatus;
     } catch (error) {
@@ -52,32 +44,21 @@ export function SupabaseAuthProvider({ children }: Readonly<{ children: ReactNod
     }
   }, []);
 
-  // Force ready state after timeout to prevent infinite loading
-  const forceReady = useCallback(() => {
-    if (!initCompleted.current) {
-      console.warn('[Auth] Forcing ready state due to timeout');
-      initCompleted.current = true;
-      setLoading(false);
-      setIsReady(true);
-      setAuthError('Auth initialization timed out. Some features may be limited.');
-    }
-  }, []);
-
   useEffect(() => {
     let mounted = true;
-    
-    // Safety timeout - force ready state if init takes too long
-    const safetyTimeout = setTimeout(forceReady, AUTH_INIT_TIMEOUT);
 
     // Get initial session
     const initAuth = async () => {
       try {
-        // Wrap getSession with timeout
-        const { data: { session }, error } = await withTimeout(
-          supabase.auth.getSession(),
-          SHORT_TIMEOUT,
-          'Session fetch timed out'
-        );
+        // Skip on server-side
+        if (typeof window === 'undefined') {
+          initCompleted.current = true;
+          setLoading(false);
+          setIsReady(true);
+          return;
+        }
+        
+        const { data: { session }, error } = await supabase.auth.getSession();
         
         if (!mounted || initCompleted.current) return;
 
@@ -112,10 +93,10 @@ export function SupabaseAuthProvider({ children }: Readonly<{ children: ReactNod
         }
       } finally {
         if (mounted && !initCompleted.current) {
-          clearTimeout(safetyTimeout);
           initCompleted.current = true;
           setLoading(false);
           setIsReady(true);
+          console.log('[SupabaseAuth] Initialization complete, isReady set to true');
         }
       }
     };
@@ -134,7 +115,7 @@ export function SupabaseAuthProvider({ children }: Readonly<{ children: ReactNod
         return;
       }
       
-      console.log('[Auth] State changed:', event);
+      console.log('[SupabaseAuth] State changed:', event, 'userId:', session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       setAuthError(null); // Clear any previous errors on successful auth change
@@ -155,10 +136,9 @@ export function SupabaseAuthProvider({ children }: Readonly<{ children: ReactNod
 
     return () => {
       mounted = false;
-      clearTimeout(safetyTimeout);
       subscription.unsubscribe();
     };
-  }, [checkAdminStatus, forceReady]);
+  }, [checkAdminStatus]);
 
   const signIn = useCallback(async (email: string, password: string) => {
     try {

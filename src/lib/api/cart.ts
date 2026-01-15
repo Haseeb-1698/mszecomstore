@@ -20,7 +20,16 @@ export interface CartData {
   subtotal: number;
   discount: number;
   total: number;
+  itemCount: number;
 }
+
+// Timeout configuration - adjust based on your Supabase tier
+// Free tier may need longer timeouts due to cold starts
+const TIMEOUT_CONFIG = {
+  FETCH: 8000,      // 8s for fetching existing data
+  CREATE: 10000,    // 10s for creating new records
+  UPDATE: 8000,     // 8s for updates
+} as const;
 
 // Helper to add timeout to promises
 function withTimeout<T>(promiseOrThenable: PromiseLike<T>, timeoutMs: number, operation: string): Promise<T> {
@@ -36,15 +45,14 @@ function withTimeout<T>(promiseOrThenable: PromiseLike<T>, timeoutMs: number, op
 // Get or create cart for user
 export async function getOrCreateCart(userId: string): Promise<CartWithItems | null> {
   try {
-    // First try to get existing cart (without nested items for now)
-    // Use longer timeout for first query (cold start can take 5-10s on Supabase free tier)
+    // First try to get existing cart
     const { data: existingCart, error: fetchError } = await withTimeout(
       supabase
         .from('carts')
         .select('*')
         .eq('user_id', userId)
         .maybeSingle(),
-      15000, // 15 seconds to account for Supabase cold start
+      TIMEOUT_CONFIG.FETCH,
       'Fetch cart'
     );
 
@@ -60,11 +68,12 @@ export async function getOrCreateCart(userId: string): Promise<CartWithItems | n
           .from('cart_items')
           .select('*')
           .eq('cart_id', existingCart.id),
-        20000, // 20 seconds for items
+        TIMEOUT_CONFIG.FETCH,
         'Fetch cart items'
       );
 
       if (itemsError) {
+        console.error('[getOrCreateCart] Fetch items error:', itemsError);
         // Return cart with empty items rather than failing completely
         return {
           ...existingCart,
@@ -85,14 +94,15 @@ export async function getOrCreateCart(userId: string): Promise<CartWithItems | n
         .insert({ user_id: userId })
         .select('*')
         .single(),
-      20000, // 20 seconds for insert
+      TIMEOUT_CONFIG.CREATE,
       'Create cart'
     );
 
     if (createError) {
       console.error('[getOrCreateCart] Create cart error:', createError);
-      // Check if cart was created by another concurrent request
+      // Check if cart was created by another concurrent request (unique constraint)
       if (createError.code === '23505') {
+        // Retry fetch - another request created the cart
         return getOrCreateCart(userId);
       }
       return null;
@@ -102,13 +112,13 @@ export async function getOrCreateCart(userId: string): Promise<CartWithItems | n
       console.error('[getOrCreateCart] No cart returned after insert');
       return null;
     }
+
     return {
       ...newCart,
       cart_items: []
     } as CartWithItems;
-console.error('[getOrCreateCart] Unexpected error:', err);
-    
   } catch (err) {
+    console.error('[getOrCreateCart] Unexpected error:', err);
     return null;
   }
 }
@@ -310,6 +320,7 @@ export function toCartData(cart: CartWithItems): CartData {
 
   const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const total = Math.max(0, subtotal - (cart.discount || 0));
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   return {
     id: cart.id,
@@ -317,6 +328,7 @@ export function toCartData(cart: CartWithItems): CartData {
     items,
     subtotal,
     discount: cart.discount || 0,
-    total
+    total,
+    itemCount
   };
 }

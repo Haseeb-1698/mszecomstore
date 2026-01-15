@@ -1,28 +1,43 @@
+/**
+ * AuthButtons - Standalone auth UI for Header
+ * 
+ * ARCHITECTURE NOTE:
+ * This component runs in Header.astro which is OUTSIDE the AppProviders tree.
+ * It intentionally manages its own auth state via direct Supabase subscriptions
+ * because:
+ * 1. Header is rendered with client:only="react" separately from page content
+ * 2. Using context here would require wrapping the entire layout in providers
+ * 3. The duplicate auth check is acceptable for this isolated header component
+ * 
+ * For components INSIDE AppProviders, use useSupabaseAuth() from context instead.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 
-/**
- * AuthButtons component - displays login/signup or profile icon based on auth state.
- * This component does NOT use React context to avoid hydration issues in Astro.
- * It directly subscribes to Supabase auth state.
- */
 const AuthButtons: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
+    
     // Get initial session
     const getInitialSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user ?? null);
-        setIsAdmin(session?.user?.email === 'umerfarooq1105@gmail.com');
+        if (mounted) {
+          setUser(session?.user ?? null);
+          setIsAdmin(session?.user?.email === 'umerfarooq1105@gmail.com');
+        }
       } catch (error) {
         console.error('Error getting session:', error);
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
@@ -30,12 +45,15 @@ const AuthButtons: React.FC = () => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
-      setUser(session?.user ?? null);
-      setIsAdmin(session?.user?.email === 'umerfarooq1105@gmail.com');
-      setLoading(false);
+      if (mounted) {
+        setUser(session?.user ?? null);
+        setIsAdmin(session?.user?.email === 'umerfarooq1105@gmail.com');
+        setLoading(false);
+      }
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);

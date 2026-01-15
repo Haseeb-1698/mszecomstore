@@ -1,21 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { useCart } from '../../hooks/useCart';
+import React from 'react';
+import { useCartContext } from '../../contexts/CartContext';
 import { Button } from '../ui/Button';
 import CartItem from './CartItem';
 import CartSummary from './CartSummary';
 
 const CartPage: React.FC = () => {
-  // Use the hook directly instead of context to avoid hydration race conditions
-  const { cart, removeItem, updateQuantity, applyDiscountCode, clearCart, isLoading, isAuthenticated } = useCart();
-  const [mounted, setMounted] = useState(false);
+  // Use context - single source of truth (CartPage is always inside AppProviders)
+  const { cart, removeItem, updateQuantity, applyDiscountCode, clearCart, isLoading, isAuthenticated } = useCartContext();
 
-  // Force re-render after hydration
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Show loading during initial hydration
-  if (!mounted || isLoading) {
+  // Show loading state
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-cream-50 dark:bg-charcoal-900 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">

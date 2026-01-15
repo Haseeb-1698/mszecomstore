@@ -1,8 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import CartPage from '../components/cart/CartPage';
+import CartPageWrapper from '../components/cart/CartPageWrapper';
 ---
 
 <Layout title="Shopping Cart - MSZ Ecom Store">
-  <CartPage client:only="react" />
+  <CartPageWrapper client:only="react" />
 </Layout>

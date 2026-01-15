@@ -4,7 +4,8 @@ import ActiveSubscriptions from './ActiveSubscriptions';
 import RecentOrders from './RecentOrders';
 import ProfileOverview from './ProfileOverview';
 import { supabase } from '../../lib/supabase';
-import { withTimeout, DEFAULT_QUERY_TIMEOUT, SHORT_TIMEOUT } from '../../lib/utils/timeout';
+import { withTimeout, DEFAULT_QUERY_TIMEOUT } from '../../lib/utils/timeout';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 
 interface CustomerStats {
   activeSubscriptions: number;
@@ -14,6 +15,9 @@ interface CustomerStats {
 }
 
 const CustomerDashboard: React.FC = () => {
+  // Use the auth context instead of making separate auth calls
+  const { user, isReady, authError } = useSupabaseAuth();
+  
   const [stats, setStats] = useState<CustomerStats>({
     activeSubscriptions: 0,
     totalOrders: 0,
@@ -24,51 +28,38 @@ const CustomerDashboard: React.FC = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
   const mountedRef = useRef(true);
+  const dataFetchedRef = useRef(false);
 
   useEffect(() => {
     mountedRef.current = true;
-    checkUser();
+    dataFetchedRef.current = false;
     
     return () => {
       mountedRef.current = false;
     };
   }, []);
 
+  // Fetch dashboard data when auth is ready and user exists
   useEffect(() => {
-    if (userId) {
+    if (isReady && user?.id && !dataFetchedRef.current) {
+      dataFetchedRef.current = true;
       fetchDashboardData();
+    } else if (isReady && !user) {
+      // Auth is ready but no user - stop loading
+      setLoading(false);
     }
-  }, [userId]);
+  }, [isReady, user?.id]);
 
-  const checkUser = async () => {
-    try {
-      const { data: { user } } = await withTimeout(
-        supabase.auth.getUser(),
-        SHORT_TIMEOUT,
-        'Auth check timed out'
-      );
-      
-      if (mountedRef.current) {
-        if (user) {
-          setUserId(user.id);
-        } else {
-          // No user - redirect to login
-          setLoading(false);
-        }
-      }
-    } catch (err) {
-      console.error('Error checking user:', err);
-      if (mountedRef.current) {
-        setLoading(false);
-        setError('Failed to verify authentication');
-      }
+  // Handle auth errors from context
+  useEffect(() => {
+    if (authError && mountedRef.current) {
+      setError(authError);
     }
-  };
+  }, [authError]);
 
   const fetchDashboardData = async () => {
-    if (!userId) return;
+    if (!user?.id) return;
 
     try {
       setLoading(true);
@@ -86,7 +77,7 @@ const CustomerDashboard: React.FC = () => {
                 service:services (*)
               )
             `)
-            .eq('user_id', userId)
+            .eq('user_id', user.id)
             .order('expires_at', { ascending: false }),
           DEFAULT_QUERY_TIMEOUT,
           'Subscriptions fetch timed out'
@@ -98,7 +89,7 @@ const CustomerDashboard: React.FC = () => {
               *,
               items:order_items (*)
             `)
-            .eq('user_id', userId)
+            .eq('user_id', user.id)
             .order('created_at', { ascending: false })
             .limit(5),
           DEFAULT_QUERY_TIMEOUT,
@@ -161,7 +152,10 @@ const CustomerDashboard: React.FC = () => {
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6 text-center">
             <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
             <button
-              onClick={() => userId ? fetchDashboardData() : checkUser()}
+              onClick={() => {
+                dataFetchedRef.current = false;
+                fetchDashboardData();
+              }}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
               Try Again
@@ -172,7 +166,8 @@ const CustomerDashboard: React.FC = () => {
     );
   }
 
-  if (loading) {
+  // Show loading while auth is initializing or data is being fetched
+  if (!isReady || loading) {
     return (
       <div className="min-h-screen bg-cream-50 dark:bg-charcoal-900 py-8">
         <div className="container mx-auto px-4">

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useCart } from '../../hooks/useCart';
+import { useCartContext } from '../../contexts/CartContext';
 import { Button } from '../ui/Button';
 import CheckoutForm from './CheckoutForm';
 import OrderReview from './OrderReview';
@@ -14,8 +14,8 @@ interface CustomerInfo {
 }
 
 const CheckoutPage: React.FC = () => {
-  // Use the hook directly instead of context to avoid hydration race conditions
-  const { cart, isLoading, clearCart, isAuthenticated } = useCart();
+  // Use context - single source of truth (CheckoutPage is always inside AppProviders)
+  const { cart, isLoading, clearCart, isAuthenticated } = useCartContext();
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: '',
     email: '',

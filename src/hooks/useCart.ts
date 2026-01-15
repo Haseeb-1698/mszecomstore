@@ -1,5 +1,17 @@
+/**
+ * useCart Hook - Core cart state management
+ * 
+ * ARCHITECTURE NOTES:
+ * - This hook is meant to be used INSIDE a provider tree (SupabaseAuthProvider → CartProvider)
+ * - It consumes auth state from useSupabaseAuth() instead of making direct Supabase calls
+ * - Cross-tab sync uses BroadcastChannel ONLY (no same-tab events to avoid loops)
+ * - Components should use useCartContext() from CartContext, not this hook directly
+ * 
+ * For standalone usage (e.g., Header CartIcon outside providers), use CartIconStandalone component
+ */
+
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { supabase } from '../lib/supabase';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { 
   getOrCreateCart, 
   addItemToCart as apiAddItem, 
@@ -11,7 +23,7 @@ import {
   type CartData
 } from '../lib/api/cart';
 
-// BroadcastChannel for cross-tab cart synchronization
+// BroadcastChannel for cross-tab cart synchronization ONLY
 const CART_CHANNEL_NAME = 'cart-sync';
 
 export interface ItemData {
@@ -39,24 +51,33 @@ export interface UseCartReturn {
 }
 
 export const useCart = (): UseCartReturn => {
+  // Consume auth from context - single source of truth
+  const { user, isReady: authReady } = useSupabaseAuth();
+  
   const [cart, setCart] = useState<CartData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
+  
+  // Refs to prevent race conditions
   const loadingRef = useRef(false);
   const broadcastChannelRef = useRef<BroadcastChannel | null>(null);
+  const mountedRef = useRef(true);
 
   // Initialize BroadcastChannel for cross-tab synchronization
   useEffect(() => {
+    mountedRef.current = true;
+    
     if (typeof BroadcastChannel !== 'undefined') {
       broadcastChannelRef.current = new BroadcastChannel(CART_CHANNEL_NAME);
     }
+    
     return () => {
+      mountedRef.current = false;
       broadcastChannelRef.current?.close();
     };
   }, []);
 
-  // Broadcast cart update to other tabs
+  // Broadcast cart update to other tabs ONLY
   const broadcastCartUpdate = useCallback(() => {
     broadcastChannelRef.current?.postMessage({ type: 'cart-updated' });
   }, []);
@@ -71,88 +92,92 @@ export const useCart = (): UseCartReturn => {
 
     try {
       loadingRef.current = true;
-      setIsLoading(true);
+      setIsLoading(true); // ALWAYS set loading, even if unmounted
+      
       console.log('[useCart] Loading cart for user:', uid);
       const dbCart = await getOrCreateCart(uid);
-      console.log('[useCart] Cart loaded:', dbCart);
+      
+      console.log('[useCart] Cart loaded successfully:', { 
+        hasCart: !!dbCart, 
+        itemCount: dbCart?.cart_items?.length || 0 
+      });
+      
       if (dbCart) {
-        setCart(toCartData(dbCart));
+        const cartData = toCartData(dbCart);
+        setCart(cartData);
+        // Cache count in localStorage for CartIcon
+        localStorage.setItem('cart-count', cartData.itemCount.toString());
       } else {
-        // If getOrCreateCart returns null, something went wrong
         console.error('[useCart] getOrCreateCart returned null');
         setCart(null);
+        localStorage.setItem('cart-count', '0');
       }
       setError(null);
     } catch (err) {
       console.error('[useCart] Failed to load cart:', err);
       setError('Failed to load your cart.');
       setCart(null);
+      localStorage.setItem('cart-count', '0');
     } finally {
+      // ALWAYS set loading to false, regardless of mounted state
       setIsLoading(false);
       loadingRef.current = false;
+      console.log('[useCart] Load cart completed, isLoading set to false');
     }
   }, []);
 
-  // Refresh cart (exposed for manual refresh and cross-tab sync)
+  // Refresh cart (exposed for manual refresh)
   const refreshCart = useCallback(async () => {
-    if (userId) {
-      await loadCart(userId);
+    if (user?.id) {
+      await loadCart(user.id);
     }
-  }, [userId, loadCart]);
+  }, [user?.id, loadCart]);
 
-  // Check auth and load cart on mount
+  // Load cart when auth is ready and user is available
   useEffect(() => {
-    let isActive = true;
-    
-    const initializeCart = async () => {
-      console.log('[useCart] Initializing cart...');
-      const { data: { session } } = await supabase.auth.getSession();
-      console.log('[useCart] Session:', session?.user?.id);
-      if (isActive && session?.user) {
-        setUserId(session.user.id);
-        await loadCart(session.user.id);
-      } else if (isActive) {
-        console.log('[useCart] No session, setting loading to false');
-        setIsLoading(false);
-      }
-    };
-
-    initializeCart();
-
-    // Listen for auth changes (skip INITIAL_SESSION as we handle it in initializeCart)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('[useCart] Auth state changed:', event, session?.user?.id);
-      
-      // Skip INITIAL_SESSION to avoid duplicate loading
-      if (event === 'INITIAL_SESSION') {
-        return;
-      }
-      
-      if (isActive && session?.user) {
-        setUserId(session.user.id);
-        await loadCart(session.user.id);
-      } else if (isActive) {
-        setUserId(null);
-        setCart(null);
-        setIsLoading(false);
-      }
+    console.log('[useCart] Auth effect triggered:', { 
+      authReady, 
+      userId: user?.id,
+      hasLoadCart: !!loadCart 
     });
+    
+    if (!authReady) {
+      // Auth still initializing - keep loading state
+      console.log('[useCart] Auth not ready yet, waiting...');
+      return;
+    }
 
-    // Listen for cart updates from other components (same tab)
-    const handleCartUpdate = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        await loadCart(session.user.id);
-      }
-    };
+    if (user?.id) {
+      console.log('[useCart] Auth ready with user, loading cart for:', user.id);
+      loadCart(user.id);
+    } else {
+      // Auth ready but no user - not authenticated
+      console.log('[useCart] Auth ready but no user - clearing cart state');
+      setCart(null);
+      setIsLoading(false);
+      localStorage.setItem('cart-count', '0');
+    }
+  }, [authReady, user?.id, loadCart]);
 
-    globalThis.addEventListener('cartUpdated', handleCartUpdate);
+  // Safety timeout - force loading to false after 20 seconds
+  useEffect(() => {
+    if (!isLoading) return;
+    
+    const timeout = setTimeout(() => {
+      console.error('[useCart] TIMEOUT: Loading took too long, forcing to false');
+      setIsLoading(false);
+      setError('Cart loading timed out. Please refresh the page.');
+    }, 20000); // 20 seconds safety timeout
 
-    // Listen for cart updates from other tabs (cross-tab sync)
+    return () => clearTimeout(timeout);
+  }, [isLoading]);
+
+  // Listen for cart updates from OTHER tabs only (cross-tab sync)
+  useEffect(() => {
     const handleBroadcastMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'cart-updated') {
+      if (event.data?.type === 'cart-updated' && user?.id && mountedRef.current) {
         console.log('[useCart] Received cross-tab cart update');
-        handleCartUpdate();
+        loadCart(user.id);
       }
     };
 
@@ -161,21 +186,21 @@ export const useCart = (): UseCartReturn => {
     }
 
     return () => {
-      isActive = false;
-      subscription.unsubscribe();
-      globalThis.removeEventListener('cartUpdated', handleCartUpdate);
+      if (broadcastChannelRef.current) {
+        broadcastChannelRef.current.onmessage = null;
+      }
     };
-  }, []);
+  }, [user?.id, loadCart]);
 
   const addItem = useCallback(async (item: ItemData) => {
-    if (!userId) {
+    if (!user?.id) {
       setError('Please log in to add items to cart');
       return;
     }
 
     try {
       const price = typeof item.price === 'string' ? Number.parseFloat(item.price) : item.price;
-      const result = await apiAddItem(userId, {
+      const result = await apiAddItem(user.id, {
         planId: item.planId,
         serviceName: item.serviceName,
         planName: item.planName,
@@ -184,61 +209,74 @@ export const useCart = (): UseCartReturn => {
       });
       
       if (result) {
-        setCart(toCartData(result));
-        globalThis.dispatchEvent(new CustomEvent('cartUpdated'));
-        broadcastCartUpdate(); // Notify other tabs
+        const cartData = toCartData(result);
+        setCart(cartData);
+        // Cache count and broadcast with count
+        localStorage.setItem('cart-count', cartData.itemCount.toString());
+        broadcastChannelRef.current?.postMessage({ 
+          type: 'cart-updated',
+          count: cartData.itemCount 
+        });
       }
       setError(null);
     } catch (err) {
       console.error('Add to cart failed:', err);
       setError(err instanceof Error ? err.message : 'Failed to add item to cart');
     }
-  }, [userId, broadcastCartUpdate]);
+  }, [user?.id]);
 
   const removeItem = useCallback(async (itemId: string) => {
-    if (!userId) return;
+    if (!user?.id) return;
 
     try {
-      const result = await apiRemoveItem(userId, itemId);
+      const result = await apiRemoveItem(user.id, itemId);
       if (result) {
-        setCart(toCartData(result));
-        globalThis.dispatchEvent(new CustomEvent('cartUpdated'));
-        broadcastCartUpdate(); // Notify other tabs
+        const cartData = toCartData(result);
+        setCart(cartData);
+        localStorage.setItem('cart-count', cartData.itemCount.toString());
+        broadcastChannelRef.current?.postMessage({ 
+          type: 'cart-updated',
+          count: cartData.itemCount 
+        });
       }
       setError(null);
     } catch (err) {
       console.error('Remove from cart failed:', err);
       setError('Failed to remove item from cart');
     }
-  }, [userId, broadcastCartUpdate]);
+  }, [user?.id]);
 
   const updateQuantity = useCallback(async (itemId: string, quantity: number) => {
-    if (!userId) return;
+    if (!user?.id) return;
 
     try {
-      const result = await apiUpdateQuantity(userId, itemId, quantity);
+      const result = await apiUpdateQuantity(user.id, itemId, quantity);
       if (result) {
-        setCart(toCartData(result));
-        globalThis.dispatchEvent(new CustomEvent('cartUpdated'));
-        broadcastCartUpdate(); // Notify other tabs
+        const cartData = toCartData(result);
+        setCart(cartData);
+        localStorage.setItem('cart-count', cartData.itemCount.toString());
+        broadcastChannelRef.current?.postMessage({ 
+          type: 'cart-updated',
+          count: cartData.itemCount 
+        });
       }
       setError(null);
     } catch (err) {
       console.error('Update quantity failed:', err);
       setError('Failed to update quantity');
     }
-  }, [userId, broadcastCartUpdate]);
+  }, [user?.id]);
 
   const applyDiscountCodeFn = useCallback(async (code: string): Promise<boolean> => {
-    if (!userId || !cart) return false;
+    if (!user?.id || !cart) return false;
 
     try {
-      const { success } = await apiApplyDiscount(userId, code, cart.subtotal);
+      const { success } = await apiApplyDiscount(user.id, code, cart.subtotal);
       
-      if (success) {
+      if (success && mountedRef.current) {
         // Reload cart to get updated discount
-        const dbCart = await getOrCreateCart(userId);
-        if (dbCart) {
+        const dbCart = await getOrCreateCart(user.id);
+        if (dbCart && mountedRef.current) {
           setCart(toCartData(dbCart));
         }
         setError(null);
@@ -247,27 +285,33 @@ export const useCart = (): UseCartReturn => {
       return success;
     } catch (err) {
       console.error('Apply discount failed:', err);
-      setError('Failed to apply discount code');
+      if (mountedRef.current) {
+        setError('Failed to apply discount code');
+      }
       return false;
     }
-  }, [userId, cart]);
+  }, [user?.id, cart]);
 
   const clearCartFn = useCallback(async () => {
-    if (!userId) return;
+    if (!user?.id) return;
 
     try {
-      const result = await apiClearCart(userId);
+      const result = await apiClearCart(user.id);
       if (result) {
-        setCart(toCartData(result));
-        globalThis.dispatchEvent(new CustomEvent('cartUpdated'));
-        broadcastCartUpdate(); // Notify other tabs
+        const cartData = toCartData(result);
+        setCart(cartData);
+        localStorage.setItem('cart-count', '0');
+        broadcastChannelRef.current?.postMessage({ 
+          type: 'cart-updated',
+          count: 0 
+        });
       }
       setError(null);
     } catch (err) {
       console.error('Clear cart failed:', err);
       setError('Failed to clear cart');
     }
-  }, [userId, broadcastCartUpdate]);
+  }, [user?.id]);
 
   const itemCount = useMemo(
     () => cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0,
@@ -291,7 +335,7 @@ export const useCart = (): UseCartReturn => {
     isEmpty,
     isLoading,
     error,
-    isAuthenticated: !!userId
+    isAuthenticated: !!user
   }), [
     cart, 
     addItem, 
@@ -304,6 +348,6 @@ export const useCart = (): UseCartReturn => {
     isEmpty, 
     isLoading, 
     error, 
-    userId
+    user
   ]);
 };

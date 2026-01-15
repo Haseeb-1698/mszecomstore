@@ -1,8 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import CheckoutPage from '../components/checkout/CheckoutPage.tsx';
+import CheckoutPageWrapper from '../components/checkout/CheckoutPageWrapper';
 ---
 
 <Layout title="Checkout - MSZ Ecom Store">
-  <CheckoutPage client:only="react" />
+  <CheckoutPageWrapper client:only="react" />
 </Layout>

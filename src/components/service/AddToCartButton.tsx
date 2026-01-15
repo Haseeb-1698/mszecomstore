@@ -1,6 +1,20 @@
-import React, { useState, useEffect } from 'react';
+/**
+ * AddToCartButton - Standalone add-to-cart button for service/plan pages
+ * 
+ * ARCHITECTURE NOTE:
+ * This component runs OUTSIDE the main AppProviders tree (on service detail pages
+ * that may not have full provider wrapping). It manages its own auth state and
+ * uses BroadcastChannel to notify other tabs of cart changes.
+ * 
+ * The cart icon in Header and CartPage will receive these updates via BroadcastChannel.
+ */
+
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
 import { addItemToCart } from '../../lib/api/cart';
+
+// BroadcastChannel for cross-tab cart synchronization
+const CART_CHANNEL_NAME = 'cart-sync';
 
 interface Plan {
   id: string;
@@ -34,8 +48,14 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
   const [isAdded, setIsAdded] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const broadcastChannelRef = useRef<BroadcastChannel | null>(null);
 
   useEffect(() => {
+    // Initialize BroadcastChannel
+    if (typeof BroadcastChannel !== 'undefined') {
+      broadcastChannelRef.current = new BroadcastChannel(CART_CHANNEL_NAME);
+    }
+
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
@@ -47,7 +67,10 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
       setUser(session?.user ?? null);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      broadcastChannelRef.current?.close();
+    };
   }, []);
 
   const handleAddToCart = async () => {
@@ -72,8 +95,13 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
         throw new Error('Failed to add item to cart');
       }
       
-      // Dispatch custom event so other components can react
-      globalThis.dispatchEvent(new CustomEvent('cartUpdated'));
+      // Calculate item count and broadcast to CartIcon
+      const itemCount = updatedCart.cart_items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+      localStorage.setItem('cart-count', itemCount.toString());
+      broadcastChannelRef.current?.postMessage({ 
+        type: 'cart-updated',
+        count: itemCount 
+      });
       
       setIsAdded(true);
       onAddToCart?.();

@@ -1,9 +1,9 @@
 <!-- filepath: src/pages/dashboard.astro -->
 ---
 import Layout from '../layouts/Layout.astro';
-import CustomerDashboard from '../components/customer/CustomerDashboard';
+import DashboardWrapper from '../components/customer/DashboardWrapper';
 ---
 
 <Layout title="Dashboard - MSZ Ecom Store">
-  <CustomerDashboard client:load />
+  <DashboardWrapper client:only="react" />
 </Layout>
