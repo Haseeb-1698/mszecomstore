@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 import type { OrderStatus } from '../../lib/database.types';
 import { formatPrice } from '../../lib/utils';
 import { withTimeout, DEFAULT_QUERY_TIMEOUT } from '../../lib/utils/timeout';
+import SubscriptionModal from './SubscriptionModal';
 
 interface Order {
   id: string;
@@ -16,6 +17,7 @@ interface Order {
   amount: string;
   status: OrderStatus;
   date: string;
+  hasSubscription: boolean;
 }
 
 interface OrdersTableProps {
@@ -32,6 +34,10 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 10;
   const queryClient = useQueryClient();
+  
+  // Subscription modal state
+  const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
   // Fetch orders with React Query
   const { data: orders = [], isLoading: loading, error } = useQuery({
@@ -53,6 +59,15 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
         throw new Error(queryError.message);
       }
 
+      // Fetch subscriptions to check which orders have them
+      const { data: subscriptions } = await supabase
+        .from('subscriptions')
+        .select('order_id');
+
+      const subscriptionOrderIds = new Set(
+        subscriptions?.map(s => s.order_id).filter(Boolean) || []
+      );
+
       const mappedOrders: Order[] = (data || []).map((order: any) => ({
         id: order.id.substring(0, 8).toUpperCase(),
         fullId: order.id,
@@ -62,7 +77,8 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
         service: order.items?.[0]?.service_name || 'N/A',
         amount: formatPrice(order.amount),
         status: order.status as OrderStatus,
-        date: new Date(order.created_at).toLocaleDateString()
+        date: new Date(order.created_at).toLocaleDateString(),
+        hasSubscription: subscriptionOrderIds.has(order.id)
       }));
 
       return mappedOrders;
@@ -125,6 +141,16 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
 
   const handleStatusChange = (fullOrderId: string, newStatus: OrderStatus) => {
     updateStatusMutation.mutate({ fullOrderId, newStatus });
+  };
+
+  const handleCreateSubscription = (orderId: string) => {
+    setSelectedOrderId(orderId);
+    setSubscriptionModalOpen(true);
+  };
+
+  const handleSubscriptionSuccess = () => {
+    // Refetch orders to update the hasSubscription flag
+    queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
   };
 
   // Reset to page 1 when filters change
@@ -264,6 +290,22 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
                 <td className="py-4 px-6 text-sm text-charcoal-600 dark:text-cream-400">{order.date}</td>
                 <td className="py-4 px-6">
                   <div className="flex items-center gap-2">
+                    {order.status === 'delivered' && !order.hasSubscription && (
+                      <button
+                        onClick={() => handleCreateSubscription(order.fullId)}
+                        className="p-2 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 text-green-600 dark:text-green-400 transition-colors"
+                        title="Create Subscription"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                      </button>
+                    )}
+                    {order.hasSubscription && (
+                      <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full font-medium">
+                        ✓ Active
+                      </span>
+                    )}
                     <button
                       className="p-2 rounded-lg hover:bg-cream-200 dark:hover:bg-charcoal-600 text-charcoal-700 dark:text-cream-300 transition-colors"
                       title="View details"
@@ -292,6 +334,19 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
           </tbody>
         </table>
       </div>
+
+      {/* Subscription Creation Modal */}
+      {selectedOrderId && (
+        <SubscriptionModal
+          isOpen={subscriptionModalOpen}
+          onClose={() => {
+            setSubscriptionModalOpen(false);
+            setSelectedOrderId(null);
+          }}
+          orderId={selectedOrderId}
+          onSuccess={handleSubscriptionSuccess}
+        />
+      )}
 
       {/* Pagination */}
       <div className="bg-cream-200 dark:bg-charcoal-900 px-6 py-4 flex items-center justify-between">

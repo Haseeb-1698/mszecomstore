@@ -684,7 +684,7 @@ Dark/light mode toggle.
 <LoginForm client:load />
 
 <!-- Client-only - for auth-dependent components -->
-<CartIcon client:only="react" />
+<CartIcon client:load />
 
 <!-- Visible - for below-fold interactive content -->
 <Comments client:visible />
