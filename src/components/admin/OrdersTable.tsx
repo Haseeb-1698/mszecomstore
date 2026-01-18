@@ -34,7 +34,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 10;
   const queryClient = useQueryClient();
-  
+
   // Subscription modal state
   const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
@@ -91,7 +91,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
   const updateStatusMutation = useMutation({
     mutationFn: async ({ fullOrderId, newStatus }: { fullOrderId: string; newStatus: OrderStatus }) => {
       const updateData: any = { status: newStatus };
-      
+
       if (newStatus === 'delivered') {
         updateData.delivered_at = new Date().toISOString();
       }
@@ -102,7 +102,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
         .eq('id', fullOrderId);
 
       if (error) throw error;
-      
+
       return { fullOrderId, newStatus };
     },
     onMutate: async ({ fullOrderId, newStatus }) => {
@@ -270,7 +270,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
               >
                 <td className="py-4 px-6">
                   <a
-                    href={`/order/${order.id}`}
+                    href={`/order/${order.fullId}`}
                     className="text-sm font-medium text-coral-600 hover:text-coral-700 dark:text-coral-400 hover:underline"
                   >
                     {order.id}
@@ -309,7 +309,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
                     <button
                       className="p-2 rounded-lg hover:bg-cream-200 dark:hover:bg-charcoal-600 text-charcoal-700 dark:text-cream-300 transition-colors"
                       title="View details"
-                      onClick={() => globalThis.location.href = `/order/${order.id}`}
+                      onClick={() => globalThis.location.href = `/order/${order.fullId}`}
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
