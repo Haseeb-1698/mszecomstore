@@ -1,23 +1,18 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { getServices } from '../../lib/api/services';
+import { getServiceBySlug } from '../../lib/api/services';
 import ServiceDetail from '../../components/service/ServiceDetail';
 
-// Fetch all services once and pass data to each page via props
-// This eliminates the N+1 database call problem
-export async function getStaticPaths() {
-  const services = await getServices();
-  return services.map(service => ({
-    params: { slug: service.slug || service.name.toLowerCase().replace(/ /g, '-') },
-    props: { service }, // Pass the full service data to avoid refetching
-  }));
+export const prerender = false;
+
+const { slug } = Astro.params;
+
+if (!slug) {
+  return Astro.redirect('/404');
 }
 
-// Get service from props (already fetched in getStaticPaths)
-const { service } = Astro.props;
+const service = await getServiceBySlug(slug);
 
-// Since getStaticPaths only generates paths for existing services, service should always exist
-// But we'll handle the case gracefully
 if (!service) {
   return Astro.redirect('/404');
 }
