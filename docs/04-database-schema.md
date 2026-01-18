@@ -12,10 +12,8 @@ This document details the complete database structure used in MSZ Ecom Store, po
 │ id (UUID) PK     │◄──────│ id (UUID) PK/FK  │
 │ email            │       │ full_name        │
 │ created_at       │       │ email            │
-│ ...              │       │ phone            │
-└──────────────────┘       │ whatsapp         │
-         │                 │ avatar_url       │
-         │                 │ role             │
+│ ...              │       │ whatsapp         │
+└──────────────────┘       │ role             │
          │                 │ created_at       │
          │                 │ updated_at       │
          │                 └──────────────────┘
@@ -48,18 +46,15 @@ This document details the complete database structure used in MSZ Ecom Store, po
 │ service_id (FK)  │       │ name             │
 │ name             │       │ slug             │
 │ type             │       │ category         │
-│ tier             │       │ description      │
-│ duration_months  │       │ long_description │
-│ price            │       │ icon_url         │
-│ original_price   │       │ badge            │
-│ savings          │       │ display_order    │
-│ features (JSONB) │       │ is_active        │
-│ is_popular       │       │ created_at       │
-│ display_order    │       │ updated_at       │
-│ is_available     │       └──────────────────┘
-│ created_at       │
-│ updated_at       │
-└──────────────────┘
+│ duration_months  │       │ description      │
+│ price            │       │ long_description │
+│ features (JSONB) │       │ icon_url         │
+│ is_popular       │       │ badge            │
+│ display_order    │       │ display_order    │
+│ is_available     │       │ is_active        │
+│ created_at       │       │ created_at       │
+│ updated_at       │       │ updated_at       │
+└──────────────────┘       └──────────────────┘
 
 ┌──────────────────┐       ┌──────────────────┐
 │     carts        │       │   cart_items     │
@@ -87,9 +82,7 @@ Extends Supabase Auth with application-specific user data.
 | `id` | UUID | PK, FK to auth.users | Links to Supabase Auth |
 | `full_name` | TEXT | nullable | User's display name |
 | `email` | TEXT | nullable | Denormalized from auth |
-| `phone` | TEXT | nullable | Phone number |
 | `whatsapp` | TEXT | nullable | WhatsApp contact |
-| `avatar_url` | TEXT | nullable | Profile picture URL |
 | `role` | TEXT | NOT NULL, default 'customer' | 'customer' or 'admin' |
 | `created_at` | TIMESTAMPTZ | default NOW() | When profile created |
 | `updated_at` | TIMESTAMPTZ | default NOW() | Last update time |
@@ -98,6 +91,7 @@ Extends Supabase Auth with application-specific user data.
 - Created automatically when user signs up (via database trigger or application logic)
 - `role` controls access to admin features
 - `email` is duplicated from auth for easier querying
+- `whatsapp` is used for order contact information
 
 ### `services`
 
@@ -136,19 +130,20 @@ Pricing tiers for each service.
 |--------|------|-------------|-------------|
 | `id` | UUID | PK | Unique identifier |
 | `service_id` | UUID | FK to services, NOT NULL | Parent service |
-| `name` | TEXT | NOT NULL | Plan name |
+| `name` | TEXT | NOT NULL | Plan name (Basic, Standard, Premium) |
 | `type` | TEXT | CHECK (shared/dedicated) | Access type |
-| `tier` | TEXT | CHECK (basic/standard/premium) | Tier level |
 | `duration_months` | INTEGER | NOT NULL | Subscription length |
 | `price` | DECIMAL(10,2) | NOT NULL | Current price |
-| `original_price` | DECIMAL(10,2) | nullable | Price before discount |
-| `savings` | DECIMAL(10,2) | nullable | Amount saved |
 | `features` | JSONB | default '[]' | Feature list as JSON array |
 | `is_popular` | BOOLEAN | default false | Highlight as popular |
 | `display_order` | INTEGER | default 0 | Sort order within service |
 | `is_available` | BOOLEAN | default true | Can be purchased |
 | `created_at` | TIMESTAMPTZ | default NOW() | Creation time |
 | `updated_at` | TIMESTAMPTZ | default NOW() | Last update |
+
+**Plan Types:**
+- `shared` - Multiple users share one account
+- `dedicated` - Single user gets their own account
 
 **Example `features` JSON:**
 ```json
@@ -374,6 +369,7 @@ Migrations are in `supabase/migrations/` and run in timestamp order:
 9. `20260114172039_emergency-fix.sql` - Bug fixes
 10. `20260114180000_role_based_signup.sql` - Role assignment
 11. `20260115000000_fix_cart_rls.sql` - Cart security
+12. `20260118000000_schema_cleanup.sql` - Remove unused fields, add indexes and helper view
 
 ---
 

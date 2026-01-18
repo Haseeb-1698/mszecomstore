@@ -150,36 +150,28 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose, onSuccess }
       const plansData = [
         {
           name: 'Basic',
-          tier: 'basic',
           duration_months: 1,
           price: priceNum,
           type: 'dedicated' as const,
           is_available: true,
           display_order: 1,
-          description: '1 month subscription with full access'
         },
         {
           name: 'Standard',
-          tier: 'standard',
           duration_months: 3,
           price: Math.round(priceNum * 3 * 0.9), // 10% discount for 3 months
           type: 'dedicated' as const,
           is_available: true,
           is_popular: true,
           display_order: 2,
-          badge: 'popular',
-          description: '3 months subscription with 10% discount'
         },
         {
           name: 'Premium',
-          tier: 'premium',
           duration_months: 12,
           price: Math.round(priceNum * 12 * 0.75), // 25% discount for 12 months
           type: 'dedicated' as const,
           is_available: true,
           display_order: 3,
-          badge: 'best_value',
-          description: '12 months subscription with 25% discount'
         }
       ];
 

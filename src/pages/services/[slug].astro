@@ -26,11 +26,8 @@ if (!service) {
 const plans = (service.plans || []).map(plan => ({
   id: plan.id,
   name: plan.name,
-  tier: plan.type,
   duration_months: plan.duration_months,
   price: plan.price,
-  original_price: plan.original_price ?? undefined,
-  savings: plan.savings ?? undefined,
   features: Array.isArray(plan.features) ? plan.features.filter((f): f is string => typeof f === 'string') : [],
   is_popular: plan.is_popular,
   is_available: plan.is_available,

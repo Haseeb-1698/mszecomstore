@@ -5,16 +5,11 @@ import { formatPrice } from '../../lib/utils';
 interface Plan {
   id: string;
   name: string;
-  tier?: string;
   duration_months: number;
   price: number;
-  original_price?: number;
-  savings?: number;
   features?: string[];
   is_popular?: boolean;
   is_available?: boolean;
-  badge?: string;
-  description?: string;
 }
 
 interface ServiceDetailProps {
@@ -44,13 +39,8 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({
     setTimeout(() => setShowSuccessMessage(false), 3000);
   };
 
-  // Group plans by tier if available
-  const sortedPlans = [...plans].sort((a, b) => {
-    const tierOrder: Record<string, number> = { basic: 1, standard: 2, premium: 3 };
-    const tierA = tierOrder[a.tier || ''] || a.duration_months;
-    const tierB = tierOrder[b.tier || ''] || b.duration_months;
-    return tierA - tierB;
-  });
+  // Sort plans by duration (shortest first)
+  const sortedPlans = [...plans].sort((a, b) => a.duration_months - b.duration_months);
 
   return (
     <div className="min-h-screen bg-cream-50 dark:bg-charcoal-900">

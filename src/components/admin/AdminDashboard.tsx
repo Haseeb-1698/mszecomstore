@@ -15,8 +15,15 @@ interface DashboardStats {
 interface RpcDashboardStats {
   total_revenue: number;
   pending_orders: number;
+  processing_orders: number;
+  completed_orders: number;
+  delivered_orders: number;
+  cancelled_orders: number;
+  total_orders: number;
   active_customers: number;
   delivered_today: number;
+  revenue_today: number;
+  active_subscriptions: number;
 }
 
 const AdminDashboard: React.FC = () => {
@@ -47,18 +54,12 @@ const AdminDashboard: React.FC = () => {
       setError(null);
 
       // Run all queries in parallel with individual timeouts
-      const [dashboardResult, ordersResult, servicesResult, subscriptionsResult] = await Promise.allSettled([
-        // Dashboard stats RPC
+      const [dashboardResult, servicesResult] = await Promise.allSettled([
+        // Dashboard stats RPC (now includes everything)
         withTimeout(
           supabase.rpc('get_admin_dashboard_stats'),
           DEFAULT_QUERY_TIMEOUT,
           'Dashboard stats timed out'
-        ),
-        // Orders count
-        withTimeout(
-          supabase.from('orders').select('*', { count: 'exact', head: true }),
-          DEFAULT_QUERY_TIMEOUT,
-          'Orders count timed out'
         ),
         // Services count
         withTimeout(
@@ -66,32 +67,18 @@ const AdminDashboard: React.FC = () => {
           DEFAULT_QUERY_TIMEOUT,
           'Services count timed out'
         ),
-        // Subscriptions count
-        withTimeout(
-          supabase.from('subscriptions').select('*', { count: 'exact', head: true }).eq('status', 'active'),
-          DEFAULT_QUERY_TIMEOUT,
-          'Subscriptions count timed out'
-        ),
       ]);
 
       if (!mountedRef.current) return;
 
       // Extract results, handling failures gracefully
       let dbStats: RpcDashboardStats | undefined;
-      let ordersCount = 0;
       let servicesCount = 0;
-      let subscriptionsCount = 0;
 
       if (dashboardResult.status === 'fulfilled' && !dashboardResult.value.error) {
         dbStats = (dashboardResult.value.data as RpcDashboardStats[] | null)?.[0];
       } else {
         console.warn('Dashboard stats failed:', dashboardResult.status === 'rejected' ? dashboardResult.reason : dashboardResult.value.error);
-      }
-
-      if (ordersResult.status === 'fulfilled' && !ordersResult.value.error) {
-        ordersCount = ordersResult.value.count || 0;
-      } else {
-        console.warn('Orders count failed:', ordersResult.status === 'rejected' ? ordersResult.reason : ordersResult.value.error);
       }
 
       if (servicesResult.status === 'fulfilled' && !servicesResult.value.error) {
@@ -100,16 +87,10 @@ const AdminDashboard: React.FC = () => {
         console.warn('Services count failed:', servicesResult.status === 'rejected' ? servicesResult.reason : servicesResult.value.error);
       }
 
-      if (subscriptionsResult.status === 'fulfilled' && !subscriptionsResult.value.error) {
-        subscriptionsCount = subscriptionsResult.value.count || 0;
-      } else {
-        console.warn('Subscriptions count failed:', subscriptionsResult.status === 'rejected' ? subscriptionsResult.reason : subscriptionsResult.value.error);
-      }
-
       setStats({
-        totalOrders: ordersCount,
+        totalOrders: dbStats?.total_orders || 0,
         totalRevenue: dbStats?.total_revenue || 0,
-        activeSubscriptions: subscriptionsCount,
+        activeSubscriptions: dbStats?.active_subscriptions || 0,
         totalServices: servicesCount,
         pendingOrders: dbStats?.pending_orders || 0,
         deliveredToday: dbStats?.delivered_today || 0

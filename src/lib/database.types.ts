@@ -32,9 +32,7 @@ export interface Database {
           id: string
           full_name: string | null
           email: string | null
-          phone: string | null
           whatsapp: string | null
-          avatar_url: string | null
           role: UserRole
           created_at: string
           updated_at: string
@@ -43,9 +41,7 @@ export interface Database {
           id: string
           full_name?: string | null
           email?: string | null
-          phone?: string | null
           whatsapp?: string | null
-          avatar_url?: string | null
           role?: UserRole
           created_at?: string
           updated_at?: string
@@ -54,9 +50,7 @@ export interface Database {
           id?: string
           full_name?: string | null
           email?: string | null
-          phone?: string | null
           whatsapp?: string | null
-          avatar_url?: string | null
           role?: UserRole
           created_at?: string
           updated_at?: string
@@ -114,8 +108,6 @@ export interface Database {
           type: PlanType
           duration_months: number
           price: number
-          original_price: number | null
-          savings: number | null
           features: Json
           is_popular: boolean
           display_order: number
@@ -130,8 +122,6 @@ export interface Database {
           type: PlanType
           duration_months: number
           price: number
-          original_price?: number | null
-          savings?: number | null
           features?: Json
           is_popular?: boolean
           display_order?: number
@@ -146,8 +136,6 @@ export interface Database {
           type?: PlanType
           duration_months?: number
           price?: number
-          original_price?: number | null
-          savings?: number | null
           features?: Json
           is_popular?: boolean
           display_order?: number
