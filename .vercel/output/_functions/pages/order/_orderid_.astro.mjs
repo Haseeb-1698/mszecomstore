@@ -1,7 +1,7 @@
 /* empty css                                    */
 import { e as createComponent, f as createAstro, k as renderComponent, r as renderTemplate } from '../../chunks/astro/server_DiKl080e.mjs';
 import 'piccolore';
-import { $ as $$Layout } from '../../chunks/Layout_BeFQ2InE.mjs';
+import { $ as $$Layout } from '../../chunks/Layout_Bc6M3UVj.mjs';
 import { jsx, jsxs } from 'react/jsx-runtime';
 import 'react';
 import { C as Card, a as CardHeader, b as CardTitle, c as CardContent } from '../../chunks/Card_Co53-fxj.mjs';

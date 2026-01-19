@@ -53,11 +53,13 @@ const team = [
           </p>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 max-w-4xl mx-auto">
           {team.map(member => (
             <div class="text-center">
-              <img src={member.avatar} alt={member.name} class="w-32 h-32 rounded-full mx-auto mb-4 shadow-soft-light dark:shadow-soft-dark" />
-              <h3 class="text-xl font-medium text-charcoal-900 dark:text-white">{member.name}</h3>
+              <div class="w-40 h-40 mx-auto mb-6 rounded-full overflow-hidden shadow-soft-light dark:shadow-soft-dark">
+                <img src={member.avatar} alt={member.name} class="w-full h-full object-cover" />
+              </div>
+              <h3 class="text-xl font-semibold text-charcoal-900 dark:text-white mb-2">{member.name}</h3>
               <p class="text-charcoal-800/70 dark:text-gray-400">{member.role}</p>
             </div>
           ))}
