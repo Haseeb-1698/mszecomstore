@@ -15,7 +15,7 @@ export default function RecentOrders() {
       id: 'ORD-001',
       customer: 'John Doe',
       service: 'Netflix Premium',
-      amount: '$15.99',
+      amount: 'PKR 4,340',
       status: 'completed',
       date: '2024-01-15'
     },
@@ -23,7 +23,7 @@ export default function RecentOrders() {
       id: 'ORD-002',
       customer: 'Jane Smith',
       service: 'Spotify Individual',
-      amount: '$9.99',
+      amount: 'PKR 3,080',
       status: 'processing',
       date: '2024-01-15'
     },
@@ -31,7 +31,7 @@ export default function RecentOrders() {
       id: 'ORD-003',
       customer: 'Bob Johnson',
       service: 'YouTube Premium',
-      amount: '$11.99',
+      amount: 'PKR 3,360',
       status: 'pending',
       date: '2024-01-14'
     },
@@ -39,7 +39,7 @@ export default function RecentOrders() {
       id: 'ORD-004',
       customer: 'Alice Williams',
       service: 'Disney+ Hotstar',
-      amount: '$7.99',
+      amount: 'PKR 2,240',
       status: 'completed',
       date: '2024-01-14'
     },
@@ -47,7 +47,7 @@ export default function RecentOrders() {
       id: 'ORD-005',
       customer: 'Charlie Brown',
       service: 'Amazon Prime',
-      amount: '$12.99',
+      amount: 'PKR 3,640',
       status: 'cancelled',
       date: '2024-01-13'
     }

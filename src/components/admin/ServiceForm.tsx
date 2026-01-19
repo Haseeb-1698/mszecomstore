@@ -147,7 +147,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onClose }) => {
           name="price"
           value={formData.price}
           onChange={handleChange}
-          placeholder="e.g., $15.99"
+          placeholder="e.g., PKR 4,340"
           error={errors.price}
         />
       </div>

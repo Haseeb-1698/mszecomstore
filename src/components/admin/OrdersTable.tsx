@@ -22,7 +22,7 @@ const OrdersTable: React.FC = () => {
       customer: 'John Doe',
       email: 'john@example.com',
       service: 'Netflix Premium',
-      amount: '$15.99',
+      amount: 'PKR 4,340',
       status: 'completed',
       date: '2024-01-15',
       paymentMethod: 'EasyPaisa'
@@ -32,7 +32,7 @@ const OrdersTable: React.FC = () => {
       customer: 'Jane Smith',
       email: 'jane@example.com',
       service: 'Spotify Individual',
-      amount: '$9.99',
+      amount: 'PKR 3,080',
       status: 'processing',
       date: '2024-01-15',
       paymentMethod: 'JazzCash'
@@ -42,7 +42,7 @@ const OrdersTable: React.FC = () => {
       customer: 'Bob Johnson',
       email: 'bob@example.com',
       service: 'YouTube Premium',
-      amount: '$11.99',
+      amount: 'PKR 3,360',
       status: 'pending',
       date: '2024-01-14',
       paymentMethod: 'Bank Transfer'
@@ -52,7 +52,7 @@ const OrdersTable: React.FC = () => {
       customer: 'Alice Williams',
       email: 'alice@example.com',
       service: 'Disney+ Hotstar',
-      amount: '$7.99',
+      amount: 'PKR 2,240',
       status: 'completed',
       date: '2024-01-14',
       paymentMethod: 'EasyPaisa'
@@ -62,7 +62,7 @@ const OrdersTable: React.FC = () => {
       customer: 'Charlie Brown',
       email: 'charlie@example.com',
       service: 'Amazon Prime',
-      amount: '$12.99',
+      amount: 'PKR 3,640',
       status: 'cancelled',
       date: '2024-01-13',
       paymentMethod: 'JazzCash'
@@ -72,7 +72,7 @@ const OrdersTable: React.FC = () => {
       customer: 'Diana Prince',
       email: 'diana@example.com',
       service: 'HBO Max',
-      amount: '$14.99',
+      amount: 'PKR 4,200',
       status: 'completed',
       date: '2024-01-13',
       paymentMethod: 'Bank Transfer'
@@ -82,7 +82,7 @@ const OrdersTable: React.FC = () => {
       customer: 'Bruce Wayne',
       email: 'bruce@example.com',
       service: 'Apple Music',
-      amount: '$9.99',
+      amount: 'PKR 2,800',
       status: 'processing',
       date: '2024-01-12',
       paymentMethod: 'EasyPaisa'
@@ -92,7 +92,7 @@ const OrdersTable: React.FC = () => {
       customer: 'Clark Kent',
       email: 'clark@example.com',
       service: 'Netflix Premium',
-      amount: '$15.99',
+      amount: 'PKR 4,340',
       status: 'completed',
       date: '2024-01-12',
       paymentMethod: 'JazzCash'
@@ -102,7 +102,7 @@ const OrdersTable: React.FC = () => {
       customer: 'Peter Parker',
       email: 'peter@example.com',
       service: 'Spotify Family',
-      amount: '$14.99',
+      amount: 'PKR 4,200',
       status: 'pending',
       date: '2024-01-11',
       paymentMethod: 'Bank Transfer'
@@ -112,7 +112,7 @@ const OrdersTable: React.FC = () => {
       customer: 'Tony Stark',
       email: 'tony@example.com',
       service: 'YouTube Premium',
-      amount: '$11.99',
+      amount: 'PKR 3,360',
       status: 'completed',
       date: '2024-01-11',
       paymentMethod: 'EasyPaisa'
